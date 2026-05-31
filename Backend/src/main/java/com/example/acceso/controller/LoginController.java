@@ -1,62 +1,76 @@
 package com.example.acceso.controller;
 
+import com.example.acceso.model.Opcion;
 import com.example.acceso.model.Usuario;
-import com.example.acceso.service.UsuarioService;
-import com.example.acceso.config.JwtUtil;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.HashMap;
-import java.util.Map;
+import com.example.acceso.service.Interfaces.ServicioAutenticacionDosPasos;
+import com.example.acceso.service.Interfaces.UsuarioService;
+import jakarta.servlet.http.HttpSession;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import java.util.Comparator;
 import java.util.Optional;
 
-@RestController // Cambiado para devolver JSON
-@RequestMapping("/api/auth") // Ruta base para autenticación
-@CrossOrigin(origins = "http://localhost:4200")
+@Controller
 public class LoginController {
-
     private final UsuarioService usuarioService;
-    private final JwtUtil jwtUtil; // Inyectaremos nuestra utilidad de JWT
-
-    public LoginController(UsuarioService usuarioService, JwtUtil jwtUtil) {
+    private final ServicioAutenticacionDosPasos servicio2FA;
+    public LoginController(UsuarioService usuarioService, ServicioAutenticacionDosPasos servicio2FA) {
         this.usuarioService = usuarioService;
-        this.jwtUtil = jwtUtil;
+        this.servicio2FA = servicio2FA;
+    }
+
+    @GetMapping("/login")
+    public String mostrarFormularioLogin(HttpSession session) {
+        if (session.getAttribute("usuarioLogueado") != null) {
+            return "redirect:/";
+        }
+        return "login";
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody Map<String, String> credentials) {
-        String username = credentials.get("usuario");
-        String password = credentials.get("clave");
-
-        Optional<Usuario> usuarioOpt = usuarioService.findByUsuario(username);
-
-        // 1. Validar existencia
+    public String procesarLogin(@RequestParam String usuario, @RequestParam String clave, @RequestParam String token,
+            HttpSession session,
+            RedirectAttributes redirectAttributes) {
+        Optional<Usuario> usuarioOpt = usuarioService.findByUsuario(usuario);
         if (usuarioOpt.isEmpty()) {
-            return ResponseEntity.status(401).body(Map.of("error", "Usuario no encontrado"));
+            redirectAttributes.addFlashAttribute("error", "Usuario no encontrado.");
+            return "redirect:/login";
         }
-
-        Usuario user = usuarioOpt.get();
-
-        // 2. Validar estado
-        if (user.getEstado() != 1) {
-            return ResponseEntity.status(403).body(Map.of("error", "Usuario inactivo"));
+        Usuario usuarioEncontrado = usuarioOpt.get();
+        if (usuarioEncontrado.getEstado() != 1) { // 1 = Activo
+            redirectAttributes.addFlashAttribute("error", "Este usuario se encuentra inactivo.");
+            return "redirect:/login";
         }
-
-        // 3. Validar contraseña
-        if (usuarioService.verificarContrasena(password, user.getClave())) {
-            // GENERAR TOKEN JWT
-            String token = jwtUtil.generarToken(user.getUsuario());
-
-            // Respuesta estructurada para Angular
-            Map<String, Object> response = new HashMap<>();
-            response.put("token", token);
-            response.put("usuario", user.getUsuario());
-            response.put("nombre", user.getNombre());
-            response.put("perfil", user.getPerfil().getNombre());
-
-            return ResponseEntity.ok(response);
+        if (usuarioService.verificarContrasena(clave, usuarioEncontrado.getClave())) {
+            if (usuarioEncontrado.isUsa2FA()) {
+                if (token == null || token.trim().isEmpty()) {
+                    redirectAttributes.addFlashAttribute("error", "Se requiere el token de seguridad.");
+                    return "redirect:/login";
+                }
+                if (!servicio2FA.esCodigoValido(usuarioEncontrado.getSecreto2FA(), token)) {
+                    redirectAttributes.addFlashAttribute("error", "El token de seguridad es incorrecto.");
+                    return "redirect:/login";
+                }
+            }
+            session.setAttribute("usuarioLogueado", usuarioEncontrado);
+            var opcionesMenu = usuarioEncontrado.getPerfil().getOpciones().stream()
+                    .sorted(Comparator.comparing(Opcion::getId))
+                    .toList();
+            session.setAttribute("menuOpciones", opcionesMenu);
+            return "redirect:/";
         } else {
-            return ResponseEntity.status(401).body(Map.of("error", "Contraseña incorrecta"));
+            redirectAttributes.addFlashAttribute("error", "Contraseña incorrecta.");
+            return "redirect:/login";
         }
+    }
+
+    @GetMapping("/logout")
+    public String logout(HttpSession session, RedirectAttributes redirectAttributes) {
+        session.invalidate();
+        redirectAttributes.addFlashAttribute("logout", "Has cerrado sesión exitosamente.");
+        return "redirect:/login";
     }
 }

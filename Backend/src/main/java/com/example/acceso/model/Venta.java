@@ -13,12 +13,12 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-@Entity
-@Table(name = "ventas")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Entity
+@Table(name = "ventas")
 public class Venta {
 
     @Id
@@ -56,23 +56,14 @@ public class Venta {
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal deuda = BigDecimal.ZERO;
 
-    @OneToMany(
-            mappedBy = "venta",
-            cascade = CascadeType.ALL,
-            orphanRemoval = true
-    )
+    @OneToMany(mappedBy = "venta", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference("venta-cuotas")
     private List<Cuota> cuotas = new ArrayList<>();
 
-    @OneToMany(
-            mappedBy = "venta",
-            cascade = CascadeType.ALL,
-            orphanRemoval = true
-    )
+    @OneToMany(mappedBy = "venta", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference("venta-detalles")
     private List<DetalleVenta> detalleVentas = new ArrayList<>();
 
     @Column(nullable = false)
-    private Integer estado = 1; // 1 = Pagado, 0 = Pendiente, 2 = Eliminado
-
+    private Integer estado = 1;
 }

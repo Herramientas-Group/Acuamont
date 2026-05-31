@@ -10,12 +10,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Entity
-@Table(name = "proveedor")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Entity
+@Table(name = "proveedor")
 public class Proveedor {
 
     @Id
@@ -36,11 +36,10 @@ public class Proveedor {
     @Column(length = 9)
     private String telefono;
 
-    @Email(message = "El correo debe tener un formato válido")
+    @Email(message = "El correo debe tener un formato válido")
     @Column(unique = true)
     private String correo;
 
     @Column(nullable = false)
     private Integer estado = 1;
-
 }

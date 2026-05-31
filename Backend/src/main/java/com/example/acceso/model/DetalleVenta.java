@@ -9,12 +9,12 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 
-@Entity
-@Table(name = "detalle_venta")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Entity
+@Table(name = "detalle_venta")
 public class DetalleVenta {
 
     @Id
@@ -38,5 +38,4 @@ public class DetalleVenta {
 
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal subtotal;
-
 }

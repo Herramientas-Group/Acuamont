@@ -10,12 +10,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Entity
-@Table(name = "productos")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Entity
+@Table(name = "productos")
 public class Producto {
 
     @Id
@@ -27,8 +27,8 @@ public class Producto {
     @Column(nullable = false, length = 100)
     private String nombre;
 
-    @NotBlank(message = "La descripción es obligatoria")
-    @Size(min = 2, max = 255, message = "La descripción debe tener entre 2 y 255 caracteres")
+    @NotBlank(message = "La descripción es obligatoria")
+    @Size(min = 2, max = 255, message = "La descripción debe tener entre 2 y 255 caracteres")
     @Column(nullable = false, length = 255)
     private String descripcion;
 
@@ -54,12 +54,11 @@ public class Producto {
 
     @Column(columnDefinition = "TEXT")
     private String imagen;
-    
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_categoria")
     private Categoria categoria;
 
     @Column(nullable = false)
     private Integer estado = 1;
-
 }

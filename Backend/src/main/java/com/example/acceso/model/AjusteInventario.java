@@ -3,16 +3,19 @@ package com.example.acceso.model;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
-@Entity
-@Table (name = "ajustes_inventario")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Entity
+@Table(name = "ajustes_inventario")
 public class AjusteInventario {
 
     @Id
@@ -36,7 +39,14 @@ public class AjusteInventario {
     @Column(nullable = false)
     private Integer cantidad;
 
-    @Size(max = 250, message = "El comentario debe tener máximo 250 caracteres")
+    @Size(max = 250, message = "El comentario debe tener máximo 250 caracteres")
     private String comentario;
 
+    public AjusteInventario(Producto producto, TipoMovimiento tipoMovimiento, Integer cantidad, String comentario) {
+        this.fecha = LocalDateTime.now();
+        this.producto = producto;
+        this.tipoMovimiento = tipoMovimiento;
+        this.cantidad = cantidad;
+        this.comentario = comentario;
+    }
 }
