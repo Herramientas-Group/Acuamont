@@ -9,12 +9,12 @@ import lombok.Setter;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "pagos")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Entity
+@Table(name = "pagos")
 public class Pago {
 
     @Id
@@ -34,10 +34,9 @@ public class Pago {
     @Column(nullable = false, length = 50)
     private String metodoPago;
 
-    @Column(nullable = false,length = 250)
+    @Column(nullable = false, length = 250)
     private String comentario;
 
     @Column(nullable = false)
-    private Integer estado = 1; // 1 = Activo, 0 = Inactivo
-
+    private Integer estado = 1;
 }

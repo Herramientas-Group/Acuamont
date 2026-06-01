@@ -11,12 +11,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Entity
-@Table(name = "opciones")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Entity
+@Table(name = "opciones")
 public class Opcion {
 
     @Id
@@ -31,5 +31,4 @@ public class Opcion {
 
     @Column(length = 50)
     private String icono;
-
 }

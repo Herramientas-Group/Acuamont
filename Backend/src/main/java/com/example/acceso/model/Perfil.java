@@ -1,29 +1,39 @@
 package com.example.acceso.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Entity
-@Table(name="perfiles")
+import java.util.HashSet;
+import java.util.Set;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Entity
+@Table(name = "perfiles")
 public class Perfil {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "El nombre es obligatorio")
-    @Size(min = 2, max = 100, message = "El nombre debe tener entre 2 y 100 caracteres")
+    @Column(nullable = false, unique = true, length = 50)
     private String nombre;
 
-    @Column(nullable = false)
-    private Integer estado=1;
+    @Column(length = 255)
+    private String descripcion;
 
+    @Column(nullable = false)
+    private int estado = 1;
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "perfil_opcion", joinColumns = @JoinColumn(name = "id_perfil"), inverseJoinColumns = @JoinColumn(name = "id_opcion"))
+    @JsonIgnoreProperties("perfiles")
+    private Set<Opcion> opciones = new HashSet<>();
 }

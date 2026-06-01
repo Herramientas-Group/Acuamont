@@ -7,12 +7,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Entity
-@Table(name = "forma_pago")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Entity
+@Table(name = "forma_pago")
 public class FormaPago {
 
     @Id
@@ -25,5 +25,4 @@ public class FormaPago {
 
     @Column(nullable = false)
     private Integer estado = 1;
-
 }

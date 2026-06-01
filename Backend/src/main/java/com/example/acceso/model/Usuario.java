@@ -9,12 +9,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Entity
-@Table(name = "usuarios")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Entity
+@Table(name = "usuarios")
 public class Usuario {
 
     @Id
@@ -41,6 +41,15 @@ public class Usuario {
     private String correo;
 
     @Column(nullable = false)
-    private Integer estado = 1; // 1: Activo, 0: Inactivo, 2: Eliminado
+    private Integer estado = 1;
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "id_perfil")
+    private Perfil perfil;
+
+    @Column(name = "usa_2fa", nullable = false)
+    private boolean usa2FA = false;
+
+    @Column(name = "secreto_2fa")
+    private String secreto2FA;
 }

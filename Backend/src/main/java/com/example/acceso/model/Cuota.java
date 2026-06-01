@@ -10,12 +10,12 @@ import lombok.Setter;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-@Entity
-@Table(name = "cuotas")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Entity
+@Table(name = "cuotas")
 public class Cuota {
 
     @Id
@@ -40,6 +40,5 @@ public class Cuota {
     private LocalDate fechaVencimiento;
 
     @Column(nullable = false)
-    private Integer estado = 0;// 0 = pendiente, 1 = pagada
-
+    private Integer estado = 0;
 }

@@ -9,12 +9,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Entity
-@Table(name = "series_comprobante")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Entity
+@Table(name = "series_comprobante")
 public class SerieComprobante {
 
     @Id
@@ -37,5 +37,4 @@ public class SerieComprobante {
 
     @Column(nullable = false)
     private Integer estado = 1;
-
 }

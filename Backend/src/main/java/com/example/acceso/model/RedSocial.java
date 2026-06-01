@@ -9,11 +9,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Entity
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Entity
 public class RedSocial {
 
     @Id
@@ -28,6 +28,5 @@ public class RedSocial {
 
     private String orden;
 
-    private Integer estado=1;
-
+    private Integer estado = 1;
 }

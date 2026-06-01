@@ -8,12 +8,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Entity
-@Table(name = "categorias")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Entity
+@Table(name = "categorias")
 public class Categoria {
 
     @Id
@@ -26,6 +26,5 @@ public class Categoria {
     private String nombre;
 
     @Column(nullable = false)
-    private Integer estado = 1; // 1 activo, 0 inactivo , 2 eliminado
-
+    private Integer estado = 1;
 }

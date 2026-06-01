@@ -39,12 +39,12 @@ export const routes: Routes = [
     title: 'Dashboard',
     canActivate: [authGuard],
     children: [
-      { path: 'usuarios', component: UsuarioComponent, data: { title: 'Usuarios' } },
-      { path: 'dashboard', component: DashboardComponent, data: { title: 'Dashboard' } },
-      { path: 'inventario', component: InventarioComponent, data: { title: 'Inventario' } },
-      { path: 'proveedores', component: ProveedoresComponent, data: { title: 'Proveedores' } },
-      { path: 'ventas', component: VentasComponent, data: { title: 'Ventas' } },
-      { path: 'perfiles', component: PerfilesComponent, data: { title: 'Perfiles' } }
+      { path: 'usuarios', component: UsuarioComponent, data: { title: 'Usuarios', opcionId: 2 } },
+      { path: 'dashboard', component: DashboardComponent, data: { title: 'Dashboard', opcionId: 1 } },
+      { path: 'inventario', component: InventarioComponent, data: { title: 'Inventario', opcionId: 9 } },
+      { path: 'proveedores', component: ProveedoresComponent, data: { title: 'Proveedores', opcionId: 10 } },
+      { path: 'ventas', component: VentasComponent, data: { title: 'Ventas', opcionId: 8 } },
+      { path: 'perfiles', component: PerfilesComponent, data: { title: 'Perfiles', opcionId: 3 } }
     ]
   },
   { path: '', redirectTo: 'inicio', pathMatch: 'full' },

@@ -1,88 +1,193 @@
 package com.example.acceso.controller;
 
 import com.example.acceso.model.Usuario;
-import com.example.acceso.service.UsuarioService;
+import com.example.acceso.service.Interfaces.PerfilService;
+import com.example.acceso.service.Interfaces.ServicioAutenticacionDosPasos;
+import com.example.acceso.service.Interfaces.UsuarioService;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.http.HttpStatus;
-
 import jakarta.validation.Valid;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
-@RequestMapping("/usuarios/api")
-@CrossOrigin(origins = "http://localhost:4200", allowCredentials = "true")
+@RequestMapping("/usuarios")
 public class UsuarioController {
-
     private final UsuarioService usuarioService;
-
-    public UsuarioController(UsuarioService usuarioService) {
+    private final PerfilService perfilService;
+    private final ServicioAutenticacionDosPasos servicio2FA;
+    public UsuarioController(UsuarioService usuarioService, PerfilService perfilService, ServicioAutenticacionDosPasos servicio2FA) {
         this.usuarioService = usuarioService;
+        this.perfilService = perfilService;
+        this.servicio2FA = servicio2FA;
     }
 
-    @GetMapping("/listar")
+    @GetMapping("/api/listar")
+    @PreAuthorize("hasAuthority('OPCION_2')")
     public ResponseEntity<?> listarUsuariosApi() {
         Map<String, Object> response = new HashMap<>();
-        try {
-            List<Usuario> usuarios = usuarioService.listarUsuarios();
-            response.put("success", true);
-            response.put("data", usuarios);
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            response.put("success", false);
-            response.put("message", "Error al listar usuarios");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-        }
+        List<Usuario> usuarios = usuarioService.listarUsuarios();
+        response.put("success", true);
+        response.put("data", usuarios);
+        return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/guardar")
-    public ResponseEntity<?> guardarUsuario(@Valid @RequestBody Usuario usuario, BindingResult bindingResult) {
+    @GetMapping("/api/usuarioLogueado")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> usuarioLogueado() {
         Map<String, Object> response = new HashMap<>();
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = (String) auth.getPrincipal();
+        Optional<Usuario> usuarioOpt = usuarioService.findByUsuario(username);
+        if (usuarioOpt.isEmpty()) {
+            response.put("success", false);
+            response.put("message", "Usuario no encontrado");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+        }
+        response.put("success", true);
+        response.put("data", usuarioOpt.get());
+        return ResponseEntity.ok(response);
+    }
 
+    @GetMapping("/api/perfiles")
+    @PreAuthorize("hasAuthority('OPCION_2')")
+    public ResponseEntity<?> listarPerfilesActivosApi() {
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("data", perfilService.listarPerfilesActivos());
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/api/guardar")
+    @PreAuthorize("hasAuthority('OPCION_2')")
+    public ResponseEntity<?> guardarUsuarioAjax(@Valid @RequestBody Usuario usuario, BindingResult bindingResult) {
+        Map<String, Object> response = new HashMap<>();
         if (bindingResult.hasErrors()) {
             Map<String, String> errores = new HashMap<>();
             bindingResult.getFieldErrors().forEach(error -> errores.put(error.getField(), error.getDefaultMessage()));
             response.put("success", false);
+            response.put("message", "Datos inválidos");
             response.put("errors", errores);
             return ResponseEntity.badRequest().body(response);
         }
-
         try {
             Usuario usuarioGuardado = usuarioService.guardarUsuario(usuario);
             response.put("success", true);
             response.put("usuario", usuarioGuardado);
-            response.put("message", usuario.getId() != null ? "Actualizado" : "Creado");
+            response.put("message",
+                    usuario.getId() != null ? "Usuario actualizado correctamente" : "Usuario creado correctamente");
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             response.put("success", false);
-            response.put("message", e.getMessage());
+            response.put("message", "Error interno del servidor: " + e.getMessage());
             return ResponseEntity.internalServerError().body(response);
         }
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/api/{id}")
+    @PreAuthorize("hasAuthority('OPCION_2')")
     public ResponseEntity<?> obtenerUsuario(@PathVariable Long id) {
-        return usuarioService.obtenerUsuarioPorId(id)
-                .map(usuario -> {
-                    Map<String, Object> response = new HashMap<>();
-                    response.put("success", true);
-                    response.put("data", usuario);
-                    return ResponseEntity.ok(response);
-                })
-                .orElse(ResponseEntity.notFound().build());
+        try {
+            return usuarioService.obtenerUsuarioPorId(id).map(usuario -> {
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", true);
+                response.put("data", usuario);
+                return ResponseEntity.ok(response);
+            }).orElse(ResponseEntity.notFound().build());
+        } catch (Exception e) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", "Error al obtener usuario: " + e.getMessage());
+            return ResponseEntity.internalServerError().body(response);
+        }
     }
 
-    @DeleteMapping("/eliminar/{id}")
-    public ResponseEntity<?> eliminarUsuario(@PathVariable Long id) {
+    @DeleteMapping("/api/eliminar/{id}")
+    @PreAuthorize("hasAuthority('OPCION_2')")
+    public ResponseEntity<?> eliminarUsuarioAjax(@PathVariable Long id) {
         Map<String, Object> response = new HashMap<>();
-        if (usuarioService.obtenerUsuarioPorId(id).isPresent()) {
+        try {
+            if (!usuarioService.obtenerUsuarioPorId(id).isPresent()) {
+                response.put("success", false);
+                response.put("message", "Usuario no encontrado");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            }
             usuarioService.eliminarUsuario(id);
             response.put("success", true);
+            response.put("message", "Usuario eliminado correctamente");
             return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "Error al eliminar usuario: " + e.getMessage());
+            return ResponseEntity.internalServerError().body(response);
         }
-        return ResponseEntity.notFound().build();
+    }
+
+    @PostMapping("/api/cambiar-estado/{id}")
+    @PreAuthorize("hasAuthority('OPCION_2')")
+    public ResponseEntity<?> cambiarEstadoUsuarioAjax(@PathVariable Long id) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            return usuarioService.cambiarEstadoUsuario(id)
+                    .map(usuario -> {
+                        response.put("success", true);
+                        response.put("usuario", usuario);
+                        response.put("message", "Estado del usuario actualizado correctamente");
+                        return ResponseEntity.ok(response);
+                    })
+                    .orElseGet(() -> {
+                        response.put("success", false);
+                        response.put("message", "Usuario no encontrado");
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+                    });
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "Error al cambiar estado: " + e.getMessage());
+            return ResponseEntity.internalServerError().body(response);
+        }
+    }
+
+    @GetMapping("/api/generar-2fa/{id}")
+    @PreAuthorize("hasAuthority('OPCION_2')")
+    public ResponseEntity<?> generarSecreto2FA(@PathVariable Long id) {
+        Map<String, Object> response = new HashMap<>();
+        Optional<Usuario> usuarioOpt = usuarioService.obtenerUsuarioPorId(id);
+        if (usuarioOpt.isEmpty()) {
+            response.put("success", false);
+            response.put("message", "Usuario no encontrado.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        }
+        Usuario usuario = usuarioOpt.get();
+        String secreto = servicio2FA.generarNuevoSecreto();
+        String qrCodeUri = servicio2FA.generarUriDatosQr(secreto, usuario.getCorreo(), "AccesoApp");
+        response.put("success", true);
+        response.put("secreto", secreto); // Se envía al front para mostrarlo por si no se puede escanear el QR
+        response.put("qrCodeUri", qrCodeUri);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/api/verificar-2fa")
+    @PreAuthorize("hasAuthority('OPCION_2')")
+    public ResponseEntity<?> verificarYActivar2FA(@RequestBody Map<String, String> payload) {
+        Map<String, Object> response = new HashMap<>();
+        Long id = Long.parseLong(payload.get("id"));
+        String codigo = payload.get("codigo");
+        String secreto = payload.get("secreto"); // El secreto se genera en el paso anterior
+        if (!servicio2FA.esCodigoValido(secreto, codigo)) {
+            response.put("success", false);
+            response.put("message", "El código de verificación es incorrecto.");
+            return ResponseEntity.badRequest().body(response);
+        }
+        usuarioService.activar2FA(id, secreto);
+        response.put("success", true);
+        response.put("message", "¡Autenticación de dos pasos activada correctamente!");
+        return ResponseEntity.ok(response);
     }
 }
