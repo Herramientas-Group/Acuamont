@@ -16,7 +16,7 @@ import java.util.List;
 public interface ReportesRepository extends JpaRepository<Venta,Long> {
     @Query(value = """
         SELECT 
-            CONCAT(sc.serie, '-', LPAD(v.correlativo, 9, '0')) AS documento,
+            CONCAT(sc.serie, '-', LPAD(v.correlativo::text, 9, '0')) AS documento,
             c.nombre AS cliente,
             v.fecha AS fecha,
             v.total AS totalVenta,

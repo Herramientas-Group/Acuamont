@@ -12,5 +12,5 @@ public interface CategoriaRepository extends JpaRepository<Categoria, Long> {
     boolean existsByNombre(String nombre);
     List<Categoria> findAllByEstadoNot(Integer estado);
     Long countByEstadoNot(Integer estado);
-    List<Categoria> findByEstadoTrue();
+    List<Categoria> findByEstado(Integer estado);
 }

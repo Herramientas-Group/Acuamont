@@ -13,6 +13,7 @@ import org.xhtmlrenderer.pdf.ITextRenderer;
 
 import java.io.ByteArrayOutputStream;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import jakarta.mail.internet.MimeMessage;
@@ -25,6 +26,12 @@ public class GenerarBoletaServiceImpl implements GenerarBoletaService {
     private final TemplateEngine templateEngine;
     private final VentaService ventaService;
     private final JavaMailSender mailSender;
+
+    @Value("${mail.from}")
+    private String mailFrom;
+
+    @Value("${mail.fromName}")
+    private String mailFromName;
 
     public byte[] generarBoletaPdf(Long ventaId) throws Exception {
 
@@ -46,7 +53,7 @@ public class GenerarBoletaServiceImpl implements GenerarBoletaService {
         return outputStream.toByteArray();
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public String enviarBoletaPorCorreo(Long ventaId) throws Exception {
 
         Venta venta = ventaService.obtenerVenta(ventaId);
@@ -64,11 +71,11 @@ public class GenerarBoletaServiceImpl implements GenerarBoletaService {
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, false, "UTF-8");
 
-        helper.setFrom("johnchm007@gmail.com", "Acuamont S.A.C.");
+        helper.setFrom(mailFrom, mailFromName);
         helper.setTo(correoCliente);
         helper.setSubject("Comprobante de Venta Acuamont: " + numeroBoleta);
 
-        String htmlBody = templateEngine.process("boleta/plantilla_Comprobante", context);
+        String htmlBody = templateEngine.process("Boleta/plantilla_Comprobante", context);
 
         helper.setText(htmlBody, true);
 

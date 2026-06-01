@@ -51,14 +51,14 @@ public class VentaServiceImpl implements VentaService {
                 .orElseThrow(() -> new RuntimeException("Error: El usuario no existe."));
         FormaPago formaPago = formaPagoRepository.findById(ventaRequest.getFormaPagoId())
                 .orElseThrow(() -> new RuntimeException("Error: La forma de pago no existe."));
-        SerieComprobante serie = serieComprobanteRepository.findById(ventaRequest.getSerieComprobanteId())
+        SerieComprobante serie = serieComprobanteRepository.findByIdWithLock(ventaRequest.getSerieComprobanteId())
                 .orElseThrow(() -> new RuntimeException("Error: La serie de comprobante no existe."));
 
         BigDecimal totalVenta = BigDecimal.ZERO;
         Venta nuevaVenta = new Venta();
 
         for (DetalleVentaDTO detalleDTO : ventaRequest.getDetalles()) {
-            Producto producto = productoRepository.findById(detalleDTO.getProductoId())
+            Producto producto = productoRepository.findByIdWithLock(detalleDTO.getProductoId())
                     .orElseThrow(() -> new RuntimeException(
                             "Error: El producto con ID " + detalleDTO.getProductoId() + " no existe."));
 

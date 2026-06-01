@@ -4,13 +4,13 @@ import com.example.acceso.model.Perfil;
 import com.example.acceso.service.Interfaces.PerfilService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@Controller
+@RestController
 @RequestMapping("/perfiles")
 public class PerfilController {
     private final PerfilService perfilService;
@@ -18,13 +18,8 @@ public class PerfilController {
         this.perfilService = perfilService;
     }
 
-    @GetMapping("/listar")
-    public String mostrarPaginaPerfiles() {
-        return "perfiles"; // Devuelve el nombre de la vista (perfiles.html)
-    }
-
     @GetMapping("/api/listar")
-    @ResponseBody
+    @PreAuthorize("hasAuthority('OPCION_3')")
     public ResponseEntity<?> listarPerfilesApi() {
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
@@ -33,7 +28,7 @@ public class PerfilController {
     }
 
     @GetMapping("/api/{id}")
-    @ResponseBody
+    @PreAuthorize("hasAuthority('OPCION_3')")
     public ResponseEntity<?> obtenerPerfil(@PathVariable Long id) {
         return perfilService.obtenerPerfilPorId(id)
                 .map(perfil -> {
@@ -53,7 +48,7 @@ public class PerfilController {
     }
 
     @PostMapping("/api/guardar")
-    @ResponseBody
+    @PreAuthorize("hasAuthority('OPCION_3')")
     public ResponseEntity<?> guardarPerfil(@RequestBody Perfil perfil) {
         Map<String, Object> response = new HashMap<>();
         try {
@@ -70,7 +65,7 @@ public class PerfilController {
     }
 
     @PostMapping("/api/cambiar-estado/{id}")
-    @ResponseBody
+    @PreAuthorize("hasAuthority('OPCION_3')")
     public ResponseEntity<?> cambiarEstadoPerfil(@PathVariable Long id) {
         Map<String, Object> response = new HashMap<>();
         return perfilService.cambiarEstadoPerfil(id)
@@ -87,7 +82,7 @@ public class PerfilController {
     }
 
     @GetMapping("/api/opciones")
-    @ResponseBody
+    @PreAuthorize("hasAuthority('OPCION_3')")
     public ResponseEntity<?> listarOpcionesApi() {
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
@@ -96,7 +91,7 @@ public class PerfilController {
     }
 
     @DeleteMapping("/api/eliminar/{id}")
-    @ResponseBody
+    @PreAuthorize("hasAuthority('OPCION_3')")
     public ResponseEntity<?> eliminarPerfil(@PathVariable Long id) {
         Map<String, Object> response = new HashMap<>();
         try {

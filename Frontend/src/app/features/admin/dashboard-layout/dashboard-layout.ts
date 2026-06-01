@@ -3,6 +3,7 @@ import { RouterOutlet, Router, NavigationEnd, ActivatedRoute, RouterLink, Router
 import { CommonModule } from '@angular/common';
 import { filter, map, mergeMap } from 'rxjs/operators';
 import { AuthService } from '../../../core/services/auth-service';
+import { Opcion } from '../../../shared/interfaces/perfil';
 
 @Component({
   selector: 'app-dashboard-layout',
@@ -12,6 +13,9 @@ import { AuthService } from '../../../core/services/auth-service';
 })
 export class DashboardLayout implements OnInit {
   titulo: string = 'Panel Administrativo';
+  menuOpciones: Opcion[] = [];
+  nombreUsuario: string = '';
+  perfilUsuario: string = '';
 
   constructor(
     private router: Router,
@@ -21,6 +25,17 @@ export class DashboardLayout implements OnInit {
   ) { }
 
   ngOnInit(): void {
+    this.menuOpciones = this.authService.getOpciones();
+    this.nombreUsuario = this.authService.getNombre() || '';
+    this.perfilUsuario = this.authService.getPerfil() || '';
+
+    this.authService.opciones$.subscribe(opciones => {
+      this.menuOpciones = opciones;
+      this.nombreUsuario = this.authService.getNombre() || '';
+      this.perfilUsuario = this.authService.getPerfil() || '';
+      this.cdr.detectChanges();
+    });
+
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd),
       map(() => this.activatedRoute),

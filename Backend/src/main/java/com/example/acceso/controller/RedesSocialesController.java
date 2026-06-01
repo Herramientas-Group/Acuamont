@@ -5,13 +5,13 @@ import com.example.acceso.model.RedSocial;
 import com.example.acceso.service.Interfaces.RedSocialService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Controller
+@RestController
 @RequestMapping("/redes")
 public class RedesSocialesController {
     private final RedSocialService redSocialService;
@@ -21,6 +21,7 @@ public class RedesSocialesController {
 
     @GetMapping("/api/listar")
     @ResponseBody
+    @PreAuthorize("hasAuthority('OPCION_6')")
     public ResponseEntity<?> listarRedesSocialesApi() {
         Map<String, Object> response = new HashMap<>();
         List<RedSocial> redesSociales = redSocialService.listarRedesSociales();
@@ -31,6 +32,7 @@ public class RedesSocialesController {
 
     @PutMapping("/api/actualizar/{id}")
     @ResponseBody
+    @PreAuthorize("hasAuthority('OPCION_6')")
     public ResponseEntity<?> actualizarRedSocial(@PathVariable Long id, @RequestBody RedSocialDTO redSocial) {
         RedSocial redSocialActualizada = redSocialService.actualizarRedSocial(id, redSocial);
         Map<String, Object> response = new HashMap<>();
@@ -42,6 +44,7 @@ public class RedesSocialesController {
 
     @PostMapping("/api/cambiar-estado/{id}")
     @ResponseBody
+    @PreAuthorize("hasAuthority('OPCION_6')")
     public ResponseEntity<?> cambiarEstadoRedSocial(@PathVariable Long id) {
         Map<String, Object> response = new HashMap<>();
         return redSocialService.cambiarEstadoRedSocial(id)

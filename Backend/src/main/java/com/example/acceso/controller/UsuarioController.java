@@ -4,20 +4,20 @@ import com.example.acceso.model.Usuario;
 import com.example.acceso.service.Interfaces.PerfilService;
 import com.example.acceso.service.Interfaces.ServicioAutenticacionDosPasos;
 import com.example.acceso.service.Interfaces.UsuarioService;
-import jakarta.servlet.http.HttpSession;
-import org.springframework.stereotype.Controller;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.http.HttpStatus;
 import jakarta.validation.Valid;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-@Controller
+@RestController
 @RequestMapping("/usuarios")
 public class UsuarioController {
     private final UsuarioService usuarioService;
@@ -29,16 +29,8 @@ public class UsuarioController {
         this.servicio2FA = servicio2FA;
     }
 
-    @GetMapping("/listar")
-    public String listarUsuarios(Model model) {
-        List<Usuario> usuarios = usuarioService.listarUsuarios();
-        model.addAttribute("usuarios", usuarios);
-        model.addAttribute("formUsuario", new Usuario());
-        return "usuarios";
-    }
-
     @GetMapping("/api/listar")
-    @ResponseBody
+    @PreAuthorize("hasAuthority('OPCION_2')")
     public ResponseEntity<?> listarUsuariosApi() {
         Map<String, Object> response = new HashMap<>();
         List<Usuario> usuarios = usuarioService.listarUsuarios();
@@ -48,20 +40,24 @@ public class UsuarioController {
     }
 
     @GetMapping("/api/usuarioLogueado")
-    @ResponseBody
-    public ResponseEntity<?> usuarioLogueado(HttpSession session) {
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> usuarioLogueado() {
         Map<String, Object> response = new HashMap<>();
-        response.put("success", true);
-        response.put("data", usuarioService.listarUsuarios());
-        Usuario usuarioLogueado = (Usuario) session.getAttribute("usuarioLogueado");
-        if (usuarioLogueado != null) {
-            response.put("usuarioActual", usuarioLogueado.getId());
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = (String) auth.getPrincipal();
+        Optional<Usuario> usuarioOpt = usuarioService.findByUsuario(username);
+        if (usuarioOpt.isEmpty()) {
+            response.put("success", false);
+            response.put("message", "Usuario no encontrado");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         }
+        response.put("success", true);
+        response.put("data", usuarioOpt.get());
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/api/perfiles")
-    @ResponseBody
+    @PreAuthorize("hasAuthority('OPCION_2')")
     public ResponseEntity<?> listarPerfilesActivosApi() {
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
@@ -70,7 +66,7 @@ public class UsuarioController {
     }
 
     @PostMapping("/api/guardar")
-    @ResponseBody
+    @PreAuthorize("hasAuthority('OPCION_2')")
     public ResponseEntity<?> guardarUsuarioAjax(@Valid @RequestBody Usuario usuario, BindingResult bindingResult) {
         Map<String, Object> response = new HashMap<>();
         if (bindingResult.hasErrors()) {
@@ -96,7 +92,7 @@ public class UsuarioController {
     }
 
     @GetMapping("/api/{id}")
-    @ResponseBody
+    @PreAuthorize("hasAuthority('OPCION_2')")
     public ResponseEntity<?> obtenerUsuario(@PathVariable Long id) {
         try {
             return usuarioService.obtenerUsuarioPorId(id).map(usuario -> {
@@ -114,7 +110,7 @@ public class UsuarioController {
     }
 
     @DeleteMapping("/api/eliminar/{id}")
-    @ResponseBody
+    @PreAuthorize("hasAuthority('OPCION_2')")
     public ResponseEntity<?> eliminarUsuarioAjax(@PathVariable Long id) {
         Map<String, Object> response = new HashMap<>();
         try {
@@ -135,7 +131,7 @@ public class UsuarioController {
     }
 
     @PostMapping("/api/cambiar-estado/{id}")
-    @ResponseBody
+    @PreAuthorize("hasAuthority('OPCION_2')")
     public ResponseEntity<?> cambiarEstadoUsuarioAjax(@PathVariable Long id) {
         Map<String, Object> response = new HashMap<>();
         try {
@@ -159,7 +155,7 @@ public class UsuarioController {
     }
 
     @GetMapping("/api/generar-2fa/{id}")
-    @ResponseBody
+    @PreAuthorize("hasAuthority('OPCION_2')")
     public ResponseEntity<?> generarSecreto2FA(@PathVariable Long id) {
         Map<String, Object> response = new HashMap<>();
         Optional<Usuario> usuarioOpt = usuarioService.obtenerUsuarioPorId(id);
@@ -178,7 +174,7 @@ public class UsuarioController {
     }
 
     @PostMapping("/api/verificar-2fa")
-    @ResponseBody
+    @PreAuthorize("hasAuthority('OPCION_2')")
     public ResponseEntity<?> verificarYActivar2FA(@RequestBody Map<String, String> payload) {
         Map<String, Object> response = new HashMap<>();
         Long id = Long.parseLong(payload.get("id"));

@@ -59,7 +59,7 @@ public class CategoriaServiceImpl implements CategoriaService {
 
     @Transactional(readOnly = true)
     public List<Categoria> listarCategoriasActivas() {
-        return categoriaRepository.findAllByEstadoNot(2);
+        return categoriaRepository.findByEstado(1);
     }
 
     @Transactional(readOnly = true)

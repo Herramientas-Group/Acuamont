@@ -4,15 +4,13 @@ import com.example.acceso.model.Cliente;
 import com.example.acceso.service.Interfaces.ClienteService;
 import jakarta.validation.Valid;
 import org.springframework.http.*;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-@Controller
+@RestController
 @RequestMapping("/clientes")
 public class ClienteController {
     private final ClienteService clienteService;
@@ -20,16 +18,8 @@ public class ClienteController {
         this.clienteService = clienteService;
     }
 
-    @GetMapping("/listar")
-    public String listarClientes(Model model) {
-        List<Cliente> clientes = clienteService.listarClientes();
-        model.addAttribute("clientes", clientes);
-        model.addAttribute("formCliente", new Cliente());
-        return "clientes";
-    }
-
     @GetMapping("/api/listar")
-    @ResponseBody
+    @PreAuthorize("hasAuthority('OPCION_7')")
     public ResponseEntity<?> listarClientesApi() {
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
@@ -38,7 +28,7 @@ public class ClienteController {
     }
 
     @PostMapping("/api/guardar")
-    @ResponseBody
+    @PreAuthorize("hasAuthority('OPCION_7')")
     public ResponseEntity<?> guardarClienteApi(@Valid @RequestBody Cliente cliente, BindingResult bindingResult) {
         Map<String, Object> response = new HashMap<>();
         if(bindingResult.hasErrors()) {
@@ -64,7 +54,7 @@ public class ClienteController {
     }
 
     @PostMapping("/api/cambiar-estado/{id}")
-    @ResponseBody
+    @PreAuthorize("hasAuthority('OPCION_7')")
     public ResponseEntity<?> cambiarEstadoClienteAjax(@PathVariable Long id) {
         Map<String, Object> response = new HashMap<>();
         try {
@@ -88,7 +78,7 @@ public class ClienteController {
     }
 
     @GetMapping("/api/{id}")
-    @ResponseBody
+    @PreAuthorize("hasAuthority('OPCION_7')")
     public ResponseEntity<?> obtenerCliente(@PathVariable Long id) {
         try {
             return clienteService.obtenerClientePorId(id).map(cliente -> {
@@ -106,7 +96,7 @@ public class ClienteController {
     }
 
     @DeleteMapping("/api/eliminar/{id}")
-    @ResponseBody
+    @PreAuthorize("hasAuthority('OPCION_7')")
     public ResponseEntity<?> eliminarCliente(@PathVariable Long id) {
         Map<String, Object> response = new HashMap<>();
         try {
@@ -127,6 +117,7 @@ public class ClienteController {
     }
 
     @GetMapping("/api/buscar-cliente-documento/{documento}")
+    @PreAuthorize("hasAuthority('OPCION_7')")
     public ResponseEntity<?> buscarPorDocumentoInterno(@PathVariable String documento) {
         return clienteService.obtenerClientePorDocumento(documento)
                 .map(cliente -> {

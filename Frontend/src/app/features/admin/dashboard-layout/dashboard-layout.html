@@ -20,40 +20,11 @@
         <!-- NAV LINKS -->
         <nav class="flex-1 mt-4 px-2 space-y-1">
 
-            <a routerLink="/admin/dashboard" routerLinkActive="bg-blue-primary text-white"
+            <a *ngFor="let opcion of menuOpciones"
+                [routerLink]="opcion.ruta" routerLinkActive="bg-blue-primary text-white"
                 class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-300 hover:bg-blue-hover hover:text-white transition-colors group relative cursor-pointer">
-                <span class="material-symbols-outlined flex-shrink-0">home</span>
-                <span class="transition-opacity duration-200 whitespace-nowrap">Dashboard</span>
-            </a>
-
-            <a routerLink="/admin/ventas" routerLinkActive="bg-blue-primary text-white"
-                class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-300 hover:bg-blue-hover hover:text-white transition-colors group relative cursor-pointer">
-                <span class="material-symbols-outlined flex-shrink-0">home</span>
-                <span class="transition-opacity duration-200 whitespace-nowrap">Gestion de Ventas</span>
-            </a>
-
-            <a routerLink="/admin/inventario" routerLinkActive="bg-blue-primary text-white"
-                class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-300 hover:bg-blue-hover hover:text-white transition-colors group relative cursor-pointer">
-                <span class="material-symbols-outlined flex-shrink-0">calendar_clock</span>
-                <span class="transition-opacity duration-200 whitespace-nowrap">Gestion Inventario</span>
-            </a>
-
-            <a routerLink="/admin/proveedores" routerLinkActive="bg-blue-primary text-white"
-                class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-300 hover:bg-blue-hover hover:text-white transition-colors group relative cursor-pointer">
-                <span class="material-symbols-outlined flex-shrink-0">nearby</span>
-                <span class="transition-opacity duration-200 whitespace-nowrap">Gestion Proveedores</span>
-            </a>
-
-            <a routerLink="/admin/usuarios" routerLinkActive="bg-blue-primary text-white"
-                class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-300 hover:bg-blue-hover hover:text-white transition-colors group relative cursor-pointer">
-                <span class="material-symbols-outlined flex-shrink-0">nearby</span>
-                <span class="transition-opacity duration-200 whitespace-nowrap">Gestion Usuarios</span>
-            </a>
-
-            <a routerLink="/admin/perfiles" routerLinkActive="bg-blue-primary text-white"
-                class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-300 hover:bg-blue-hover hover:text-white transition-colors group relative cursor-pointer">
-                <span class="material-symbols-outlined flex-shrink-0">nearby</span>
-                <span class="transition-opacity duration-200 whitespace-nowrap">Gestion Perfiles</span>
+                <span class="material-symbols-outlined flex-shrink-0">{{ opcion.icono }}</span>
+                <span class="transition-opacity duration-200 whitespace-nowrap">{{ opcion.nombre }}</span>
             </a>
 
         </nav>
@@ -81,12 +52,12 @@
 
             <div class="flex items-center gap-3">
                 <div class="text-right">
-                    <p class="text-sm font-bold text-black leading-none">Nombre</p>
-                    <p class="text-[10px] text-slate-500">Rol</p>
+                    <p class="text-sm font-bold text-black leading-none">{{ nombreUsuario }}</p>
+                    <p class="text-[10px] text-slate-500">{{ perfilUsuario }}</p>
                 </div>
                 <div
                     class="w-10 h-10 bg-blue-primary text-black rounded-full flex items-center justify-center font-bold">
-                    N
+                    {{ nombreUsuario.charAt(0) }}
                 </div>
             </div>
         </header>

@@ -9,6 +9,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -84,7 +85,9 @@ public class ProductoServiceImpl implements ProductoService {
                 for (MultipartFile foto : fotos) {
                     if (foto != null && !foto.isEmpty()) {
                         String urlImagen = cloudinaryService.subirImagen(foto, nombreCarpetaNube);
-                        listaImagenes.add(urlImagen);
+                        if (urlImagen != null) {
+                            listaImagenes.add(urlImagen);
+                        }
                     }
                 }
                 String jsonImagenesNuevo = objectMapper.writeValueAsString(listaImagenes);
@@ -235,6 +238,6 @@ public class ProductoServiceImpl implements ProductoService {
 
     @Override
     public List<Object[]> findTop5ProductosMasVendidos() {
-        return productoRepository.findTop5ProductosMasVendidos();
+        return productoRepository.findTop5ProductosMasVendidos(PageRequest.of(0, 5));
     }
 }

@@ -4,16 +4,14 @@ import com.example.acceso.model.Proveedor;
 import com.example.acceso.service.Interfaces.ProveedorService;
 import jakarta.validation.Valid;
 import org.springframework.http.*;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-@Controller
+@RestController
 @RequestMapping("/proveedores")
 public class ProveedorController {
 
@@ -23,16 +21,8 @@ public class ProveedorController {
         this.proveedorService = proveedorService;
     }
     
-    @GetMapping("/listar")
-    public String listarProveedores(Model model) {
-        List<Proveedor> proveedores = proveedorService.listarProveedores();
-        model.addAttribute("proveedores", proveedores);
-        model.addAttribute("formProveedor", new Proveedor());
-        return "proveedores";
-    }
-    
     @GetMapping("/api/listar")
-    @ResponseBody
+    @PreAuthorize("hasAuthority('OPCION_10')")
     public ResponseEntity<?> listarProveedoresApi() {
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
@@ -41,7 +31,7 @@ public class ProveedorController {
     }
 
     @PostMapping("/api/guardar")
-    @ResponseBody
+    @PreAuthorize("hasAuthority('OPCION_10')")
     public ResponseEntity<?> guardarProveedorApi(@Valid @RequestBody Proveedor proveedor, BindingResult bindingResult) {
         Map<String, Object> response = new HashMap<>();
 
@@ -69,7 +59,7 @@ public class ProveedorController {
     }
 
     @PostMapping("/api/cambiar-estado/{id}")
-    @ResponseBody
+    @PreAuthorize("hasAuthority('OPCION_10')")
     public ResponseEntity<?> cambiarEstadoProveedorAjax(@PathVariable Long id) {
         Map<String, Object> response = new HashMap<>();
         try {
@@ -93,7 +83,7 @@ public class ProveedorController {
     }
 
     @GetMapping("/api/{id}")
-    @ResponseBody
+    @PreAuthorize("hasAuthority('OPCION_10')")
     public ResponseEntity<?> obtenerProveedor(@PathVariable Long id) {
         try {
             return proveedorService.obtenerProveedorPorId(id).map(proveedor -> {
@@ -111,7 +101,7 @@ public class ProveedorController {
     }
 
     @DeleteMapping("/api/eliminar/{id}")
-    @ResponseBody
+    @PreAuthorize("hasAuthority('OPCION_10')")
     public ResponseEntity<?> eliminarProveedor(@PathVariable Long id) {
         Map<String, Object> response = new HashMap<>();
         try {
@@ -133,6 +123,7 @@ public class ProveedorController {
 
 
     @GetMapping("/api/buscar-proveedor-documento/{documento}")
+    @PreAuthorize("hasAuthority('OPCION_10')")
     public ResponseEntity<?> buscarPorDocumentoInterno(@PathVariable String documento) {
         return proveedorService.obtenerProveedorPorDocumento(documento)
                 .map(proveedor -> {

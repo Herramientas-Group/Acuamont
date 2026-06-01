@@ -6,10 +6,11 @@ import com.example.acceso.DTO.ReporteUttilidadUsuarioDTO;
 import com.example.acceso.service.Interfaces.ReportesService;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -18,7 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Controller
+@RestController
 @RequestMapping("/reportes")
 public class ReportesController {
 
@@ -28,12 +29,8 @@ public class ReportesController {
         this.reportesService = reportesService;
     }
 
-    @GetMapping("/listar")
-    public String mostrarReportes (){
-        return "reportes";
-    }
-
     @GetMapping("/api/utilidad-ventas")
+    @PreAuthorize("hasAuthority('OPCION_11')")
     public ResponseEntity<?> getUtilidadVentas() {
         Map<String, Object> response = new HashMap<>();
         try {
@@ -49,6 +46,7 @@ public class ReportesController {
     }
 
     @GetMapping("/api/utilidad-ventas-rango")
+    @PreAuthorize("hasAuthority('OPCION_11')")
     public ResponseEntity<?> getUtilidadVentasRango(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate inicio,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fin
@@ -63,12 +61,13 @@ public class ReportesController {
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             response.put("success",false);
-            response.put("mensage",e.getMessage());
+            response.put("message",e.getMessage());
             return ResponseEntity.internalServerError().body(response);
         }
     }
 
     @GetMapping("/api/utilidad-usuarios")
+    @PreAuthorize("hasAuthority('OPCION_11')")
     public ResponseEntity<?> getUtilidadUsuarios() {
         Map<String, Object> response = new HashMap<>();
         try {
@@ -78,12 +77,13 @@ public class ReportesController {
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             response.put("success",false);
-            response.put("mensage",e.getMessage());
+            response.put("message",e.getMessage());
             return ResponseEntity.internalServerError().body(response);
         }
     }
 
     @GetMapping("/api/utilidad-usuarios-rango")
+    @PreAuthorize("hasAuthority('OPCION_11')")
     public ResponseEntity<?> getUtilidadUsuariosRango(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate inicio,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fin
@@ -98,12 +98,13 @@ public class ReportesController {
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             response.put("success",false);
-            response.put("mensage",e.getMessage());
+            response.put("message",e.getMessage());
             return ResponseEntity.internalServerError().body(response);
         }
     }
 
     @GetMapping("/api/utilidad-producto")
+    @PreAuthorize("hasAuthority('OPCION_11')")
     public ResponseEntity<?> getUtilidadProductos() {
         Map<String, Object> response = new HashMap<>();
         try {
@@ -113,12 +114,13 @@ public class ReportesController {
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             response.put("success",false);
-            response.put("mensage",e.getMessage());
+            response.put("message",e.getMessage());
             return ResponseEntity.internalServerError().body(response);
         }
     }
 
     @GetMapping("/api/utilidad-producto-rango")
+    @PreAuthorize("hasAuthority('OPCION_11')")
     public ResponseEntity<?> getUtilidadProductosRango(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate inicio,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fin
@@ -133,7 +135,7 @@ public class ReportesController {
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             response.put("success",false);
-            response.put("mensage",e.getMessage());
+            response.put("message",e.getMessage());
             return ResponseEntity.internalServerError().body(response);
         }
     }

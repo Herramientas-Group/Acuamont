@@ -2,16 +2,16 @@ package com.example.acceso.controller;
 
 import com.example.acceso.DTO.PagosDTO;
 import com.example.acceso.model.Venta;
-import com.example.acceso.service.Implements.VentaServiceImpl;
 import com.example.acceso.service.Interfaces.VentaService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-@Controller
+@RestController
 @RequestMapping("/pagos")
 public class PagoController {
     private final VentaService ventaService;
@@ -20,6 +20,7 @@ public class PagoController {
     }
 
     @PostMapping("/api/registrarPago")
+    @PreAuthorize("hasAuthority('OPCION_8')")
     public ResponseEntity<Venta> registrarPago(@Valid @RequestBody PagosDTO pagoRequest) {
         Venta ventaActualizada = ventaService.registrarPago(pagoRequest);
         return ResponseEntity.ok(ventaActualizada);

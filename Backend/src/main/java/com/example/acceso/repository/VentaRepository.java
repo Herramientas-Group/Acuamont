@@ -14,9 +14,9 @@ public interface VentaRepository extends JpaRepository<Venta, Long> {
     List<Venta> findVentasByProductoId(@Param("productoId") Long productoId);
     List<Venta> findAllByEstadoNot(Integer estado);
     Long countByEstado(Integer estado);
-    @Query("SELECT COALESCE(SUM(v.total), 0) FROM Venta v WHERE v.estado <> 2 AND FUNCTION('DATE', v.fecha) = CURRENT_DATE")
+    @Query("SELECT COALESCE(SUM(v.total), 0) FROM Venta v WHERE v.estado <> 2 AND cast(v.fecha as date) = CURRENT_DATE")
     BigDecimal sumTotalVentasDelDia();
-    @Query("SELECT COALESCE(SUM(v.total), 0) FROM Venta v WHERE v.estado <> 2 AND YEAR(v.fecha) = YEAR(CURRENT_DATE) AND MONTH(v.fecha) = MONTH(CURRENT_DATE)")
+    @Query("SELECT COALESCE(SUM(v.total), 0) FROM Venta v WHERE v.estado <> 2 AND extract(year from v.fecha) = extract(year from CURRENT_DATE) AND extract(month from v.fecha) = extract(month from CURRENT_DATE)")
     BigDecimal sumTotalVentasDelMes();
     @Query("SELECT COALESCE(SUM(v.deuda), 0) FROM Venta v WHERE v.estado <> 2")
     BigDecimal sumTotalDeuda();

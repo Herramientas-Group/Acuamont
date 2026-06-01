@@ -6,15 +6,14 @@ import com.example.acceso.service.Interfaces.CategoriaService;
 import com.example.acceso.service.Interfaces.ProductoService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Controller
+@RestController
 @RequestMapping("/productos")
 public class ProductoController {
     private final ProductoService productoService;
@@ -24,16 +23,7 @@ public class ProductoController {
         this.categoriaService = categoriaService;
     }
 
-    @GetMapping("/listar")
-    public String listarProductos(Model model) {
-        List<Producto> productos = productoService.listarProductos();
-        model.addAttribute("productos", productos);
-        model.addAttribute("formProducto", new Producto());
-        return "productos";
-    }
-
     @GetMapping("/api/listar")
-    @ResponseBody
     public ResponseEntity<?> listarProductosApi() {
         Map<String, Object> response = new HashMap<>();
         List<Producto> productos = productoService.listarProductos();
@@ -43,7 +33,6 @@ public class ProductoController {
     }
 
     @GetMapping("/api/categorias")
-    @ResponseBody
     public ResponseEntity<?> listarCategoriasActivas() {
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
@@ -52,7 +41,7 @@ public class ProductoController {
     }
 
     @PostMapping("/api/guardar")
-    @ResponseBody
+    @PreAuthorize("hasAuthority('OPCION_5')")
     public ResponseEntity<Map<String, Object>> guardarProductoApi(
             @RequestParam(value = "id", required = false) Long id,
             @RequestParam("nombre") String nombre,
@@ -99,7 +88,7 @@ public class ProductoController {
     }
 
     @GetMapping("/api/{id}")
-    @ResponseBody
+    @PreAuthorize("hasAuthority('OPCION_5')")
     public ResponseEntity<?> obtenerProducto(@PathVariable Long id) {
         try {
             return productoService.obtenerProductoPorId(id).map(producto -> {
@@ -117,7 +106,7 @@ public class ProductoController {
     }
 
     @DeleteMapping("/api/eliminar/{id}")
-    @ResponseBody
+    @PreAuthorize("hasAuthority('OPCION_5')")
     public ResponseEntity<?> eliminarProductoAjax(@PathVariable Long id) {
         Map<String, Object> response = new HashMap<>();
         try {
@@ -138,7 +127,7 @@ public class ProductoController {
     }
 
     @PostMapping("/api/cambiar-estado/{id}")
-    @ResponseBody
+    @PreAuthorize("hasAuthority('OPCION_5')")
     public ResponseEntity<?> cambiarEstadoProductoAjax(@PathVariable Long id) {
         Map<String, Object> response = new HashMap<>();
         try {
@@ -162,7 +151,7 @@ public class ProductoController {
     }
 
     @PostMapping("/api/eliminar-imagen")
-    @ResponseBody
+    @PreAuthorize("hasAuthority('OPCION_5')")
     public ResponseEntity<Map<String, Object>> eliminarImagen(
             @RequestParam Long productoId,
             @RequestParam String nombreImagen) {

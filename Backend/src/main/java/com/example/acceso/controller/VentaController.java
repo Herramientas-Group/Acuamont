@@ -10,17 +10,18 @@ import com.example.acceso.service.Interfaces.SerieComprobanteService;
 import com.example.acceso.service.Interfaces.VentaService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Controller
+@Slf4j
+@RestController
 @RequestMapping("/ventas")
 public class VentaController {
     private GenerarBoletaService generarBoletaService;
@@ -35,16 +36,8 @@ public class VentaController {
         this.serieComprobanteService = serieComprobanteService;
     }
 
-    @GetMapping("/listar")
-    public String listarVentas(Model model) {
-        List<Venta> ventas = ventaService.listarVentas();
-        model.addAttribute("ventas", ventas);
-        model.addAttribute("formVenta", new Venta());
-        return "ventas";
-    }
-
     @GetMapping("/api/listar")
-    @ResponseBody
+    @PreAuthorize("hasAuthority('OPCION_8')")
     public ResponseEntity<?> listarVentasApi() {
         Map<String, Object> response = new HashMap<>();
         List<Venta> ventas = ventaService.listarVentas();
@@ -54,6 +47,7 @@ public class VentaController {
     }
 
     @GetMapping("/api/ventas_id/{id}")
+    @PreAuthorize("hasAuthority('OPCION_8')")
     public ResponseEntity<?> obtenerVentaPorId(@PathVariable Long id) {
         try {
             Venta venta = ventaService.obtenerVenta(id);
@@ -69,7 +63,7 @@ public class VentaController {
     }
 
     @GetMapping("/api/formaPago")
-    @ResponseBody
+    @PreAuthorize("hasAuthority('OPCION_8')")
     public ResponseEntity<?> listarFormasPagoApi() {
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
@@ -78,7 +72,7 @@ public class VentaController {
     }
 
     @GetMapping("/api/serieComprobante")
-    @ResponseBody
+    @PreAuthorize("hasAuthority('OPCION_8')")
     public ResponseEntity<?> listarSeriesComprobanteApi() {
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
@@ -87,7 +81,7 @@ public class VentaController {
     }
 
     @PostMapping("/api/guardar")
-    @ResponseBody
+    @PreAuthorize("hasAuthority('OPCION_8')")
     public ResponseEntity<?> guardarVentaApi(@Valid @RequestBody VentaDTO venta) {
         try {
             Venta ventaGuardada = ventaService.crearVenta(venta);
@@ -105,7 +99,7 @@ public class VentaController {
     }
 
     @PutMapping("/api/actualizar/{id}")
-    @ResponseBody
+    @PreAuthorize("hasAuthority('OPCION_8')")
     public ResponseEntity<?> actualizarVenta(@PathVariable Long id, @Valid @RequestBody VentaDTO ventaRequest) {
         try {
             Venta ventaReemplazo = ventaService.reemplazarVenta(id, ventaRequest);
@@ -123,47 +117,65 @@ public class VentaController {
     }
 
     @DeleteMapping("/api/eliminar/{id}")
-    @ResponseBody
+    @PreAuthorize("hasAuthority('OPCION_8')")
     public ResponseEntity<?> eliminarVentaApi(@PathVariable Long id) {
-        Venta ventaEliminada = ventaService.anularVenta(id);
         Map<String, Object> response = new HashMap<>();
-        response.put("success", true);
-        response.put("message", "Venta anulada correctamente");
-        response.put("data", ventaEliminada);
-        return ResponseEntity.ok(response);
+        try {
+            Venta ventaEliminada = ventaService.anularVenta(id);
+            response.put("success", true);
+            response.put("message", "Venta anulada correctamente");
+            response.put("data", ventaEliminada);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "Error al anular venta: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
     }
 
     @GetMapping("/api/cuotas/{ventaId}")
-    @ResponseBody
-    public ResponseEntity<List<Cuota>> listarCuotasPorVenta(@PathVariable Long ventaId) {
-        List<Cuota> cuotas = ventaService.obtenerCuotasPorVenta(ventaId);
-        return ResponseEntity.ok(cuotas);
+    @PreAuthorize("hasAuthority('OPCION_8')")
+    public ResponseEntity<?> listarCuotasPorVenta(@PathVariable Long ventaId) {
+        try {
+            List<Cuota> cuotas = ventaService.obtenerCuotasPorVenta(ventaId);
+            return ResponseEntity.ok(cuotas);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("success", false, "message", e.getMessage()));
+        }
     }
 
     @GetMapping("/api/pagos/{ventaId}")
-    @ResponseBody
-    public ResponseEntity<List<Pago>> listarPagosPorVenta(@PathVariable Long ventaId) {
-        List<Pago> pagos = ventaService.obtenerPagosPorVenta(ventaId);
-        return ResponseEntity.ok(pagos);
+    @PreAuthorize("hasAuthority('OPCION_8')")
+    public ResponseEntity<?> listarPagosPorVenta(@PathVariable Long ventaId) {
+        try {
+            List<Pago> pagos = ventaService.obtenerPagosPorVenta(ventaId);
+            return ResponseEntity.ok(pagos);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("success", false, "message", e.getMessage()));
+        }
     }
 
     @GetMapping("/api/boleta/{ventaId}")
+    @PreAuthorize("hasAuthority('OPCION_8')")
     public void descargarBoletaPDF(@PathVariable Long ventaId, HttpServletResponse response) {
         try {
             byte[] pdfBytes = generarBoletaService.generarBoletaPdf(ventaId);
             response.setContentType("application/pdf");
             response.setHeader("Content-Disposition", "attachment; filename=\"boleta_" + ventaId + ".pdf\"");
-            OutputStream outputStream = response.getOutputStream();
-            outputStream.write(pdfBytes);
-            outputStream.flush();
-            outputStream.close();
+            try (OutputStream outputStream = response.getOutputStream()) {
+                outputStream.write(pdfBytes);
+                outputStream.flush();
+            }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Error generando boleta PDF", e);
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
     }
 
     @GetMapping("/api/envio-correo/{ventaid}")
+    @PreAuthorize("hasAuthority('OPCION_8')")
     public ResponseEntity<?> enviarBoletaPorCorreo(@PathVariable Long ventaid) {
         Map<String, Object> response = new HashMap<>();
         try {

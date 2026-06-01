@@ -5,15 +5,14 @@ import com.example.acceso.service.Interfaces.CategoriaService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Controller
+@RestController
 @RequestMapping("/categorias")
 public class CategoriaController {
     private final CategoriaService categoriaService;
@@ -21,16 +20,8 @@ public class CategoriaController {
         this.categoriaService = categoriaService;
     }
 
-    @GetMapping("/listar")
-    public String listarCategorias(Model model) {
-        List<Categoria> categorias = categoriaService.listarCategorias();
-        model.addAttribute("categorias", categorias);
-        model.addAttribute("formCategoria", new Categoria());
-        return "categorias";
-    }
-
     @GetMapping("/api/listar")
-    @ResponseBody
+    @PreAuthorize("hasAuthority('OPCION_4')")
     public ResponseEntity<?> listarCategoriasApi() {
         Map<String, Object> response = new HashMap<>();
         List<Categoria> categorias = categoriaService.listarCategorias();
@@ -40,7 +31,7 @@ public class CategoriaController {
     }
 
     @PostMapping("/api/guardar")
-    @ResponseBody
+    @PreAuthorize("hasAuthority('OPCION_4')")
     public ResponseEntity<?> guardarCategoriaAjax(@Valid @RequestBody Categoria categoria, BindingResult bindingResult) {
         Map<String, Object> response = new HashMap<>();
         if(bindingResult.hasErrors()) {
@@ -66,7 +57,7 @@ public class CategoriaController {
     }
 
     @GetMapping("/api/{id}")
-    @ResponseBody
+    @PreAuthorize("hasAuthority('OPCION_4')")
     public ResponseEntity<?> obtenerCategoria(@PathVariable Long id) {
         try {
             return categoriaService.obtenerCategoriaPorId(id).map(categoria -> {
@@ -84,7 +75,7 @@ public class CategoriaController {
     }
 
     @DeleteMapping("/api/eliminar/{id}")
-    @ResponseBody
+    @PreAuthorize("hasAuthority('OPCION_4')")
     public ResponseEntity<?> eliminarCategoriaAjax(@PathVariable Long id) {
         Map<String, Object> response = new HashMap<>();
         try {
@@ -105,7 +96,7 @@ public class CategoriaController {
     }
 
     @PostMapping("/api/cambiar-estado/{id}")
-    @ResponseBody
+    @PreAuthorize("hasAuthority('OPCION_4')")
     public ResponseEntity<?> cambiarEstadoCategoriaAjax(@PathVariable Long id) {
         Map<String, Object> response = new HashMap<>();
         try {

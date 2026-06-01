@@ -9,14 +9,13 @@ import com.example.acceso.service.Interfaces.AjusteInventarioService;
 import com.example.acceso.service.Interfaces.InventarioService;
 import com.example.acceso.service.Interfaces.ProductoService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Controller
+@RestController
 @RequestMapping("/inventario")
 public class InventarioController {
     private final ProductoService productoService;
@@ -28,16 +27,8 @@ public class InventarioController {
         this.ajusteInventarioService = ajusteInventarioService;
     }
 
-    @GetMapping("/listar")
-    public String listarProductos(Model model) {
-        List<Producto> productos = productoService.listarProductos();
-        model.addAttribute("inventario", productos);
-        model.addAttribute("formProducto", new Producto());
-        return "inventario";
-    }
-
     @GetMapping("/api/listar")
-    @ResponseBody
+    @PreAuthorize("hasAuthority('OPCION_9')")
     public ResponseEntity<?> listarProductosApi() {
         Map<String, Object> response = new HashMap<>();
         List<Producto> productos = productoService.listarProductos();
@@ -47,6 +38,7 @@ public class InventarioController {
     }
 
     @GetMapping("/api/movimientos/{productoId}")
+    @PreAuthorize("hasAuthority('OPCION_9')")
     public ResponseEntity<?> obtenerMovimientos(@PathVariable Long productoId) {
         List<Venta> movimientos = inventarioService.listarMovimientosPorProducto(productoId);
         Map<String, Object> response = new HashMap<>();
@@ -56,6 +48,7 @@ public class InventarioController {
     }
 
     @GetMapping("/api/ajustes/{productoId}")
+    @PreAuthorize("hasAuthority('OPCION_9')")
     public ResponseEntity<?> obtenerAjustes(@PathVariable Long productoId) {
         List<AjusteInventario> ajustes = ajusteInventarioService.listarAjustePorProducto(productoId);
         Map<String, Object> response = new HashMap<>();
@@ -65,6 +58,7 @@ public class InventarioController {
     }
 
     @PostMapping("/api/guardarAjuste")
+    @PreAuthorize("hasAuthority('OPCION_9')")
     public ResponseEntity<?> guardarAjuste(@RequestBody AjusteInventarioDTO ajusteInventarioDTO) {
         Map<String, Object> response = new HashMap<>();
         AjusteInventario nuevoAjuste = ajusteInventarioService.guardarAjuste(ajusteInventarioDTO);
@@ -74,6 +68,7 @@ public class InventarioController {
     }
 
     @GetMapping("/api/tipoMovimientos")
+    @PreAuthorize("hasAuthority('OPCION_9')")
     public ResponseEntity<?> obtenerTiposMovimientos() {
         List<TipoMovimiento> tiposMovimientos = inventarioService.listarTiposMovimientos();
         Map<String, Object> response = new HashMap<>();
