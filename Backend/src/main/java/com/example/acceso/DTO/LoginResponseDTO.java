@@ -9,6 +9,7 @@ import java.util.List;
 
 @Data @NoArgsConstructor @AllArgsConstructor @Builder
 public class LoginResponseDTO {
+    private Long id;
     private String token;
     private String usuario;
     private String nombre;

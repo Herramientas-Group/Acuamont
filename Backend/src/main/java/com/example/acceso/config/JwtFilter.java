@@ -8,12 +8,14 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.List;
 
+@Slf4j
 @Component
 public class JwtFilter extends OncePerRequestFilter {
 
@@ -35,9 +37,10 @@ public class JwtFilter extends OncePerRequestFilter {
                 String username = jwtUtil.extraerUsername(token);
                 if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                     List<Integer> opcionIds = jwtUtil.extraerOpciones(token);
-                    List<SimpleGrantedAuthority> authorities = opcionIds.stream()
-                            .map(id -> new SimpleGrantedAuthority("OPCION_" + id))
-                            .toList();
+                    log.debug("Opciones extraídas del token para '{}': {}", username, opcionIds);
+                    List<SimpleGrantedAuthority> authorities = opcionIds != null
+                            ? opcionIds.stream().map(id -> new SimpleGrantedAuthority("OPCION_" + id)).toList()
+                            : List.of();
 
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                             username, null, authorities);

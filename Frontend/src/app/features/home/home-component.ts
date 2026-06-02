@@ -20,8 +20,8 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   constructor(
     private http: HttpClient,
-    private cdr: ChangeDetectorRef
-  ) { }
+    private cdr: ChangeDetectorRef,
+  ) {}
 
   ngOnInit(): void {
     this.cargarSlides();
@@ -32,18 +32,17 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   private cargarSlides(): void {
-    this.http.get<string[]>('http://localhost:8080/slides/api/listar-urls')
-      .subscribe({
-        next: (urls) => {
-          this.slides = urls || [];
-          this.startAutoSlide();
-          this.cdr.detectChanges();
-        },
-        error: () => {
-          this.slidesError = true;
-          this.cdr.detectChanges();
-        }
-      });
+    this.http.get<string[]>('http://localhost:8080/slides/api/listar-urls').subscribe({
+      next: (urls) => {
+        this.slides = urls || [];
+        this.startAutoSlide();
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.slidesError = true;
+        this.cdr.detectChanges();
+      },
+    });
   }
 
   prevSlide(): void {

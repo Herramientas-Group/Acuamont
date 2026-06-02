@@ -2,32 +2,57 @@
   <app-navbar-component></app-navbar-component>
 
   <!-- CARRUSEL -->
-  <div class="relative overflow-hidden bg-gray-100" style="height: 500px;">
-    <div *ngIf="slides.length === 0 && !slidesError" class="flex items-center justify-center h-full bg-gray-100">
-      <div class="w-10 h-10 border-4 border-gray-300 border-t-[#0D72C5] rounded-full animate-spin"></div>
+  <div class="relative overflow-hidden bg-gray-100" style="height: 500px">
+    <div
+      *ngIf="slides.length === 0 && !slidesError"
+      class="flex items-center justify-center h-full bg-gray-100"
+    >
+      <div
+        class="w-10 h-10 border-4 border-gray-300 border-t-[#0D72C5] rounded-full animate-spin"
+      ></div>
     </div>
     <div *ngIf="slidesError" class="flex items-center justify-center h-full bg-gray-200">
       <h3 class="text-lg text-gray-500 font-semibold">No hay imágenes disponibles</h3>
     </div>
-    <div *ngIf="slides.length > 0" class="flex h-full transition-transform duration-500 ease-in-out"
-      [style.transform]="'translateX(-' + currentSlide * 100 + '%)'">
-      <img *ngFor="let url of slides; let i = index" [src]="url"
-        [alt]="'Slide ' + (i + 1)" class="min-w-full h-full object-cover flex-shrink-0"
-        (error)="onSlideError($event)" />
+    <div
+      *ngIf="slides.length > 0"
+      class="flex h-full transition-transform duration-500 ease-in-out"
+      [style.transform]="'translateX(-' + currentSlide * 100 + '%)'"
+    >
+      <img
+        *ngFor="let url of slides; let i = index"
+        [src]="url"
+        [alt]="'Slide ' + (i + 1)"
+        class="min-w-full h-full object-cover flex-shrink-0"
+        (error)="onSlideError($event)"
+      />
     </div>
-    <button *ngIf="slides.length > 1" (click)="prevSlide()"
-      class="absolute left-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-black/30 hover:bg-black/50 text-white flex items-center justify-center transition-all cursor-pointer">
+    <button
+      *ngIf="slides.length > 1"
+      (click)="prevSlide()"
+      class="absolute left-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-black/30 hover:bg-black/50 text-white flex items-center justify-center transition-all cursor-pointer"
+    >
       <span class="material-symbols-outlined text-xl">chevron_left</span>
     </button>
-    <button *ngIf="slides.length > 1" (click)="nextSlide()"
-      class="absolute right-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-black/30 hover:bg-black/50 text-white flex items-center justify-center transition-all cursor-pointer">
+    <button
+      *ngIf="slides.length > 1"
+      (click)="nextSlide()"
+      class="absolute right-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-black/30 hover:bg-black/50 text-white flex items-center justify-center transition-all cursor-pointer"
+    >
       <span class="material-symbols-outlined text-xl">chevron_right</span>
     </button>
-    <div *ngIf="slides.length > 1" class="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex gap-2">
-      <button *ngFor="let _ of slides; let i = index" (click)="goToSlide(i)"
+    <div
+      *ngIf="slides.length > 1"
+      class="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex gap-2"
+    >
+      <button
+        *ngFor="let _ of slides; let i = index"
+        (click)="goToSlide(i)"
         class="w-2.5 h-2.5 rounded-full transition-all cursor-pointer"
-        [class.bg-white]="i === currentSlide" [class.bg-white/50]="i !== currentSlide"
-        [style.transform]="i === currentSlide ? 'scale(1.3)' : ''"></button>
+        [class.bg-white]="i === currentSlide"
+        [class.bg-white/50]="i !== currentSlide"
+        [style.transform]="i === currentSlide ? 'scale(1.3)' : ''"
+      ></button>
     </div>
   </div>
 
@@ -36,18 +61,24 @@
     <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-8 text-center my-12">
       <h2 class="text-4xl font-bold text-gray-800 mb-3">Tu Mundo Acuático, Siempre Vivo</h2>
       <p class="text-gray-500 leading-relaxed max-w-3xl mx-auto mb-6">
-        Descubre la mejor selección de peces, accesorios y servicios especializados para crear acuarios vibrantes y saludables.
-        En Acuamont te ofrecemos productos de calidad, asesoría profesional y todo lo necesario para mantener un ecosistema acuático equilibrado.
-        Tanto si eres un aficionado como un profesional, tenemos soluciones que se adaptan a cada necesidad y espacio.
+        Descubre la mejor selección de peces, accesorios y servicios especializados para crear
+        acuarios vibrantes y saludables. En Acuamont te ofrecemos productos de calidad, asesoría
+        profesional y todo lo necesario para mantener un ecosistema acuático equilibrado. Tanto si
+        eres un aficionado como un profesional, tenemos soluciones que se adaptan a cada necesidad y
+        espacio.
       </p>
       <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
-        <a routerLink="/contacto"
+        <a
+          routerLink="/contacto"
           class="px-6 py-3 rounded-xl text-white text-sm font-semibold shadow-sm hover:opacity-90 transition-all cursor-pointer"
-          style="background-color: #061748">
+          style="background-color: #061748"
+        >
           Contáctanos
         </a>
-        <a routerLink="/ver-servicios"
-          class="px-6 py-3 rounded-xl border-2 border-gray-200 text-gray-600 hover:bg-gray-100 transition-all cursor-pointer text-sm font-semibold">
+        <a
+          routerLink="/ver-servicios"
+          class="px-6 py-3 rounded-xl border-2 border-gray-200 text-gray-600 hover:bg-gray-100 transition-all cursor-pointer text-sm font-semibold"
+        >
           Saber Más
         </a>
       </div>
@@ -59,19 +90,25 @@
         <h1 class="text-lg font-bold text-gray-800 pb-3">Servicios</h1>
       </div>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4">
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md hover:-translate-y-0.5 transition-all">
+        <div
+          class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md hover:-translate-y-0.5 transition-all"
+        >
           <div class="w-16 h-16 rounded-xl bg-blue-50 flex items-center justify-center mb-4">
             <span class="material-symbols-outlined text-3xl text-[#0D72C5]">pets</span>
           </div>
           <h5 class="text-lg font-bold text-gray-800 mb-2">Venta de Peces Ornamentales</h5>
         </div>
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md hover:-translate-y-0.5 transition-all">
+        <div
+          class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md hover:-translate-y-0.5 transition-all"
+        >
           <div class="w-16 h-16 rounded-xl bg-blue-50 flex items-center justify-center mb-4">
             <span class="material-symbols-outlined text-3xl text-[#0D72C5]">ecology</span>
           </div>
           <h5 class="text-lg font-bold text-gray-800 mb-2">Decoración de Acuarios</h5>
         </div>
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md hover:-translate-y-0.5 transition-all">
+        <div
+          class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md hover:-translate-y-0.5 transition-all"
+        >
           <div class="w-16 h-16 rounded-xl bg-blue-50 flex items-center justify-center mb-4">
             <span class="material-symbols-outlined text-3xl text-[#0D72C5]">support_agent</span>
           </div>
@@ -79,9 +116,11 @@
         </div>
       </div>
       <div class="flex justify-center mt-6">
-        <a routerLink="/ver-servicios"
+        <a
+          routerLink="/ver-servicios"
           class="px-6 py-3 rounded-xl text-white text-sm font-semibold shadow-sm hover:opacity-90 transition-all cursor-pointer"
-          style="background-color: #061748">
+          style="background-color: #061748"
+        >
           Más info
         </a>
       </div>
@@ -93,21 +132,41 @@
         <h1 class="text-lg font-bold text-gray-800 pb-3">Locales</h1>
       </div>
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-4">
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 text-center hover:shadow-md hover:-translate-y-0.5 transition-all">
-          <iframe class="w-full rounded-xl" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3961.8717175905995!2d-79.83736038924275!3d-6.78546176633165!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x904cef33dda3be85%3A0x10d1e6ea25b85c0a!2sPuerto%20de%20Palos%20182%2C%20La%20Victoria%2014008!5e0!3m2!1ses-419!2spe!4v1756787755898!5m2!1ses-419!2spe" style="height: 300px" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        <div
+          class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 text-center hover:shadow-md hover:-translate-y-0.5 transition-all"
+        >
+          <iframe
+            class="w-full rounded-xl"
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3961.8717175905995!2d-79.83736038924275!3d-6.78546176633165!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x904cef33dda3be85%3A0x10d1e6ea25b85c0a!2sPuerto%20de%20Palos%20182%2C%20La%20Victoria%2014008!5e0!3m2!1ses-419!2spe!4v1756787755898!5m2!1ses-419!2spe"
+            style="height: 300px"
+            allowfullscreen=""
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"
+          ></iframe>
           <h5 class="text-lg font-bold text-gray-800 mt-4 mb-3">La Victoria</h5>
           <button
             class="px-5 py-2.5 rounded-xl text-white text-sm font-semibold shadow-sm hover:opacity-90 transition-all cursor-pointer"
-            style="background-color: #061748">
+            style="background-color: #061748"
+          >
             Mostrar más
           </button>
         </div>
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 text-center hover:shadow-md hover:-translate-y-0.5 transition-all">
-          <iframe class="w-full rounded-xl" src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d440.4604851549938!2d-79.81999321805348!3d-6.868133662199248!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1ses-419!2spe!4v1756788272436!5m2!1ses-419!2spe" style="height: 300px" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        <div
+          class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 text-center hover:shadow-md hover:-translate-y-0.5 transition-all"
+        >
+          <iframe
+            class="w-full rounded-xl"
+            src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d440.4604851549938!2d-79.81999321805348!3d-6.868133662199248!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1ses-419!2spe!4v1756788272436!5m2!1ses-419!2spe"
+            style="height: 300px"
+            allowfullscreen=""
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"
+          ></iframe>
           <h5 class="text-lg font-bold text-gray-800 mt-4 mb-3">Reque</h5>
           <button
             class="px-5 py-2.5 rounded-xl text-white text-sm font-semibold shadow-sm hover:opacity-90 transition-all cursor-pointer"
-            style="background-color: #061748">
+            style="background-color: #061748"
+          >
             Mostrar más
           </button>
         </div>
@@ -119,10 +178,18 @@
       <div class="flex flex-col md:flex-row items-center gap-8">
         <div class="md:w-2/3">
           <h2 class="text-2xl font-bold text-gray-800">"Lleva más color a tu acuario"</h2>
-          <p class="text-gray-500 mt-3 leading-relaxed">Compra 2 peces ornamentales y llévate el 3ro con 30% de descuento. Ideal para empezar tu acuario con variedad y vida.</p>
+          <p class="text-gray-500 mt-3 leading-relaxed">
+            Compra 2 peces ornamentales y llévate el 3ro con 30% de descuento. Ideal para empezar tu
+            acuario con variedad y vida.
+          </p>
         </div>
         <div class="md:w-1/3 flex justify-center">
-          <img class="w-full max-w-xs rounded-xl border border-gray-200" src="https://res.cloudinary.com/dukl00gcz/image/upload/iconos/promo1.png" alt="Promo 1" (error)="onPromoError($event)" />
+          <img
+            class="w-full max-w-xs rounded-xl border border-gray-200"
+            src="https://res.cloudinary.com/dukl00gcz/image/upload/v1780377894/promo1_ebahbh.webp"
+            alt="Promo 1"
+            (error)="onPromoError($event)"
+          />
         </div>
       </div>
     </div>
@@ -132,10 +199,18 @@
       <div class="flex flex-col md:flex-row-reverse items-center gap-8">
         <div class="md:w-2/3">
           <h2 class="text-2xl font-bold text-gray-800">"Dale estilo a tu acuario"</h2>
-          <p class="text-gray-500 mt-3 leading-relaxed">En la compra de un motor o filtro, obtén 10% de descuento en decoraciones y plantas acuáticas para personalizar tu espacio acuático.</p>
+          <p class="text-gray-500 mt-3 leading-relaxed">
+            En la compra de un motor o filtro, obtén 10% de descuento en decoraciones y plantas
+            acuáticas para personalizar tu espacio acuático.
+          </p>
         </div>
         <div class="md:w-1/3 flex justify-center">
-          <img class="w-full max-w-xs rounded-xl border border-gray-200" src="https://res.cloudinary.com/dukl00gcz/image/upload/iconos/promo2.jpg" alt="Promo 2" (error)="onPromoError($event)" />
+          <img
+            class="w-full max-w-xs rounded-xl border border-gray-200"
+            src="https://res.cloudinary.com/dukl00gcz/image/upload/v1780377894/promo2_dmzqvx.jpg"
+            alt="Promo 2"
+            (error)="onPromoError($event)"
+          />
         </div>
       </div>
     </div>

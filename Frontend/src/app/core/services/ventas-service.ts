@@ -52,9 +52,17 @@ export class VentasService {
   }
 
   descargarBoleta(ventaId: number): void {
-    const token = localStorage.getItem('token');
-    const url = `${this.apiUrl}/boleta/${ventaId}?token=${token}`;
-    window.open(url, '_blank');
+    this.http.get(`${this.apiUrl}/boleta/${ventaId}`, { responseType: 'blob' }).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `boleta_${ventaId}.pdf`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+      },
+      error: () => {}
+    });
   }
 
   enviarBoletaCorreo(ventaId: number): Observable<any> {
