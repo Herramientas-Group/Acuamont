@@ -72,6 +72,7 @@ public class AuthController {
                 : List.of();
 
         LoginResponseDTO response = LoginResponseDTO.builder()
+                .id(usuario.getId())
                 .token(token)
                 .usuario(usuario.getUsuario())
                 .nombre(usuario.getNombre())

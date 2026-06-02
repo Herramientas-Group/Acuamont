@@ -1,69 +1,85 @@
 <div class="flex h-screen w-full bg-gray-200 overflow-hidden">
 
-    <!-- SIDEBAR -->
-    <aside
-        class="bg-[#102139] text-white flex flex-col shadow-xl transition-all duration-300 ease-in-out overflow-hidden">
+  <!-- SIDEBAR -->
+  <aside
+    class="bg-[#102139] text-white flex flex-col shadow-xl transition-all duration-300 ease-in-out overflow-hidden">
 
-        <!-- HEADER LOGO -->
-        <div class="p-4 flex flex-col items-center border-b border-slate-700 min-h-[80px] justify-center">
+    <!-- HEADER LOGO -->
+    <div class="p-4 flex flex-col items-center border-b border-slate-700 min-h-[80px] justify-center">
 
-            <div class="flex flex-col items-center w-full transition-opacity duration-200">
-                <img src="logo1.png" alt="Logo" class="w-24 h-auto object-contain">
-                <p
-                    class="text-xs text-gray-400 font-medium tracking-widest uppercase border-t border-gray-600 pt-2 mt-1">
-                    Panel Administrativo
-                </p>
-            </div>
+      <div class="flex flex-col items-center w-full transition-opacity duration-200">
+        <img src="logo1.png" alt="Logo" class="w-24 h-auto object-contain">
+        <p
+          class="text-xs text-gray-400 font-medium tracking-widest uppercase border-t border-gray-600 pt-2 mt-1">
+          Panel Administrativo
+        </p>
+      </div>
 
-        </div>
-
-        <!-- NAV LINKS -->
-        <nav class="flex-1 mt-4 px-2 space-y-1">
-
-            <a *ngFor="let opcion of menuOpciones"
-                [routerLink]="opcion.ruta" routerLinkActive="bg-blue-primary text-white"
-                class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-300 hover:bg-blue-hover hover:text-white transition-colors group relative cursor-pointer">
-                <span class="material-symbols-outlined flex-shrink-0">{{ opcion.icono }}</span>
-                <span class="transition-opacity duration-200 whitespace-nowrap">{{ opcion.nombre }}</span>
-            </a>
-
-        </nav>
-
-        <!-- FOOTER: CERRAR SESIÓN -->
-        <div class="p-2 border-t border-slate-700">
-            <button (click)="cerrarSesion()"
-                class="flex items-center cursor-pointer gap-3 p-3 text-red-600 py-2.5 hover:text-red-500 w-full group relative rounded-lg hover:bg-red-400/10 transition-colors">
-                <span class="material-symbols-outlined text-xl flex-shrink-0">exit_to_app</span>
-                <span class="transition-opacity duration-200 whitespace-nowrap">Cerrar Sesión</span>
-            </button>
-        </div>
-    </aside>
-
-    <!-- CONTENIDO PRINCIPAL -->
-    <div class="flex-1 flex flex-col overflow-hidden transition-all duration-300">
-        <header class="bg-white h-16 shadow-sm flex items-center justify-between px-6">
-            <div class="flex items-center gap-4">
-                <div class="flex items-center space-x-4">
-                    <h1 class="text-2xl font-bold text-gray-800">Dashboard</h1>
-                    <span class="text-gray-400">|</span>
-                    <p class=" font-bold text-gray-800">{{titulo}}</p>
-                </div>
-            </div>
-
-            <div class="flex items-center gap-3">
-                <div class="text-right">
-                    <p class="text-sm font-bold text-black leading-none">{{ nombreUsuario }}</p>
-                    <p class="text-[10px] text-slate-500">{{ perfilUsuario }}</p>
-                </div>
-                <div
-                    class="w-10 h-10 bg-blue-primary text-black rounded-full flex items-center justify-center font-bold">
-                    {{ nombreUsuario.charAt(0) }}
-                </div>
-            </div>
-        </header>
-
-        <main class="flex-1 overflow-y-auto p-8">
-            <router-outlet></router-outlet>
-        </main>
     </div>
+
+    <!-- NAV LINKS -->
+    <nav class="flex-1 mt-4 px-2 space-y-1">
+
+      @for (opcion of menuOpciones; track opcion) {
+        <a
+          [routerLink]="opcion.ruta"
+          routerLinkActive="bg-blue-primary text-white"
+          class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-300 hover:bg-blue-hover hover:text-white transition-colors group relative cursor-pointer">
+
+        <i class="{{ opcion.icono }} flex-shrink-0 text-lg"></i>
+
+          <span class="transition-opacity duration-200 whitespace-nowrap">
+            {{ opcion.nombre }}
+        </span>
+        </a>
+      }
+
+    </nav>
+
+    <!-- PAGINA WEB -->
+    <div class="px-2 pb-2">
+      <a href="/inicio" target="_blank" rel="noopener noreferrer"
+         class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-300 hover:bg-blue-hover hover:text-white transition-colors whitespace-nowrap cursor-pointer">
+        <i class="bi bi-globe2 flex-shrink-0 text-lg"></i>
+        <span class="transition-opacity duration-200">Pagina Web</span>
+      </a>
+    </div>
+
+    <!-- FOOTER: CERRAR SESIÓN -->
+    <div class="p-2 border-t border-slate-700">
+      <button (click)="cerrarSesion()"
+              class="flex items-center cursor-pointer gap-3 p-3 text-red-600 py-2.5 hover:text-red-500 w-full group relative rounded-lg hover:bg-red-400/10 transition-colors">
+        <i class="bi bi-box-arrow-right text-xl flex-shrink-0"></i>
+        <span class="transition-opacity duration-200 whitespace-nowrap">Cerrar Sesión</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- CONTENIDO PRINCIPAL -->
+  <div class="flex-1 flex flex-col overflow-hidden transition-all duration-300">
+    <header class="bg-white h-16 shadow-sm flex items-center justify-between px-6">
+      <div class="flex items-center gap-4">
+        <div class="flex items-center space-x-4">
+          <h1 class="text-2xl font-bold text-gray-800">Dashboard</h1>
+          <span class="text-gray-400">|</span>
+          <p class=" font-bold text-gray-800">{{ titulo }}</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <div class="text-right">
+          <p class="text-sm font-bold text-black leading-none">{{ nombreUsuario }}</p>
+          <p class="text-[10px] text-slate-500">{{ perfilUsuario }}</p>
+        </div>
+        <div
+          class="w-10 h-10 bg-blue-primary text-black rounded-full flex items-center justify-center font-bold">
+          {{ nombreUsuario.charAt(0) }}
+        </div>
+      </div>
+    </header>
+
+    <main class="flex-1 overflow-y-auto p-8">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
 </div>

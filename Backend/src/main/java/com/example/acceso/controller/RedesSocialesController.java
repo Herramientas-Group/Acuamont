@@ -19,6 +19,11 @@ public class RedesSocialesController {
         this.redSocialService = redSocialService;
     }
 
+    @GetMapping("/api/activas")
+    public ResponseEntity<?> listarRedesActivas() {
+        return ResponseEntity.ok(redSocialService.listarRedesSocialesActivas());
+    }
+
     @GetMapping("/api/listar")
     @ResponseBody
     @PreAuthorize("hasAuthority('OPCION_6')")

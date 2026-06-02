@@ -1,6 +1,6 @@
 package com.example.acceso.model;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -57,11 +57,11 @@ public class Venta {
     private BigDecimal deuda = BigDecimal.ZERO;
 
     @OneToMany(mappedBy = "venta", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference("venta-cuotas")
+    @JsonIgnore
     private List<Cuota> cuotas = new ArrayList<>();
 
     @OneToMany(mappedBy = "venta", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference("venta-detalles")
+    @JsonIgnore
     private List<DetalleVenta> detalleVentas = new ArrayList<>();
 
     @Column(nullable = false)

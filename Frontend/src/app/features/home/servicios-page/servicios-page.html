@@ -1,5 +1,23 @@
 <div class="min-h-screen">
-    <app-navbar-component></app-navbar-component>
-    <!-- MAS COSAS -->
-    <app-footer-component></app-footer-component>
+  <app-navbar-component></app-navbar-component>
+
+  <div class="container mx-auto px-4 py-12">
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-8 mb-6">
+      <h1 class="text-3xl font-bold text-gray-800 mb-2">Nuestros Servicios</h1>
+      <p class="text-gray-500 text-sm">Todo lo que necesitas para el cuidado de tu acuario</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div *ngFor="let s of servicios"
+        class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md hover:-translate-y-0.5 transition-all">
+        <div class="w-16 h-16 rounded-xl bg-blue-50 flex items-center justify-center mb-4">
+          <img [src]="s.icono" [alt]="s.nombre" class="w-10 h-10 object-contain" />
+        </div>
+        <h5 class="text-lg font-bold text-gray-800 mb-2">{{s.nombre}}</h5>
+        <p class="text-sm text-gray-500 leading-relaxed">{{s.descripcion}}</p>
+      </div>
+    </div>
+  </div>
+
+  <app-footer-component></app-footer-component>
 </div>

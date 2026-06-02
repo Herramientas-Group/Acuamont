@@ -3,10 +3,13 @@ package com.example.acceso.controller;
 import com.example.acceso.model.Cliente;
 import com.example.acceso.service.Interfaces.ClienteService;
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,8 +17,20 @@ import java.util.Map;
 @RequestMapping("/clientes")
 public class ClienteController {
     private final ClienteService clienteService;
-    public ClienteController(ClienteService clienteService) {
+    private final RestTemplate restTemplate;
+
+    @Value("${documento.tokenCode}")
+    private String tokenCode;
+
+    @Value("${documento.urlDni}")
+    private String urlDni;
+
+    @Value("${documento.urlRuc}")
+    private String urlRuc;
+
+    public ClienteController(ClienteService clienteService, RestTemplate restTemplate) {
         this.clienteService = clienteService;
+        this.restTemplate = restTemplate;
     }
 
     @GetMapping("/api/listar")
@@ -132,5 +147,43 @@ public class ClienteController {
                     response.put("message", "Cliente no encontrado en la base de datos local.");
                     return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
                 });
+    }
+
+    @GetMapping("/api/buscar-documento/{documento}")
+    public ResponseEntity<?> buscarDocumentoExterno(@PathVariable String documento) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            String url;
+            if (documento.length() == 8) {
+                url = urlDni + documento;
+            } else if (documento.length() == 11) {
+                url = urlRuc + documento;
+            } else {
+                response.put("success", false);
+                response.put("message", "Documento inválido");
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setBearerAuth(tokenCode);
+            HttpEntity<Void> entity = new HttpEntity<>(headers);
+
+            ResponseEntity<Map> apiResponse = restTemplate.exchange(
+                    url, HttpMethod.GET, entity, Map.class);
+
+            Map body = apiResponse.getBody();
+            if (body == null || body.get("success") != Boolean.TRUE) {
+                response.put("success", false);
+                response.put("message", "No se encontró información para el documento ingresado");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            }
+
+            return ResponseEntity.ok(body);
+
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "Error al consultar el documento: " + e.getMessage());
+            return ResponseEntity.internalServerError().body(response);
+        }
     }
 }

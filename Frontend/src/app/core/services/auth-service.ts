@@ -14,7 +14,7 @@ export class AuthService {
 
   constructor(private http: HttpClient, private router: Router) { }
 
-  login(credentials: { usuario: string, clave: string }) {
+  login(credentials: { usuario: string, clave: string, token?: string }) {
     return this.http.post<LoginResponse>(`${this.apiUrl}/login`, credentials)
       .pipe(
         tap(res => {
@@ -23,11 +23,17 @@ export class AuthService {
             localStorage.setItem('nombreUsuario', res.nombre);
             localStorage.setItem('perfil', res.perfil);
             localStorage.setItem('usuario', res.usuario);
+            localStorage.setItem('usuarioId', String(res.id));
             localStorage.setItem('opciones', JSON.stringify(res.opciones));
             this.opcionesSubject.next(res.opciones);
           }
         })
       );
+  }
+
+  getUsuarioId(): number | null {
+    const id = localStorage.getItem('usuarioId');
+    return id ? Number(id) : null;
   }
 
   getToken(): string | null {

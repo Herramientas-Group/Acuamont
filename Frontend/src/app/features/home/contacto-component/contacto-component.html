@@ -1,0 +1,66 @@
+<div class="min-h-screen">
+  <app-navbar-component></app-navbar-component>
+
+  <div class="container mx-auto px-4 py-12">
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <div class="lg:col-span-1">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 h-full">
+          <h3 class="text-lg font-bold text-gray-800 pb-3 border-b-2 border-gray-800 mb-4">Redes Sociales</h3>
+          <div class="space-y-3 mb-6">
+            <a *ngFor="let red of redes" [href]="red.url" target="_blank" rel="noopener noreferrer"
+              class="flex items-center gap-3 w-full px-4 py-2.5 rounded-xl text-white text-sm font-semibold shadow-sm hover:opacity-90 transition-all"
+              style="background-color: #061748">
+              <i [class]="red.icono"></i>
+              <span>{{red.nombre}}</span>
+            </a>
+          </div>
+
+          <h3 class="text-lg font-bold text-gray-800 pb-3 border-b-2 border-gray-800 mb-4">Teléfono</h3>
+          <p class="text-gray-600 text-sm mb-6">
+            <a href="tel:074470558" class="hover:text-[#0D72C5] transition-colors">(074) 470558</a>
+          </p>
+
+          <h3 class="text-lg font-bold text-gray-800 pb-3 border-b-2 border-gray-800 mb-4">Correo</h3>
+          <p class="text-gray-600 text-sm">
+            <a href="mailto:acuamont@gmail.com" class="hover:text-[#0D72C5] transition-colors">acuamont&#64;gmail.com</a>
+          </p>
+        </div>
+      </div>
+
+      <div class="lg:col-span-3">
+        <div class="bg-blue-50 rounded-xl p-6 h-full">
+          <h3 class="text-lg font-bold text-gray-800 pb-3 border-b-2 border-gray-800 mb-6">Contáctanos y cuéntanos tu idea</h3>
+          <form action="https://formsubmit.co/johnchm007&#64;gmail.com" method="POST" class="space-y-4">
+            <div>
+              <label for="nombre" class="block text-sm font-semibold text-gray-700 mb-1">Nombre completo</label>
+              <input type="text" name="Nombres" id="nombre" placeholder="nombres y apellidos"
+                pattern="[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+" required
+                class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#0D72C5] focus:border-transparent transition-all" />
+            </div>
+            <div>
+              <label for="telefono" class="block text-sm font-semibold text-gray-700 mb-1">Número</label>
+              <input type="tel" name="Numero" id="telefono" placeholder="999 999 999"
+                pattern="[0-9]{9}"
+                class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#0D72C5] focus:border-transparent transition-all" />
+            </div>
+            <div>
+              <label for="mensaje" class="block text-sm font-semibold text-gray-700 mb-1">Mensaje</label>
+              <textarea name="Mensaje" id="mensaje" rows="4" placeholder="Escribe tu mensaje..."
+                class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#0D72C5] focus:border-transparent transition-all resize-none"></textarea>
+            </div>
+            <input type="hidden" name="_next" value="https://acuamont-system-ek2h.onrender.com/PrincipalPage-web">
+            <input type="hidden" name="_captcha" value="false">
+            <input type="hidden" name="_subject" value="Nuevo mensaje desde el formulario de la web">
+            <button type="submit"
+              class="w-full py-3 rounded-xl text-white text-sm font-semibold shadow-sm hover:opacity-90 transition-all cursor-pointer"
+              style="background-color: #061748">
+              Enviar
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <app-footer-component></app-footer-component>
+</div>

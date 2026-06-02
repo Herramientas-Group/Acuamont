@@ -1,0 +1,208 @@
+<div class="p-1">
+  <div class="bg-white rounded-3xl shadow-sm border border-blue-100/50 p-8 mb-6 backdrop-blur-sm">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+      <div>
+        <h3 class="text-4xl font-bold bg-gradient-to-r from-[#0D72C5] to-[#0a5a9c] bg-clip-text text-transparent mb-2">
+          Reportes de Utilidades
+        </h3>
+        <p class="text-gray-600 text-sm flex items-center gap-2">
+          Visualiza las utilidades por ventas, vendedores y productos
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="flex gap-1 mb-6 border-b border-gray-200">
+    <button (click)="activeTab = 0"
+      class="px-6 py-3 text-sm font-semibold transition-all cursor-pointer rounded-t-xl"
+      [ngClass]="activeTab === 0 ? 'bg-white text-[#0D72C5] border-x border-t border-gray-200 shadow-sm' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'">
+      Utilidades-Ventas
+    </button>
+    <button (click)="activeTab = 1"
+      class="px-6 py-3 text-sm font-semibold transition-all cursor-pointer rounded-t-xl"
+      [ngClass]="activeTab === 1 ? 'bg-white text-[#0D72C5] border-x border-t border-gray-200 shadow-sm' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'">
+      Utilidades-Vendedor
+    </button>
+    <button (click)="activeTab = 2"
+      class="px-6 py-3 text-sm font-semibold transition-all cursor-pointer rounded-t-xl"
+      [ngClass]="activeTab === 2 ? 'bg-white text-[#0D72C5] border-x border-t border-gray-200 shadow-sm' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'">
+      Utilidades-Producto
+    </button>
+  </div>
+
+  <div *ngIf="activeTab === 0">
+    <div class="bg-white rounded-xl shadow-sm border border-blue-100/50 p-6 mb-6 backdrop-blur-sm">
+      <div class="flex flex-wrap items-end gap-4">
+        <div class="flex flex-col gap-1">
+          <label class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Fecha Inicio</label>
+          <input type="date" [(ngModel)]="ventasInicio" class="w-48 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#0D72C5] focus:border-transparent outline-none" name="ventasInicio" />
+        </div>
+        <div class="flex flex-col gap-1">
+          <label class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Fecha Fin</label>
+          <input type="date" [(ngModel)]="ventasFin" class="w-48 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#0D72C5] focus:border-transparent outline-none" name="ventasFin" />
+        </div>
+        <button (click)="filtrarVentas()"
+          class="bg-[#0D72C5] hover:bg-[#0a5a9c] text-white px-4 py-2.5 rounded-xl transition-all cursor-pointer text-sm font-semibold shadow-lg shadow-blue-200/50 flex items-center gap-2">
+          <span class="material-symbols-outlined text-sm">search</span> Buscar
+        </button>
+        <button (click)="limpiarFiltrosVentas()"
+          class="px-4 py-2.5 rounded-xl border-2 border-gray-200 text-gray-600 hover:bg-gray-100 transition-all cursor-pointer text-sm font-semibold">
+          Limpiar
+        </button>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm border border-blue-100/50 backdrop-blur-sm overflow-hidden mb-6">
+      <div class="overflow-visible">
+        <p-table [value]="ventas" styleClass="!border-none" [style]="{'min-width': '900px'}">
+          <ng-template pTemplate="header">
+            <tr>
+              <th class="px-4 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Documento</th>
+              <th class="px-4 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Cliente</th>
+              <th class="px-4 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Fecha</th>
+              <th class="px-4 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Total</th>
+              <th class="px-4 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Utilidad</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-r>
+            <tr class="hover:bg-blue-50/30 transition-colors">
+              <td class="px-4 py-4 text-sm font-medium text-gray-800">{{r.documento}}</td>
+              <td class="px-4 py-4 text-sm text-gray-600">{{r.cliente}}</td>
+              <td class="px-4 py-4 text-sm text-gray-600">{{r.fecha | date:'dd/MM/yyyy'}}</td>
+              <td class="px-4 py-4 text-sm font-semibold text-gray-800">S/ {{r.totalVenta | number:'1.2-2'}}</td>
+              <td class="px-4 py-4 text-sm font-semibold" [ngClass]="r.utilidad >= 0 ? 'text-green-700' : 'text-red-700'">
+                S/ {{r.utilidad | number:'1.2-2'}}
+              </td>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="emptymessage">
+            <tr>
+              <td colspan="5" class="px-6 py-12 text-center text-gray-400 text-sm">No se encontraron registros de ventas.</td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm border border-blue-100/50 p-6 backdrop-blur-sm">
+      <h4 class="text-lg font-bold text-gray-800 mb-4 text-center">Tendencia de Ventas vs. Utilidad</h4>
+      <div class="chart-container" style="height: 350px">
+        <p-chart #chartVentas type="bar" [data]="ventasChartData" [options]="ventasChartOptions" />
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="activeTab === 1">
+    <div class="bg-white rounded-xl shadow-sm border border-blue-100/50 p-6 mb-6 backdrop-blur-sm">
+      <div class="flex flex-wrap items-end gap-4">
+        <div class="flex flex-col gap-1">
+          <label class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Fecha Inicio</label>
+          <input type="date" [(ngModel)]="usuariosInicio" class="w-48 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#0D72C5] focus:border-transparent outline-none" name="usuariosInicio" />
+        </div>
+        <div class="flex flex-col gap-1">
+          <label class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Fecha Fin</label>
+          <input type="date" [(ngModel)]="usuariosFin" class="w-48 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#0D72C5] focus:border-transparent outline-none" name="usuariosFin" />
+        </div>
+        <button (click)="filtrarUsuarios()"
+          class="bg-[#0D72C5] hover:bg-[#0a5a9c] text-white px-4 py-2.5 rounded-xl transition-all cursor-pointer text-sm font-semibold shadow-lg shadow-blue-200/50 flex items-center gap-2">
+          <span class="material-symbols-outlined text-sm">search</span> Buscar
+        </button>
+        <button (click)="limpiarFiltrosUsuarios()"
+          class="px-4 py-2.5 rounded-xl border-2 border-gray-200 text-gray-600 hover:bg-gray-100 transition-all cursor-pointer text-sm font-semibold">
+          Limpiar
+        </button>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm border border-blue-100/50 backdrop-blur-sm overflow-hidden mb-6">
+      <div class="overflow-visible">
+        <p-table [value]="usuarios" styleClass="!border-none" [style]="{'min-width': '700px'}">
+          <ng-template pTemplate="header">
+            <tr>
+              <th class="px-4 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Vendedor</th>
+              <th class="px-4 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Total de Ventas</th>
+              <th class="px-4 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Utilidad Total</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-r>
+            <tr class="hover:bg-blue-50/30 transition-colors">
+              <td class="px-4 py-4 text-sm font-semibold text-gray-800">{{r.usuario}}</td>
+              <td class="px-4 py-4 text-sm text-gray-600">{{r.cantidadVentas}}</td>
+              <td class="px-4 py-4 text-sm font-semibold text-green-700">S/ {{r.utilidad | number:'1.2-2'}}</td>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="emptymessage">
+            <tr>
+              <td colspan="3" class="px-6 py-12 text-center text-gray-400 text-sm">No se encontraron registros de vendedores.</td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm border border-blue-100/50 p-6 backdrop-blur-sm">
+      <h4 class="text-lg font-bold text-gray-800 mb-4 text-center">Ranking de Utilidad por Vendedor</h4>
+      <div class="chart-container" style="height: 350px">
+        <p-chart #chartUsuarios type="bar" [data]="usuariosChartData" [options]="usuariosChartOptions" />
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="activeTab === 2">
+    <div class="bg-white rounded-xl shadow-sm border border-blue-100/50 p-6 mb-6 backdrop-blur-sm">
+      <div class="flex flex-wrap items-end gap-4">
+        <div class="flex flex-col gap-1">
+          <label class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Fecha Inicio</label>
+          <input type="date" [(ngModel)]="productosInicio" class="w-48 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#0D72C5] focus:border-transparent outline-none" name="productosInicio" />
+        </div>
+        <div class="flex flex-col gap-1">
+          <label class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Fecha Fin</label>
+          <input type="date" [(ngModel)]="productosFin" class="w-48 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#0D72C5] focus:border-transparent outline-none" name="productosFin" />
+        </div>
+        <button (click)="filtrarProductos()"
+          class="bg-[#0D72C5] hover:bg-[#0a5a9c] text-white px-4 py-2.5 rounded-xl transition-all cursor-pointer text-sm font-semibold shadow-lg shadow-blue-200/50 flex items-center gap-2">
+          <span class="material-symbols-outlined text-sm">search</span> Buscar
+        </button>
+        <button (click)="limpiarFiltrosProductos()"
+          class="px-4 py-2.5 rounded-xl border-2 border-gray-200 text-gray-600 hover:bg-gray-100 transition-all cursor-pointer text-sm font-semibold">
+          Limpiar
+        </button>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm border border-blue-100/50 backdrop-blur-sm overflow-hidden mb-6">
+      <div class="overflow-visible">
+        <p-table [value]="productos" styleClass="!border-none" [style]="{'min-width': '800px'}">
+          <ng-template pTemplate="header">
+            <tr>
+              <th class="px-4 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Producto</th>
+              <th class="px-4 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Cantidad Vendida</th>
+              <th class="px-4 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Total Venta</th>
+              <th class="px-4 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Utilidad</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-r>
+            <tr class="hover:bg-blue-50/30 transition-colors">
+              <td class="px-4 py-4 text-sm font-semibold text-gray-800">{{r.producto}}</td>
+              <td class="px-4 py-4 text-sm text-gray-600">{{r.cantidadVendida}}</td>
+              <td class="px-4 py-4 text-sm font-semibold text-gray-800">S/ {{r.totalVenta | number:'1.2-2'}}</td>
+              <td class="px-4 py-4 text-sm font-semibold text-green-700">S/ {{r.utilidad | number:'1.2-2'}}</td>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="emptymessage">
+            <tr>
+              <td colspan="4" class="px-6 py-12 text-center text-gray-400 text-sm">No se encontraron registros de productos.</td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm border border-blue-100/50 p-6 backdrop-blur-sm">
+      <h4 class="text-lg font-bold text-gray-800 mb-4 text-center">Utilidad por Producto (TOP 10)</h4>
+      <div class="chart-container" style="height: 350px">
+        <p-chart #chartProductos type="bar" [data]="productosChartData" [options]="productosChartOptions" />
+      </div>
+    </div>
+  </div>
+</div>

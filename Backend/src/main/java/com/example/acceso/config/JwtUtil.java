@@ -11,6 +11,7 @@ import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 @Component
 public class JwtUtil {
@@ -61,9 +62,15 @@ public class JwtUtil {
         return getClaims(token).get("perfil", String.class);
     }
 
-    @SuppressWarnings("unchecked")
     public List<Integer> extraerOpciones(String token) {
-        return getClaims(token).get("opciones", List.class);
+        Object raw = getClaims(token).get("opciones");
+        if (raw instanceof List<?> list) {
+            return list.stream()
+                    .map(e -> e instanceof Number n ? n.intValue() : null)
+                    .filter(Objects::nonNull)
+                    .toList();
+        }
+        return List.of();
     }
 
     public boolean validarToken(String token) {

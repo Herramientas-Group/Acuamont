@@ -16,6 +16,7 @@
 !.vscode/extensions.json
 !.vscode/mcp.json
 .history/*
+.vscode/launch.json
 
 ## Opencode ##
 AGENTS.md

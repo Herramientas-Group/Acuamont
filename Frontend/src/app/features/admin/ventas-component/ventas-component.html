@@ -1,1 +1,491 @@
-<p>ventas-component works!</p>
+<p-confirmDialog />
+
+<div class="p-1">
+  <div class="bg-white rounded-3xl shadow-sm border border-blue-100/50 p-8 mb-6 backdrop-blur-sm">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+      <div>
+        <h3 class="text-4xl font-bold bg-gradient-to-r from-[#0D72C5] to-[#0a5a9c] bg-clip-text text-transparent mb-2">
+          Gestión de Ventas
+        </h3>
+        <p class="text-gray-600 text-sm flex items-center gap-2">
+          Administra y registra las ventas del sistema
+        </p>
+      </div>
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto">
+        <button (click)="abrirModalNuevaVenta()"
+          class="bg-[#0D72C5] hover:bg-[#0a5a9c] text-white px-6 py-3 rounded-xl transition-all flex items-center justify-center gap-2 font-semibold text-sm shadow-lg shadow-blue-200/50 hover:shadow-xl hover:shadow-blue-300/50 hover:-translate-y-0.5 whitespace-nowrap group cursor-pointer">
+          <span class="material-symbols-outlined text-lg group-hover:rotate-90 transition-transform">add</span>
+          Nueva Venta
+        </button>
+      </div>
+    </div>
+    <hr class="border-gray-100 my-6" />
+    <div class="flex flex-wrap items-end gap-4">
+      <div class="flex flex-wrap items-end gap-4 flex-1">
+        <div class="flex flex-col gap-1">
+          <label class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Buscar por cliente</label>
+          <input pInputText [(ngModel)]="filtroNombre" placeholder="Buscar..."
+            class="w-64" (input)="aplicarFiltros()" />
+        </div>
+        <div class="flex flex-col gap-1">
+          <label class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Estado</label>
+          <p-select [options]="estadosFiltro" [(ngModel)]="filtroEstado"
+            placeholder="Todos" optionLabel="label" optionValue="value"
+            (onChange)="aplicarFiltros()" styleClass="w-48" [appendTo]="'body'" />
+        </div>
+      </div>
+      <button (click)="limpiarFiltros()"
+        class="px-4 py-3 rounded-xl border-2 border-gray-200 text-gray-600 hover:bg-gray-100 transition-all cursor-pointer text-sm font-semibold">
+        Limpiar
+      </button>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-xl shadow-sm border border-blue-100/50 backdrop-blur-sm overflow-hidden">
+    <div class="overflow-visible">
+      <p-table
+        #dt
+        [value]="filteredVentas"
+        [paginator]="true"
+        [rows]="10"
+        [rowsPerPageOptions]="[5, 10, 20, 50]"
+        sortMode="single"
+        [customSort]="true"
+        (onSort)="customSort($event)"
+        dataKey="id"
+        [showCurrentPageReport]="true"
+        currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} registros"
+        styleClass="!border-none"
+      >
+        <ng-template pTemplate="header">
+          <tr>
+            <th pSortableColumn="id" class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">ID <p-sortIcon field="id" /></th>
+            <th pSortableColumn="correlativo" class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">N° Documento <p-sortIcon field="correlativo" /></th>
+            <th pSortableColumn="cliente.nombre" class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Cliente <p-sortIcon field="cliente.nombre" /></th>
+            <th pSortableColumn="usuario.nombre" class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Vendedor <p-sortIcon field="usuario.nombre" /></th>
+            <th pSortableColumn="fecha" class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Fecha <p-sortIcon field="fecha" /></th>
+            <th pSortableColumn="total" class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Total <p-sortIcon field="total" /></th>
+            <th pSortableColumn="formaPago.nombre" class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Forma Pago <p-sortIcon field="formaPago.nombre" /></th>
+            <th pSortableColumn="deuda" class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Deuda <p-sortIcon field="deuda" /></th>
+            <th pSortableColumn="estado" class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Estado <p-sortIcon field="estado" /></th>
+            <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider !text-center">Comprobante</th>
+            <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider !text-center">Acciones</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-v>
+          <tr class="hover:bg-blue-50/30 transition-colors">
+            <td class="px-6 py-4 text-sm font-medium text-gray-400">#{{v.id}}</td>
+            <td class="px-6 py-4 text-sm font-semibold text-gray-800 font-mono">
+              {{v.serieComprobante?.serie}}-{{v.correlativo}}
+            </td>
+            <td class="px-6 py-4">{{v.cliente?.nombre || '-'}}</td>
+            <td class="px-6 py-4 text-sm text-gray-600">{{v.usuario?.nombre || '-'}}</td>
+            <td class="px-6 py-4 text-sm text-gray-600">{{v.fecha | date:'dd/MM/yyyy HH:mm'}}</td>
+            <td class="px-6 py-4 text-sm font-semibold text-gray-800">{{formatMonto(v.total)}}</td>
+            <td class="px-6 py-4 text-sm text-gray-600">{{v.formaPago?.nombre || '-'}}</td>
+            <td class="px-6 py-4 text-sm font-semibold" [class.text-red-600]="v.deuda > 0" [class.text-green-600]="v.deuda === 0">
+              {{formatMonto(v.deuda)}}
+            </td>
+            <td class="px-6 py-4">
+              <p-tag [value]="getEstadoLabel(v.estado)" [severity]="getEstadoSeverity(v.estado)" />
+            </td>
+            <td class="px-6 py-4">
+              <div class="flex justify-center gap-2">
+                <button (click)="descargarPDF(v.id)"
+                  class="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors cursor-pointer" title="Descargar Boleta">
+                  <i class="bi bi-file-earmark-pdf text-lg"></i>
+                </button>
+                <button (click)="enviarCorreo($event, v.id)"
+                  class="p-2 text-green-600 hover:bg-green-100 rounded-lg transition-colors cursor-pointer" title="Enviar por Correo">
+                  <i class="bi bi-envelope text-lg"></i>
+                </button>
+              </div>
+            </td>
+            <td class="px-6 py-4">
+              <div class="flex justify-center gap-2">
+                <button (click)="abrirModalCuotas(v)"
+                  class="p-2 text-indigo-600 hover:bg-indigo-100 rounded-lg transition-colors cursor-pointer" title="Ver Cuotas">
+                  <i class="bi bi-currency-dollar text-lg"></i>
+                </button>
+                <button (click)="abrirModalPagos(v)"
+                  class="p-2 text-teal-600 hover:bg-teal-100 rounded-lg transition-colors cursor-pointer" title="Ver Pagos">
+                  <i class="bi bi-receipt text-lg"></i>
+                </button>
+                <button (click)="confirmarAnularVenta(v)"
+                  class="p-2 text-red-600 hover:bg-red-100 rounded-lg transition-colors cursor-pointer" title="Anular Venta">
+                  <i class="bi bi-x-circle text-lg"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="11" class="px-6 py-12 text-center">
+              <div class="flex flex-col items-center gap-2 text-gray-400">
+                <span class="material-symbols-outlined text-4xl">receipt_long</span>
+                <p class="text-sm">No se encontraron ventas registradas.</p>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+  </div>
+</div>
+
+<p-dialog
+  [(visible)]="modalVentaVisible"
+  [modal]="true"
+  [closable]="false"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{width: '900px'}"
+  styleClass="!rounded-2xl !p-0 !shadow-2xl"
+  header="Nueva Venta"
+>
+  <div class="p-6">
+    <div class="grid grid-cols-2 gap-4 mb-4">
+      <div class="flex flex-col gap-1">
+        <label class="text-sm font-semibold text-gray-700">Cliente (DNI/RUC)</label>
+        <div class="flex gap-2">
+          <input pInputText [(ngModel)]="documento" placeholder="Ingrese DNI o RUC"
+            name="documento" class="flex-1" maxlength="11" />
+          <button (click)="buscarClientePorDocumento()" [disabled]="buscandoCliente || !documento.trim()"
+            class="bg-[#0D72C5] hover:bg-[#0a5a9c] disabled:opacity-50 disabled:cursor-not-allowed text-white px-4 py-2 rounded-xl transition-all cursor-pointer text-sm font-semibold shadow-lg shadow-blue-200/50 whitespace-nowrap">
+            {{ buscandoCliente ? 'Buscando...' : 'Buscar' }}
+          </button>
+        </div>
+      </div>
+      <div class="flex flex-col gap-1">
+        <label class="text-sm font-semibold text-gray-700">Nombre del cliente</label>
+        <input pInputText [(ngModel)]="nombreCliente" name="nombreCliente" class="w-full" readonly />
+      </div>
+    </div>
+    <div class="grid grid-cols-3 gap-4 mb-4">
+      <div class="flex flex-col gap-1">
+        <label class="text-sm font-semibold text-gray-700">Serie Comprobante</label>
+        <p-select [options]="seriesComprobante" [(ngModel)]="serieComprobanteId"
+          placeholder="Seleccione" optionLabel="nombre" optionValue="id"
+          (onChange)="onSerieComprobanteChange()" styleClass="w-full" [appendTo]="'body'" />
+      </div>
+      <div class="flex flex-col gap-1">
+        <label class="text-sm font-semibold text-gray-700">Correlativo de Venta</label>
+        <input pInputText [value]="correlativoVisual" class="w-full bg-gray-50" readonly />
+      </div>
+      <div class="flex flex-col gap-1">
+        <label class="text-sm font-semibold text-gray-700">Forma de Pago</label>
+        <p-select [options]="formasPago" [(ngModel)]="formaPagoId"
+          placeholder="Seleccione" optionLabel="nombre" optionValue="id"
+          (onChange)="onFormaPagoChange()" styleClass="w-full" [appendTo]="'body'" />
+      </div>
+    </div>
+
+    @if (esCredito) {
+    <div class="bg-gray-50 rounded-xl p-4 mb-4 border border-gray-200">
+      <h6 class="text-sm font-bold text-gray-700 mb-3">Configuración de Crédito</h6>
+      <div class="grid grid-cols-2 gap-4 mb-3">
+        <div class="flex flex-col gap-1">
+          <label class="text-sm font-semibold text-gray-700">Monto Inicial</label>
+          <p-inputNumber [(ngModel)]="montoInicial" mode="currency" currency="PEN"
+            locale="es-PE" inputId="currency-peru" class="w-full" />
+        </div>
+      </div>
+      <div class="flex items-end gap-2 mb-2">
+        <div class="flex flex-col gap-1 flex-1">
+          <label class="text-sm font-semibold text-gray-700">Monto Cuota</label>
+          <p-inputNumber [(ngModel)]="nuevaCuotaMonto" mode="currency" currency="PEN"
+            locale="es-PE" inputId="cuota-currency" class="w-full" />
+        </div>
+        <div class="flex flex-col gap-1 flex-1">
+          <label class="text-sm font-semibold text-gray-700">Fecha Vencimiento</label>
+          <input type="date" [(ngModel)]="nuevaCuotaFecha" name="fechaCuota"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#0D72C5] focus:border-[#0D72C5] outline-none transition-all" />
+        </div>
+        <button (click)="agregarCuota()" [disabled]="!nuevaCuotaMonto || !nuevaCuotaFecha"
+          class="bg-[#0D72C5] hover:bg-[#0a5a9c] disabled:opacity-50 disabled:cursor-not-allowed text-white px-4 py-3 rounded-xl transition-all cursor-pointer text-sm font-semibold shadow-lg shadow-blue-200/50 whitespace-nowrap">
+          + Agregar
+        </button>
+      </div>
+      @if (planDeCuotas.length > 0) {
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="border-b border-gray-200">
+            <th class="text-left py-1 text-xs font-bold text-gray-500 uppercase tracking-wider">#</th>
+            <th class="text-left py-1 text-xs font-bold text-gray-500 uppercase tracking-wider">Monto</th>
+            <th class="text-left py-1 text-xs font-bold text-gray-500 uppercase tracking-wider">Vencimiento</th>
+            <th class="text-center py-1 text-xs font-bold text-gray-500 uppercase tracking-wider"></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (cuota of planDeCuotas; track $index) {
+          <tr class="border-b border-gray-100">
+            <td class="py-2 text-gray-600">{{$index + 1}}</td>
+            <td class="py-2 text-gray-800 font-semibold">{{formatMonto(cuota.monto)}}</td>
+            <td class="py-2 text-gray-600">{{cuota.fechaVencimiento | date:'dd/MM/yyyy'}}</td>
+            <td class="py-2 text-center">
+              <button (click)="eliminarCuota($index)"
+                class="text-red-500 hover:text-red-700 cursor-pointer">
+                <i class="bi bi-trash"></i>
+              </button>
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+      }
+    </div>
+    }
+
+    <div class="mb-4">
+      <label class="text-sm font-semibold text-gray-700 mb-1 block">Buscar Producto</label>
+      <p-autoComplete
+        [(ngModel)]="busquedaProducto"
+        [suggestions]="productosSugeridos"
+        (completeMethod)="filtrarProductos($event)"
+        (onSelect)="onProductoSelect($event)"
+        field="nombre"
+        placeholder="Escribe el nombre del producto..."
+        [dropdown]="false"
+        [forceSelection]="false"
+        styleClass="w-full"
+        inputStyleClass="w-full"
+      >
+        <ng-template pTemplate="item" let-item>
+          <div class="flex justify-between items-center gap-4 p-2">
+            <span>{{item.nombre}}</span>
+            <span class="text-xs text-gray-500 font-semibold">{{formatMonto(item.precioVenta)}} | Stock: {{item.stock}}</span>
+          </div>
+        </ng-template>
+      </p-autoComplete>
+    </div>
+
+    @if (detalles.length > 0) {
+    <div class="bg-gray-50 rounded-xl p-4 border border-gray-200">
+      <h6 class="text-sm font-bold text-gray-700 mb-3">Productos en la venta</h6>
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="border-b border-gray-200">
+            <th class="text-left py-2 text-xs font-bold text-gray-500 uppercase tracking-wider">Producto</th>
+            <th class="text-left py-2 text-xs font-bold text-gray-500 uppercase tracking-wider">Cantidad</th>
+            <th class="text-left py-2 text-xs font-bold text-gray-500 uppercase tracking-wider">Precio Unit.</th>
+            <th class="text-left py-2 text-xs font-bold text-gray-500 uppercase tracking-wider">Subtotal</th>
+            <th class="text-center py-2 text-xs font-bold text-gray-500 uppercase tracking-wider"></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (det of detalles; track $index) {
+          <tr class="border-b border-gray-100">
+            <td class="py-2 text-gray-800 font-semibold">{{det.producto.nombre}}</td>
+            <td class="py-2" style="max-width: 100px;">
+              <p-inputNumber [(ngModel)]="det.cantidad" [min]="1" [max]="det.producto.stock"
+                (onInput)="actualizarSubtotal(det)" styleClass="w-full" />
+            </td>
+            <td class="py-2 text-gray-600">{{formatMonto(det.precioUnitario)}}</td>
+            <td class="py-2 text-gray-800 font-semibold">{{formatMonto(det.subtotal)}}</td>
+            <td class="py-2 text-center">
+              <button (click)="eliminarDetalle($index)"
+                class="text-red-500 hover:text-red-700 cursor-pointer">
+                <i class="bi bi-trash"></i>
+              </button>
+            </td>
+          </tr>
+          }
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="3" class="text-right py-2 font-bold text-gray-700">Total:</td>
+            <td class="py-2 font-bold text-[#0D72C5]">{{formatMonto(getTotalVenta())}}</td>
+            <td></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+    }
+
+    <div class="flex justify-end gap-3 mt-6">
+      <button type="button" (click)="modalVentaVisible = false"
+        class="px-5 py-2.5 rounded-xl border-2 border-gray-200 text-gray-600 hover:bg-gray-100 transition-all cursor-pointer text-sm font-semibold">
+        Cancelar
+      </button>
+      <button type="submit" (click)="guardarVenta()"
+        [disabled]="guardando || !clienteId || !serieComprobanteId || !formaPagoId || detalles.length === 0"
+        class="bg-[#0D72C5] hover:bg-[#0a5a9c] disabled:opacity-50 disabled:cursor-not-allowed text-white px-5 py-2.5 rounded-xl transition-all cursor-pointer text-sm font-semibold shadow-lg shadow-blue-200/50">
+        {{ guardando ? 'Guardando...' : 'Guardar Venta' }}
+      </button>
+    </div>
+  </div>
+</p-dialog>
+
+<p-dialog
+  [(visible)]="cuotasModalVisible"
+  [modal]="true"
+  [closable]="false"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{width: '700px'}"
+  styleClass="!rounded-2xl !p-0 !shadow-2xl"
+  header="Cuotas de la Venta"
+>
+  <div class="p-6">
+    <div class="flex gap-6 mb-4 text-sm">
+      <div><strong>ID Venta:</strong> {{cuotasVentaId}}</div>
+      <div><strong>Cliente:</strong> {{cuotasClienteNombre}}</div>
+      <div><strong>Total:</strong> {{formatMonto(cuotasVentaTotal)}}</div>
+    </div>
+    @if (cuotas.length === 0) {
+    <div class="text-center py-8 text-gray-400">
+      <i class="bi bi-inbox text-3xl block mb-2"></i>
+      <p class="text-sm">Esta venta no tiene cuotas registradas.</p>
+    </div>
+    } @else {
+    <table class="w-full text-sm">
+      <thead>
+        <tr class="border-b border-gray-200">
+          <th class="text-left py-2 text-xs font-bold text-gray-500 uppercase tracking-wider"># Cuota</th>
+          <th class="text-left py-2 text-xs font-bold text-gray-500 uppercase tracking-wider">Fecha Vencimiento</th>
+          <th class="text-left py-2 text-xs font-bold text-gray-500 uppercase tracking-wider">Monto</th>
+          <th class="text-left py-2 text-xs font-bold text-gray-500 uppercase tracking-wider">Saldo</th>
+          <th class="text-left py-2 text-xs font-bold text-gray-500 uppercase tracking-wider">Estado</th>
+          <th class="text-center py-2 text-xs font-bold text-gray-500 uppercase tracking-wider">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (cuota of cuotas; track cuota.id) {
+        <tr class="border-b border-gray-100 hover:bg-gray-50">
+          <td class="py-3 text-gray-800 font-semibold">{{cuota.numeroCuota}}</td>
+          <td class="py-3 text-gray-600">{{cuota.fechaVencimiento | date:'dd/MM/yyyy'}}</td>
+          <td class="py-3 text-gray-800">{{formatMonto(cuota.monto)}}</td>
+          <td class="py-3 text-gray-800">{{formatMonto(cuota.saldo)}}</td>
+          <td class="py-3">
+            <p-tag [value]="getEstadoCuota(cuota.estado)" [severity]="getCuotaSeverity(cuota.estado)" />
+          </td>
+          <td class="py-3 text-center">
+            @if (cuota.estado !== 1) {
+            <button (click)="abrirModalRegistrarPago(cuota)"
+              class="text-[#0D72C5] hover:text-[#0a5a9c] text-xs font-semibold bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition-all cursor-pointer">
+              Registrar Pago
+            </button>
+            }
+          </td>
+        </tr>
+        }
+      </tbody>
+    </table>
+    }
+    <div class="flex justify-end mt-6">
+      <button type="button" (click)="cuotasModalVisible = false"
+        class="px-5 py-2.5 rounded-xl border-2 border-gray-200 text-gray-600 hover:bg-gray-100 transition-all cursor-pointer text-sm font-semibold">
+        Cerrar
+      </button>
+    </div>
+  </div>
+</p-dialog>
+
+<p-dialog
+  [(visible)]="pagosModalVisible"
+  [modal]="true"
+  [closable]="false"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{width: '700px'}"
+  styleClass="!rounded-2xl !p-0 !shadow-2xl"
+  header="Pagos Realizados"
+>
+  <div class="p-6">
+    <div class="flex gap-6 mb-4 text-sm">
+      <div><strong>ID Venta:</strong> {{pagosVentaId}}</div>
+      <div><strong>Cliente:</strong> {{pagosClienteNombre}}</div>
+    </div>
+    @if (pagos.length === 0) {
+    <div class="text-center py-8 text-gray-400">
+      <i class="bi bi-inbox text-3xl block mb-2"></i>
+      <p class="text-sm">No se han registrado pagos para esta venta.</p>
+    </div>
+    } @else {
+    <table class="w-full text-sm">
+      <thead>
+        <tr class="border-b border-gray-200">
+          <th class="text-left py-2 text-xs font-bold text-gray-500 uppercase tracking-wider"># Cuota</th>
+          <th class="text-left py-2 text-xs font-bold text-gray-500 uppercase tracking-wider">Fecha Vencimiento</th>
+          <th class="text-left py-2 text-xs font-bold text-gray-500 uppercase tracking-wider">Monto</th>
+          <th class="text-left py-2 text-xs font-bold text-gray-500 uppercase tracking-wider">Estado</th>
+          <th class="text-left py-2 text-xs font-bold text-gray-500 uppercase tracking-wider">Método Pago</th>
+          <th class="text-left py-2 text-xs font-bold text-gray-500 uppercase tracking-wider">Comentario</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (pago of pagos; track pago.id) {
+        <tr class="border-b border-gray-100">
+          <td class="py-3 text-gray-800 font-semibold">{{pago.cuota.numeroCuota || '-'}}</td>
+          <td class="py-3 text-gray-600">{{pago.fechaPago | date:'dd/MM/yyyy'}}</td>
+          <td class="py-3 text-gray-800">{{formatMonto(pago.montoPagado)}}</td>
+          <td class="py-3">
+            <p-tag value="Pagado" severity="success" />
+          </td>
+          <td class="py-3 text-gray-600">{{pago.metodoPago}}</td>
+          <td class="py-3 text-gray-500 max-w-[150px] truncate">{{pago.comentario || '-'}}</td>
+        </tr>
+        }
+      </tbody>
+    </table>
+    }
+    <div class="flex justify-end mt-6">
+      <button type="button" (click)="pagosModalVisible = false"
+        class="px-5 py-2.5 rounded-xl border-2 border-gray-200 text-gray-600 hover:bg-gray-100 transition-all cursor-pointer text-sm font-semibold">
+        Cerrar
+      </button>
+    </div>
+  </div>
+</p-dialog>
+
+<p-dialog
+  [(visible)]="registrarPagoModalVisible"
+  [modal]="true"
+  [closable]="false"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{width: '500px'}"
+  styleClass="!rounded-2xl !p-0 !shadow-2xl"
+  header="Registrar Pago"
+>
+  <div class="p-6">
+    @if (selectedCuota) {
+    <div class="flex flex-col gap-4">
+      <div class="bg-gray-50 rounded-xl p-4 border border-gray-200">
+        <div class="grid grid-cols-2 gap-3 text-sm">
+          <div><strong>Cuota a Pagar:</strong> #{{selectedCuota.numeroCuota}}</div>
+          <div><strong>Monto:</strong> {{formatMonto(selectedCuota.saldo)}}</div>
+        </div>
+      </div>
+      <div class="flex flex-col gap-1">
+        <label class="text-sm font-semibold text-gray-700">Método de Pago</label>
+        <p-select [(ngModel)]="pagoMetodo" [options]="[
+          {label: 'Efectivo', value: 'EFECTIVO'},
+          {label: 'Tarjeta', value: 'TARJETA'},
+          {label: 'Transferencia', value: 'TRANSFERENCIA'},
+          {label: 'Yape', value: 'YAPE'},
+          {label: 'Plin', value: 'PLIN'}
+        ]" placeholder="Seleccione método" optionLabel="label" optionValue="value"
+          styleClass="w-full" [appendTo]="'body'" />
+      </div>
+      <div class="flex flex-col gap-1">
+        <label class="text-sm font-semibold text-gray-700">Comentario</label>
+        <textarea pInputTextarea [(ngModel)]="pagoComentario" maxlength="250"
+          rows="3" class="w-full" placeholder="Comentario (opcional)"></textarea>
+      </div>
+    </div>
+    }
+    <div class="flex justify-end gap-3 mt-6">
+      <button type="button" (click)="registrarPagoModalVisible = false"
+        class="px-5 py-2.5 rounded-xl border-2 border-gray-200 text-gray-600 hover:bg-gray-100 transition-all cursor-pointer text-sm font-semibold">
+        Cancelar
+      </button>
+      <button type="submit" (click)="registrarPago()"
+        [disabled]="!pagoMetodo"
+        class="bg-[#0D72C5] hover:bg-[#0a5a9c] disabled:opacity-50 disabled:cursor-not-allowed text-white px-5 py-2.5 rounded-xl transition-all cursor-pointer text-sm font-semibold shadow-lg shadow-blue-200/50">
+        Registrar Pago
+      </button>
+    </div>
+  </div>
+</p-dialog>

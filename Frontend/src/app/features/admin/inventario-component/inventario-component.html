@@ -1,1 +1,243 @@
-<p>inventario-component works!</p>
+<div class="p-1">
+  <div class="bg-white rounded-3xl shadow-sm border border-blue-100/50 p-8 mb-6 backdrop-blur-sm">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+      <div>
+        <h3 class="text-4xl font-bold bg-gradient-to-r from-[#0D72C5] to-[#0a5a9c] bg-clip-text text-transparent mb-2">
+          Control de Inventario
+        </h3>
+        <p class="text-gray-600 text-sm flex items-center gap-2">
+          Monitorea el stock y registra movimientos de tus productos
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-xl shadow-sm border border-blue-100/50 backdrop-blur-sm overflow-hidden">
+    <div class="overflow-visible">
+      <p-table
+        #dt
+        [value]="filteredProductos"
+        [paginator]="true"
+        [rows]="10"
+        [rowsPerPageOptions]="[5, 10, 20, 50]"
+        sortMode="single"
+        [customSort]="true"
+        (onSort)="customSort($event)"
+        dataKey="id"
+        [showCurrentPageReport]="true"
+        currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} registros"
+        styleClass="!border-none"
+        [style]="{'min-width': '1000px'}"
+      >
+        <ng-template pTemplate="header">
+          <tr>
+            <th class="px-4 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Producto</th>
+            <th pSortableColumn="stock" class="px-4 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Stock Actual <p-sortIcon field="stock" /></th>
+            <th pSortableColumn="stockSeguridad" class="px-4 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Stock Seguridad <p-sortIcon field="stockSeguridad" /></th>
+            <th class="px-4 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider !text-center">Acciones</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-p>
+          <tr class="hover:bg-blue-50/30 transition-colors">
+            <td class="px-4 py-4">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg flex items-center justify-center text-white text-sm font-bold"
+                  [style.background-color]="getAvatarColor(p.nombre)">
+                  {{getInitial(p.nombre)}}
+                </div>
+                <div>
+                  <p class="text-sm font-semibold text-gray-800">{{p.nombre}}</p>
+                  <p class="text-xs text-gray-400">#{{p.id}}</p>
+                </div>
+              </div>
+            </td>
+            <td class="px-4 py-4">
+              <span [ngClass]="{
+                'bg-green-100 text-green-700': getStockStatus(p.stock, p.stockSeguridad) === 'ok',
+                'bg-amber-100 text-amber-700': getStockStatus(p.stock, p.stockSeguridad) === 'warning',
+                'bg-red-100 text-red-700': getStockStatus(p.stock, p.stockSeguridad) === 'critical'
+              }" class="px-3 py-1 rounded-full text-xs font-bold">
+                {{p.stock}}
+              </span>
+            </td>
+            <td class="px-4 py-4 text-sm text-gray-600">{{p.stockSeguridad}}</td>
+            <td class="px-4 py-4">
+              <div class="flex justify-center gap-2">
+                <button (click)="verMovimientos(p)"
+                  class="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors cursor-pointer"
+                  title="Ver movimientos">
+                  <span class="material-symbols-outlined text-sm">receipt_long</span>
+                </button>
+                <button (click)="verAjustes(p)"
+                  class="p-2 text-purple-600 hover:bg-purple-100 rounded-lg transition-colors cursor-pointer"
+                  title="Ver ajustes">
+                  <span class="material-symbols-outlined text-sm">list_alt</span>
+                </button>
+                <button (click)="abrirRegistrarAjuste(p)"
+                  class="p-2 text-emerald-600 hover:bg-emerald-100 rounded-lg transition-colors cursor-pointer"
+                  title="Registrar ajuste">
+                  <span class="material-symbols-outlined text-sm">add_circle</span>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="4" class="px-6 py-12 text-center">
+              <div class="flex flex-col items-center gap-2 text-gray-400">
+                <span class="material-symbols-outlined text-4xl">inventory_2</span>
+                <p class="text-sm">No se encontraron productos registrados.</p>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+  </div>
+</div>
+
+<p-dialog
+  [(visible)]="modalMovimientosVisible"
+  [modal]="true"
+  [closable]="false"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{width: '900px'}"
+  styleClass="!rounded-2xl !p-0 !shadow-2xl"
+  header="Movimientos - {{productoSeleccionado?.nombre}}"
+>
+  <div class="p-6">
+    <p-table [value]="movimientos" styleClass="!border-none" [style]="{'min-width': '700px'}">
+      <ng-template pTemplate="header">
+        <tr>
+          <th class="px-4 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">Fecha</th>
+          <th class="px-4 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">N° Documento</th>
+          <th class="px-4 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">Precio Venta</th>
+          <th class="px-4 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">Cantidad</th>
+          <th class="px-4 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">Subtotal</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-m>
+        <tr class="hover:bg-blue-50/30 transition-colors">
+          <td class="px-4 py-3 text-sm text-gray-700">{{m.fecha | date:'dd/MM/yyyy HH:mm'}}</td>
+          <td class="px-4 py-3 text-sm font-medium text-gray-800">{{m.documento}}</td>
+          <td class="px-4 py-3 text-sm text-gray-700">S/ {{m.precioVenta | number:'1.2-2'}}</td>
+          <td class="px-4 py-3 text-sm text-gray-700">{{m.cantidad}}</td>
+          <td class="px-4 py-3 text-sm font-semibold text-green-700">S/ {{m.subtotal | number:'1.2-2'}}</td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="footer">
+        <tr class="bg-gray-50 font-bold">
+          <td colspan="3" class="px-4 py-3 text-sm text-gray-600 text-right">Totales:</td>
+          <td class="px-4 py-3 text-sm text-gray-800">{{totalMovimientosCantidad}}</td>
+          <td class="px-4 py-3 text-sm text-green-700">S/ {{totalMovimientosSubtotal | number:'1.2-2'}}</td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="5" class="px-6 py-8 text-center text-gray-400 text-sm">No se encontraron movimientos para este producto.</td>
+        </tr>
+      </ng-template>
+    </p-table>
+    <div class="flex justify-end mt-6">
+      <button type="button" (click)="modalMovimientosVisible = false"
+        class="px-5 py-2.5 rounded-xl border-2 border-gray-200 text-gray-600 hover:bg-gray-100 transition-all cursor-pointer text-sm font-semibold">
+        Cerrar
+      </button>
+    </div>
+  </div>
+</p-dialog>
+
+<p-dialog
+  [(visible)]="modalAjustesVisible"
+  [modal]="true"
+  [closable]="false"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{width: '800px'}"
+  styleClass="!rounded-2xl !p-0 !shadow-2xl"
+  header="Historial de Ajustes - {{productoSeleccionado?.nombre}}"
+>
+  <div class="p-6">
+    <p-table [value]="ajustes" styleClass="!border-none" [style]="{'min-width': '600px'}">
+      <ng-template pTemplate="header">
+        <tr>
+          <th class="px-4 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">Fecha de Registro</th>
+          <th class="px-4 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">Tipo Movimiento</th>
+          <th class="px-4 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">Cantidad</th>
+          <th class="px-4 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">Comentario</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-a>
+        <tr class="hover:bg-blue-50/30 transition-colors">
+          <td class="px-4 py-3 text-sm text-gray-700">{{a.fecha | date:'dd/MM/yyyy HH:mm'}}</td>
+          <td class="px-4 py-3">
+            <span [ngClass]="{
+              'bg-green-100 text-green-700': a.tipoMovimiento?.nombre === 'Entrada',
+              'bg-red-100 text-red-700': a.tipoMovimiento?.nombre === 'Salida'
+            }" class="px-3 py-1 rounded-full text-xs font-bold">
+              {{a.tipoMovimiento?.nombre}}
+            </span>
+          </td>
+          <td class="px-4 py-3 text-sm font-semibold text-gray-800">{{a.cantidad}}</td>
+          <td class="px-4 py-3 text-sm text-gray-600 max-w-[200px] truncate">{{a.comentario || '-'}}</td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="4" class="px-6 py-8 text-center text-gray-400 text-sm">No se encontraron ajustes para este producto.</td>
+        </tr>
+      </ng-template>
+    </p-table>
+    <div class="flex justify-end mt-6">
+      <button type="button" (click)="modalAjustesVisible = false"
+        class="px-5 py-2.5 rounded-xl border-2 border-gray-200 text-gray-600 hover:bg-gray-100 transition-all cursor-pointer text-sm font-semibold">
+        Cerrar
+      </button>
+    </div>
+  </div>
+</p-dialog>
+
+<p-dialog
+  [(visible)]="modalRegistrarAjusteVisible"
+  [modal]="true"
+  [closable]="false"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{width: '500px'}"
+  styleClass="!rounded-2xl !p-0 !shadow-2xl"
+  header="Registrar Ajuste - {{productoSeleccionado?.nombre}}"
+>
+  <div class="p-6">
+    <div class="flex flex-col gap-4">
+      <div class="flex flex-col gap-1">
+        <label class="text-sm font-semibold text-gray-700">Tipo de Movimiento</label>
+        <p-select [options]="tiposMovimiento" [(ngModel)]="formAjuste.tipoMovimientoId"
+          placeholder="Seleccionar" optionLabel="nombre" optionValue="id"
+          styleClass="w-full" [appendTo]="'body'" name="tipoMovimientoId" />
+      </div>
+      <div class="flex flex-col gap-1">
+        <label class="text-sm font-semibold text-gray-700">Cantidad</label>
+        <p-inputNumber [(ngModel)]="formAjuste.cantidad" [min]="1" [useGrouping]="false"
+          placeholder="0" styleClass="w-full" name="cantidad" />
+      </div>
+      <div class="flex flex-col gap-1">
+        <label class="text-sm font-semibold text-gray-700">Comentario</label>
+        <textarea [(ngModel)]="formAjuste.comentario" placeholder="Comentario (opcional)"
+          rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#0D72C5] focus:border-transparent outline-none" name="comentario"></textarea>
+      </div>
+    </div>
+    <div class="flex justify-end gap-3 mt-6">
+      <button type="button" (click)="modalRegistrarAjusteVisible = false"
+        class="px-5 py-2.5 rounded-xl border-2 border-gray-200 text-gray-600 hover:bg-gray-100 transition-all cursor-pointer text-sm font-semibold">
+        Cancelar
+      </button>
+      <button type="submit" (click)="guardarAjuste()"
+        [disabled]="!formAjuste.tipoMovimientoId || !formAjuste.cantidad"
+        class="bg-[#0D72C5] hover:bg-[#0a5a9c] disabled:opacity-50 disabled:cursor-not-allowed text-white px-5 py-2.5 rounded-xl transition-all cursor-pointer text-sm font-semibold shadow-lg shadow-blue-200/50">
+        Guardar
+      </button>
+    </div>
+  </div>
+</p-dialog>

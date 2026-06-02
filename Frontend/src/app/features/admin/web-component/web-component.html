@@ -1,0 +1,155 @@
+<div class="p-1">
+  <div class="bg-white rounded-3xl shadow-sm border border-blue-100/50 p-8 mb-6 backdrop-blur-sm">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+      <div>
+        <h3 class="text-4xl font-bold bg-gradient-to-r from-[#0D72C5] to-[#0a5a9c] bg-clip-text text-transparent mb-2">
+          Gestión Web
+        </h3>
+        <p class="text-gray-600 text-sm flex items-center gap-2">
+          Administra el logo, redes sociales y slides de inicio
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+    <div class="lg:col-span-1">
+      <div class="bg-white rounded-xl shadow-sm border border-blue-100/50 p-6 backdrop-blur-sm h-full">
+        <h4 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+          <span class="material-symbols-outlined text-[#0D72C5]">image</span>
+          Logo de la empresa
+        </h4>
+        <div class="flex gap-2 mb-4">
+          <input type="file" accept="image/*" (change)="onLogoSelected($event)"
+            class="flex-1 text-sm file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-[#0D72C5] hover:file:bg-blue-100 transition-all cursor-pointer" />
+        </div>
+        <div class="text-center">
+          <img [src]="logoUrl" alt="Logo actual"
+            class="mx-auto max-h-[150px] object-contain rounded-lg"
+            (error)="onImageError($event)" *ngIf="logoUrl" />
+          <p class="text-xs text-gray-400 mt-2" *ngIf="subiendoLogo">Subiendo logo...</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="lg:col-span-2">
+      <div class="bg-white rounded-xl shadow-sm border border-blue-100/50 p-6 backdrop-blur-sm h-full">
+        <h4 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+          <span class="material-symbols-outlined text-[#0D72C5]">share</span>
+          Redes Sociales
+        </h4>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="border-b border-gray-200">
+                <th class="text-left px-3 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">Icono</th>
+                <th class="text-left px-3 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">Nombre</th>
+                <th class="text-left px-3 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">URL</th>
+                <th class="text-center px-3 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">Estado</th>
+                <th class="text-center px-3 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let red of redes" class="border-b border-gray-100 hover:bg-blue-50/30 transition-colors">
+                <td class="px-3 py-3">
+                  <span class="text-xl" [innerHTML]="red.icono"></span>
+                </td>
+                <td class="px-3 py-3 text-sm font-semibold text-gray-800">{{red.nombre}}</td>
+                <td class="px-3 py-3 text-sm text-gray-500 max-w-[200px] truncate">{{red.url || '—'}}</td>
+                <td class="px-3 py-3 text-center">
+                  <span [ngClass]="{
+                    'bg-green-100 text-green-700': red.estado === 1,
+                    'bg-red-100 text-red-700': red.estado === 0
+                  }" class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">
+                    {{ red.estado === 1 ? 'Activo' : 'Inactivo' }}
+                  </span>
+                </td>
+                <td class="px-3 py-3">
+                  <div class="flex justify-center gap-2">
+                    <button (click)="abrirModalEditar(red)"
+                      class="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors cursor-pointer"
+                      title="Editar URL">
+                      <span class="material-symbols-outlined text-sm">edit</span>
+                    </button>
+                    <button (click)="toggleEstado(red.id)"
+                      class="p-2 text-amber-600 hover:bg-amber-100 rounded-lg transition-colors cursor-pointer"
+                      title="Cambiar Estado">
+                      <span class="material-symbols-outlined text-sm">power_settings_new</span>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              <tr *ngIf="!redes.length">
+                <td colspan="5" class="px-3 py-8 text-center text-gray-400 text-sm">
+                  No hay redes sociales registradas.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-xl shadow-sm border border-blue-100/50 p-6 backdrop-blur-sm">
+    <h4 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+      <span class="material-symbols-outlined text-[#0D72C5]">slideshow</span>
+      Slides de Inicio
+    </h4>
+
+    <div class="flex gap-2 mb-6 p-4 bg-gray-50 rounded-xl">
+      <input type="file" accept="image/*" (change)="onSlideSelected($event)"
+        class="flex-1 text-sm file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100 transition-all cursor-pointer" />
+      <p class="text-xs text-gray-400 self-center" *ngIf="subiendoSlide">Subiendo slide...</p>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div *ngFor="let slide of slides" class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden group">
+        <div class="h-[150px] overflow-hidden bg-gray-50">
+          <img [src]="slide" alt="Slide"
+            class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            (error)="onImageError($event)" />
+        </div>
+        <div class="p-3 text-center">
+          <button (click)="eliminarSlide(slide)"
+            class="px-4 py-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-all cursor-pointer text-xs font-semibold flex items-center gap-1.5 mx-auto">
+            <span class="material-symbols-outlined text-sm">delete</span>
+            Eliminar
+          </button>
+        </div>
+      </div>
+      <div *ngIf="!slides.length"
+        class="col-span-full text-center py-8 text-gray-400 text-sm">
+        No hay slides registrados. Sube una imagen para comenzar.
+      </div>
+    </div>
+  </div>
+</div>
+
+<p-dialog header="Editar URL"
+  [(visible)]="modalEditarVisible" [modal]="true" [closable]="false"
+  [draggable]="false" [resizable]="false"
+  [style]="{ width: '480px' }" styleClass="rounded-xl">
+  <div class="space-y-4">
+    <div class="flex flex-col gap-1.5">
+      <label class="text-sm font-semibold text-gray-700">Nombre</label>
+      <input pInputText [value]="formRed.nombre" disabled
+        class="w-full bg-gray-50 text-gray-500" />
+    </div>
+    <div class="flex flex-col gap-1.5">
+      <label class="text-sm font-semibold text-gray-700">URL (Enlace)</label>
+      <input pInputText [(ngModel)]="formRed.url" placeholder="https://..."
+        class="w-full" />
+    </div>
+  </div>
+  <div class="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-100">
+    <button (click)="modalEditarVisible = false"
+      class="px-5 py-2.5 rounded-xl border-2 border-gray-200 text-gray-600 hover:bg-gray-100 transition-all cursor-pointer text-sm font-semibold">
+      Cancelar
+    </button>
+    <button (click)="guardarURL()"
+      class="px-5 py-2.5 rounded-xl bg-[#0D72C5] hover:bg-[#0a5a9c] text-white transition-all cursor-pointer text-sm font-semibold shadow-lg shadow-blue-200/50">
+      Guardar Cambios
+    </button>
+  </div>
+</p-dialog>
