@@ -18,6 +18,21 @@ export class HomeComponent implements OnInit, OnDestroy {
   currentYear = new Date().getFullYear();
   private autoSlideTimer: ReturnType<typeof setInterval> | null = null;
 
+  servicios = [
+    {
+      nombre: 'Venta de Peces Ornamentales',
+      icono: 'https://res.cloudinary.com/dukl00gcz/image/upload/v1780381878/fish_isrhbc.png'
+    },
+    {
+      nombre: 'Decoración de Acuarios',
+      icono: 'https://res.cloudinary.com/dukl00gcz/image/upload/v1780381876/hojas_wubh1r.png'
+    },
+    {
+      nombre: 'Asesoría Personalizada',
+      icono: 'https://res.cloudinary.com/dukl00gcz/image/upload/v1780381875/asesor_eazjot.png'
+    },
+  ];
+
   constructor(
     private http: HttpClient,
     private cdr: ChangeDetectorRef,

@@ -108,6 +108,15 @@ export class ProductosPage implements OnInit {
     this.carritoService.vaciar();
   }
 
+  obtenerPrimeraImagen(producto: Producto): string | null {
+    try {
+      const urls: string[] = producto.imagen ? JSON.parse(producto.imagen) : [];
+      return urls.length > 0 ? urls[0] : null;
+    } catch {
+      return null;
+    }
+  }
+
   onImageError(event: Event): void {
     const img = event.target as HTMLImageElement;
     img.style.display = 'none';

@@ -21,7 +21,7 @@ public class LogoController {
     @PreAuthorize("hasAuthority('OPCION_6')")
     public ResponseEntity<?> obtenerLogoUrl() {
         Map<String, Object> response = new HashMap<>();
-        String url = cloudinaryService.obtenerUrlImagen("logo_acuamont");
+        String url = cloudinaryService.obtenerUrlImagen("logo2");
         response.put("success", true);
         response.put("data", url != null ? url : "");
         return ResponseEntity.ok(response);
@@ -32,7 +32,7 @@ public class LogoController {
     public ResponseEntity<?> subirLogo(@RequestParam("logo") MultipartFile logo) {
         Map<String, Object> response = new HashMap<>();
         try {
-            String url = cloudinaryService.subirImagenConNombreFijo(logo, "logo_acuamont");
+            String url = cloudinaryService.subirImagenConNombreFijo(logo, "logo2");
             response.put("success", true);
             response.put("data", url);
             response.put("message", "Logo actualizado correctamente");
