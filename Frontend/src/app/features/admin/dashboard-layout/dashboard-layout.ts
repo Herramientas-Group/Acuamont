@@ -25,12 +25,12 @@ export class DashboardLayout implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.menuOpciones = this.authService.getOpciones();
+    this.menuOpciones = this.transformarRutas(this.authService.getOpciones());
     this.nombreUsuario = this.authService.getNombre() || '';
     this.perfilUsuario = this.authService.getPerfil() || '';
 
     this.authService.opciones$.subscribe(opciones => {
-      this.menuOpciones = opciones;
+      this.menuOpciones = this.transformarRutas(opciones);
       this.nombreUsuario = this.authService.getNombre() || '';
       this.perfilUsuario = this.authService.getPerfil() || '';
       this.cdr.detectChanges();
@@ -59,6 +59,13 @@ export class DashboardLayout implements OnInit {
       this.titulo = data['title'] || 'Panel Administrativo';
       this.cdr.detectChanges();
     });
+  }
+
+  private transformarRutas(opciones: Opcion[]): Opcion[] {
+    return opciones.map(op => ({
+      ...op,
+      ruta: op.ruta === '/' ? '/admin/dashboard' : '/admin' + op.ruta
+    }));
   }
 
   cerrarSesion(): void {

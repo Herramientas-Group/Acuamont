@@ -1,7 +1,9 @@
 export interface Perfil {
     id?: number;
     nombre: string;
+    descripcion?: string;
     estado: number;
+    opcionIds?: number[];
 }
 
 export interface Usuario {
@@ -22,9 +24,21 @@ export interface Opcion {
 }
 
 export interface LoginResponse {
+    id: number;
     token: string;
     usuario: string;
     nombre: string;
     perfil: string;
     opciones: Opcion[];
+}
+
+export interface Generar2FAResponse {
+  secret: string;
+  qrCode: string;
+}
+
+export interface Verificar2FARequest {
+  id: number;
+  codigo: string;
+  secreto: string;
 }

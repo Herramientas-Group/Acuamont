@@ -1,1 +1,164 @@
-<p>dashboard-component works!</p>
+<div class="p-1">
+  <div class="bg-white rounded-3xl shadow-sm border border-blue-100/50 p-8 mb-6 backdrop-blur-sm">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+      <div>
+        <h3 class="text-4xl font-bold bg-gradient-to-r from-[#0D72C5] to-[#0a5a9c] bg-clip-text text-transparent mb-2">
+          Dashboard
+        </h3>
+        <p class="text-gray-600 text-sm flex items-center gap-2">
+          Panel de control general del sistema
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-3xl shadow-sm border border-blue-100/50 p-8 mb-6 backdrop-blur-sm">
+    <h4 class="text-xl font-bold text-gray-800 mb-6">Información General</h4>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="bg-white rounded-xl shadow-sm border border-blue-100/50 border-l-4 border-l-[#0D72C5] p-5 flex items-center gap-4">
+        <div class="w-12 h-12 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
+          <span class="material-symbols-outlined text-[#0D72C5] text-2xl">group</span>
+        </div>
+        <div class="min-w-0">
+          <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Total de Usuarios</p>
+          <h4 class="text-2xl font-bold text-gray-800 mb-0.5">{{resumen?.totalUsuarios ?? 0}}</h4>
+          <a routerLink="/admin/usuarios/listar" class="text-xs text-[#0D72C5] hover:underline font-medium">Ver detalles →</a>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl shadow-sm border border-blue-100/50 border-l-4 border-l-amber-500 p-5 flex items-center gap-4">
+        <div class="w-12 h-12 rounded-lg bg-amber-100 flex items-center justify-center flex-shrink-0">
+          <span class="material-symbols-outlined text-amber-600 text-2xl">category</span>
+        </div>
+        <div class="min-w-0">
+          <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Total de Categorías</p>
+          <h4 class="text-2xl font-bold text-gray-800 mb-0.5">{{resumen?.totalCategorias ?? 0}}</h4>
+          <a routerLink="/admin/categorias/listar" class="text-xs text-amber-600 hover:underline font-medium">Ver detalles →</a>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl shadow-sm border border-blue-100/50 border-l-4 border-l-red-500 p-5 flex items-center gap-4">
+        <div class="w-12 h-12 rounded-lg bg-red-100 flex items-center justify-center flex-shrink-0">
+          <span class="material-symbols-outlined text-red-600 text-2xl">inventory_2</span>
+        </div>
+        <div class="min-w-0">
+          <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Total de Productos</p>
+          <h4 class="text-2xl font-bold text-gray-800 mb-0.5">{{resumen?.totalProductos ?? 0}}</h4>
+          <a routerLink="/admin/productos/listar" class="text-xs text-red-500 hover:underline font-medium">Ver detalles →</a>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl shadow-sm border border-blue-100/50 border-l-4 border-l-cyan-500 p-5 flex items-center gap-4">
+        <div class="w-12 h-12 rounded-lg bg-cyan-100 flex items-center justify-center flex-shrink-0">
+          <span class="material-symbols-outlined text-cyan-600 text-2xl">storefront</span>
+        </div>
+        <div class="min-w-0">
+          <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Catálogo</p>
+          <h4 class="text-2xl font-bold text-gray-800 mb-0.5">Ver Catálogo</h4>
+          <p class="text-xs text-gray-400 font-medium">Productos en venta</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-3xl shadow-sm border border-blue-100/50 p-8 mb-6 backdrop-blur-sm">
+    <h4 class="text-xl font-bold text-gray-800 mb-6">Información de Ventas</h4>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div class="bg-white rounded-xl shadow-sm border border-blue-100/50 border-l-4 border-l-green-500 p-5 flex items-center gap-4">
+        <div class="w-12 h-12 rounded-lg bg-green-100 flex items-center justify-center flex-shrink-0">
+          <span class="material-symbols-outlined text-green-600 text-2xl">payments</span>
+        </div>
+        <div class="min-w-0">
+          <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Total Ventas del Día</p>
+          <h4 class="text-2xl font-bold text-green-700 mb-0.5">S/ {{ (resumen?.totalVentasDia ?? 0) | number:'1.2-2' }}</h4>
+          <a routerLink="/admin/ventas/listar" class="text-xs text-green-600 hover:underline font-medium">Ver detalles →</a>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl shadow-sm border border-blue-100/50 border-l-4 border-l-amber-500 p-5 flex items-center gap-4">
+        <div class="w-12 h-12 rounded-lg bg-amber-100 flex items-center justify-center flex-shrink-0">
+          <span class="material-symbols-outlined text-amber-600 text-2xl">trending_up</span>
+        </div>
+        <div class="min-w-0">
+          <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Total Ventas del Mes</p>
+          <h4 class="text-2xl font-bold text-amber-700 mb-0.5">S/ {{ (resumen?.totalVentasMes ?? 0) | number:'1.2-2' }}</h4>
+          <a routerLink="/admin/ventas/listar" class="text-xs text-amber-600 hover:underline font-medium">Ver detalles →</a>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl shadow-sm border border-blue-100/50 border-l-4 border-l-red-500 p-5 flex items-center gap-4">
+        <div class="w-12 h-12 rounded-lg bg-red-100 flex items-center justify-center flex-shrink-0">
+          <span class="material-symbols-outlined text-red-600 text-2xl">account_balance_wallet</span>
+        </div>
+        <div class="min-w-0">
+          <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Total Deudas por Cobrar</p>
+          <h4 class="text-2xl font-bold text-red-700 mb-0.5">S/ {{ (resumen?.totalDeuda ?? 0) | number:'1.2-2' }}</h4>
+          <a routerLink="/admin/ventas/listar" class="text-xs text-red-500 hover:underline font-medium">Ver detalles →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="lg:col-span-2">
+      <div class="bg-white rounded-xl shadow-sm border border-blue-100/50 p-6 backdrop-blur-sm h-full">
+        <h4 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+          <span class="material-symbols-outlined text-amber-600">receipt_long</span>
+          Cuentas por Cobrar Pendientes
+        </h4>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm" *ngIf="resumen?.cuentasPorCobrar?.length">
+            <thead>
+              <tr class="border-b border-gray-200">
+                <th class="text-left px-3 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">ID Venta</th>
+                <th class="text-left px-3 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">Cliente</th>
+                <th class="text-left px-3 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">Fecha</th>
+                <th class="text-right px-3 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">Deuda</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let c of resumen!.cuentasPorCobrar" class="border-b border-gray-100 hover:bg-blue-50/30 transition-colors">
+                <td class="px-3 py-3 text-sm font-medium text-gray-400">#{{c.idVenta}}</td>
+                <td class="px-3 py-3 text-sm font-semibold text-gray-800">{{c.cliente}}</td>
+                <td class="px-3 py-3 text-sm text-gray-600">{{c.fecha}}</td>
+                <td class="px-3 py-3 text-sm font-semibold text-red-700 text-right">S/ {{c.deuda | number:'1.2-2'}}</td>
+              </tr>
+            </tbody>
+          </table>
+          <div *ngIf="!resumen?.cuentasPorCobrar?.length" class="text-center py-8 text-gray-400 text-sm">
+            No hay cuentas por cobrar pendientes.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="lg:col-span-1">
+      <div class="bg-white rounded-xl shadow-sm border border-blue-100/50 p-6 backdrop-blur-sm h-full">
+        <h4 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+          <span class="material-symbols-outlined text-green-600">trophy</span>
+          Top 5 Productos Más Vendidos
+        </h4>
+        <ul class="space-y-2" *ngIf="resumen?.topProductos?.length">
+          <li *ngFor="let p of resumen!.topProductos; let i = index"
+              class="flex items-center justify-between px-3 py-2.5 rounded-lg"
+              [ngClass]="i === 0 ? 'bg-yellow-50' : i === 1 ? 'bg-gray-50' : i === 2 ? 'bg-orange-50' : ''">
+            <div class="flex items-center gap-3 min-w-0">
+              <span class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold"
+                    [ngClass]="{
+                      'bg-yellow-400 text-white': i === 0,
+                      'bg-gray-400 text-white': i === 1,
+                      'bg-orange-400 text-white': i === 2,
+                      'bg-gray-200 text-gray-500': i >= 3
+                    }">{{i + 1}}</span>
+              <span class="text-sm font-medium text-gray-800 truncate">{{p.producto}}</span>
+            </div>
+            <span class="bg-[#0D72C5] text-white text-xs font-bold px-2.5 py-1 rounded-full flex-shrink-0 ml-2">{{p.cantidadVendida}}</span>
+          </li>
+        </ul>
+        <div *ngIf="!resumen?.topProductos?.length" class="text-center py-8 text-gray-400 text-sm">
+          No hay datos de productos vendidos.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

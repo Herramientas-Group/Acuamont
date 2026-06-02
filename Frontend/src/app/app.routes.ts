@@ -11,6 +11,13 @@ import { ProveedoresComponent } from './features/admin/proveedores-component/pro
 import { VentasComponent } from './features/admin/ventas-component/ventas-component';
 import { authGuard } from './core/guards/auth.guard';
 import { PerfilesComponent } from './features/admin/perfiles-component/perfiles-component';
+import { CategoriaComponent } from './features/admin/categoria-component/categoria-component';
+import { ProductosComponent } from './features/admin/productos-component/productos-component';
+import { WebComponent } from './features/admin/web-component/web-component';
+import { ClientesComponent } from './features/admin/clientes-component/clientes-component';
+import { UtilidadesComponent } from './features/admin/utilidades-component/utilidades-component';
+import { ContactoComponent } from './features/home/contacto-component/contacto-component';
+import { ComentariosComponent } from './features/home/comentarios-component/comentarios-component';
 
 export const routes: Routes = [
   {
@@ -34,17 +41,33 @@ export const routes: Routes = [
     title: 'Servicios',
   },
   {
+    path: 'contacto',
+    component: ContactoComponent,
+    title: 'Contacto',
+  },
+  {
+    path: 'comentarios',
+    component: ComentariosComponent,
+    title: 'Comentarios',
+  },
+  {
     path: 'admin',
     component: DashboardLayout,
     title: 'Dashboard',
-    canActivate: [authGuard],
+    canActivateChild: [authGuard],
     children: [
-      { path: 'usuarios', component: UsuarioComponent, data: { title: 'Usuarios', opcionId: 2 } },
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: 'dashboard', component: DashboardComponent, data: { title: 'Dashboard', opcionId: 1 } },
-      { path: 'inventario', component: InventarioComponent, data: { title: 'Inventario', opcionId: 9 } },
-      { path: 'proveedores', component: ProveedoresComponent, data: { title: 'Proveedores', opcionId: 10 } },
-      { path: 'ventas', component: VentasComponent, data: { title: 'Ventas', opcionId: 8 } },
-      { path: 'perfiles', component: PerfilesComponent, data: { title: 'Perfiles', opcionId: 3 } }
+      { path: 'usuarios/listar', component: UsuarioComponent, data: { title: 'Usuarios', opcionId: 2 } },
+      { path: 'perfiles/listar', component: PerfilesComponent, data: { title: 'Perfiles', opcionId: 3 } },
+      { path: 'categorias/listar', component: CategoriaComponent, data: { title: 'Categorías', opcionId: 4 } },
+      { path: 'productos/listar', component: ProductosComponent, data: { title: 'Productos', opcionId: 5 } },
+      { path: 'slides/listar', component: WebComponent, data: { title: 'Gestión Web', opcionId: 6 } },
+      { path: 'clientes/listar', component: ClientesComponent, data: { title: 'Clientes', opcionId: 7 } },
+      { path: 'ventas/listar', component: VentasComponent, data: { title: 'Ventas', opcionId: 8 } },
+      { path: 'inventario/listar', component: InventarioComponent, data: { title: 'Inventario', opcionId: 9 } },
+      { path: 'proveedores/listar', component: ProveedoresComponent, data: { title: 'Proveedores', opcionId: 10 } },
+      { path: 'reportes/listar', component: UtilidadesComponent, data: { title: 'Reportes Utilidades', opcionId: 11 } }
     ]
   },
   { path: '', redirectTo: 'inicio', pathMatch: 'full' },

@@ -1,94 +1,204 @@
 <div class="p-1">
-    <div class="bg-white rounded-3xl shadow-sm border border-blue-100/50 p-8 mb-6 backdrop-blur-sm">
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-            <div>
-                <h3
-                    class="text-4xl font-bold bg-gradient-to-r from-[#0D72C5] to-[#0a5a9c] bg-clip-text text-transparent mb-2">
-                    Lista de Perfiles
-                </h3>
-                <p class="text-gray-600 text-sm flex items-center gap-2">
-                    Gestiona tus perfiles de manera eficiente
-                </p>
-            </div>
-
-            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto">
-                <div class="relative group w-full sm:w-80">
-                    <i
-                        class="pi pi-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#0D72C5] transition-colors"></i>
-                    <input placeholder="Buscar perfil..."
-                        class="w-full pl-11 pr-4 py-3 rounded-xl border-2 border-gray-200 focus:border-[#0D72C5] focus:ring-4 focus:ring-blue-100 transition-all outline-none text-sm bg-white/80 backdrop-blur-sm" />
-                </div>
-                <button
-                    class="bg-[#0D72C5] hover:bg-[#0a5a9c] text-white px-6 py-3 rounded-xl transition-all flex items-center justify-center gap-2 font-semibold text-sm shadow-lg shadow-blue-200/50 hover:shadow-xl hover:shadow-blue-300/50 hover:-translate-y-0.5 whitespace-nowrap group cursor-pointer">
-                    <span
-                        class="material-symbols-outlined text-lg group-hover:rotate-90 transition-transform">add</span>
-                    Nuevo Registro
-                </button>
-            </div>
+  <div class="bg-white rounded-3xl shadow-sm border border-blue-100/50 p-8 mb-6 backdrop-blur-sm">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+      <div>
+        <h3
+          class="text-4xl font-bold bg-gradient-to-r from-[#0D72C5] to-[#0a5a9c] bg-clip-text text-transparent mb-2">
+          Lista de Perfiles
+        </h3>
+        <p class="text-gray-600 text-sm flex items-center gap-2">
+          Gestiona tus perfiles de manera eficiente
+        </p>
+      </div>
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto">
+        <button (click)="abrirModal()"
+          class="bg-[#0D72C5] hover:bg-[#0a5a9c] text-white px-6 py-3 rounded-xl transition-all flex items-center justify-center gap-2 font-semibold text-sm shadow-lg shadow-blue-200/50 hover:shadow-xl hover:shadow-blue-300/50 hover:-translate-y-0.5 whitespace-nowrap group cursor-pointer">
+          <span
+            class="material-symbols-outlined text-lg group-hover:rotate-90 transition-transform">add</span>
+          Nuevo Registro
+        </button>
+      </div>
+    </div>
+    <hr class="border-gray-100 my-6" />
+    <div class="flex flex-wrap items-end gap-4">
+      <div class="flex flex-wrap items-end gap-4 flex-1">
+        <div class="flex flex-col gap-1">
+          <label class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Buscar por nombre</label>
+          <input pInputText [(ngModel)]="filtroNombre" placeholder="Buscar..."
+            class="w-64" (input)="aplicarFiltros()" />
         </div>
+        <div class="flex flex-col gap-1">
+          <label class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Estado</label>
+          <p-select [options]="estadosFiltro" [(ngModel)]="filtroEstado"
+            placeholder="Todos" optionLabel="label" optionValue="value"
+            (onChange)="aplicarFiltros()" styleClass="w-48" [appendTo]="'body'" />
+        </div>
+      </div>
+      <button (click)="limpiarFiltros()"
+        class="px-4 py-3 rounded-xl border-2 border-gray-200 text-gray-600 hover:bg-gray-100 transition-all cursor-pointer text-sm font-semibold">
+        Limpiar
+      </button>
     </div>
-</div>
-<div class="overflow-hidden bg-white rounded-3xl shadow-sm border border-blue-100/50 backdrop-blur-sm">
-    <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse">
-            <thead>
-                <tr class="bg-gray-50/50 border-b border-gray-100">
-                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">ID</th>
-                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Nombre</th>
-                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Estado</th>
-                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-center">Acciones
-                    </th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-50">
-                <tr *ngFor="let perfil of perfiles" class="hover:bg-blue-50/30 transition-colors group">
-                    <td class="px-6 py-4 text-sm font-medium text-gray-400">#{{perfil.id}}</td>
-                    <td class="px-6 py-4">
-                        <div class="flex items-center gap-3">
-                            <div
-                                class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-[#0D72C5] font-bold text-xs">
-                                {{perfil.nombre | slice:0:1}}
-                            </div>
-                            <div>
-                                <p class="text-sm font-semibold text-gray-800">{{perfil.nombre}}</p>
-                            </div>
-                        </div>
-                    </td>
-                    <td class="px-6 py-4">
-                        <span [ngClass]="{
-                            'bg-green-100 text-green-700': perfil.estado === 1,
-                            'bg-red-100 text-red-700': perfil.estado === 0
-                        }" class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">
-                            {{ perfil.estado === 1 ? 'Activo' : 'Inactivo' }}
-                        </span>
-                    </td>
-                    <td class="px-6 py-4">
-                        <div class="flex justify-center gap-2">
-                            <button
-                                class="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors cursor-pointer"
-                                title="Editar">
-                                <span class="material-symbols-outlined text-sm">edit</span>
-                            </button>
-                            <button
-                                class="p-2 text-red-600 hover:bg-red-100 rounded-lg transition-colors cursor-pointer"
-                                title="Eliminar">
-                                <span class="material-symbols-outlined text-sm">delete</span>
-                            </button>
-                        </div>
-                    </td>
-                </tr>
-                @if(perfiles.length === 0){
-                <tr>
-                    <td colspan="6" class="px-6 py-12 text-center">
-                        <div class="flex flex-col items-center gap-2 text-gray-400">
-                            <span class="material-symbols-outlined text-4xl">folder_open</span>
-                            <p class="text-sm">No se encontraron usuarios registrados.</p>
-                        </div>
-                    </td>
-                </tr>
-                }
+  </div>
 
-            </tbody>
-        </table>
+  <div class="bg-white rounded-xl shadow-sm border border-blue-100/50 backdrop-blur-sm overflow-hidden">
+    <div class="overflow-visible">
+      <p-table
+        #dt
+        [value]="filteredPerfiles"
+        [paginator]="true"
+        [rows]="10"
+        [rowsPerPageOptions]="[5, 10, 20, 50]"
+        sortMode="single"
+        [customSort]="true"
+        (onSort)="customSort($event)"
+        dataKey="id"
+        [showCurrentPageReport]="true"
+        currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} registros"
+        styleClass="!border-none"
+      >
+        <ng-template pTemplate="header">
+          <tr>
+            <th pSortableColumn="id" class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
+              ID <p-sortIcon field="id" />
+            </th>
+            <th pSortableColumn="nombre" class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
+              Perfil <p-sortIcon field="nombre" />
+            </th>
+            <th pSortableColumn="descripcion" class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
+              Descripción <p-sortIcon field="descripcion" />
+            </th>
+            <th pSortableColumn="estado" class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
+              Estado <p-sortIcon field="estado" />
+            </th>
+            <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider !text-center">Acciones</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-perfil>
+          <tr class="hover:bg-blue-50/30 transition-colors">
+            <td class="px-6 py-4 text-sm font-medium text-gray-400">#{{perfil.id}}</td>
+            <td class="px-6 py-4">
+              <div class="flex items-center gap-3">
+                <div
+                  class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-[#0D72C5] font-bold text-xs">
+                  {{perfil.nombre[0]}}
+                </div>
+                <div>
+                  <p class="text-sm font-semibold text-gray-800">{{perfil.nombre}}</p>
+                </div>
+              </div>
+            </td>
+            <td class="px-6 py-4">
+              <p class="text-sm text-gray-600 max-w-[200px] truncate">{{perfil.descripcion || '—'}}</p>
+            </td>
+            <td class="px-6 py-4">
+              <span [ngClass]="{
+                'bg-green-100 text-green-700': perfil.estado === 1,
+                'bg-red-100 text-red-700': perfil.estado === 0
+              }" class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">
+                {{ perfil.estado === 1 ? 'Activo' : 'Inactivo' }}
+              </span>
+            </td>
+            <td class="px-6 py-4">
+              <div class="flex justify-center gap-2">
+                <button (click)="abrirModal(perfil)"
+                  class="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors cursor-pointer"
+                  title="Editar">
+                  <span class="material-symbols-outlined text-sm">edit</span>
+                </button>
+                <button (click)="abrirModalPermisos(perfil)"
+                  class="p-2 text-purple-600 hover:bg-purple-100 rounded-lg transition-colors cursor-pointer"
+                  title="Asignar Permisos">
+                  <span class="material-symbols-outlined text-sm">security</span>
+                </button>
+                <button (click)="toggleEstado(perfil.id!)"
+                  class="p-2 text-amber-600 hover:bg-amber-100 rounded-lg transition-colors cursor-pointer"
+                  title="Cambiar Estado">
+                  <span class="material-symbols-outlined text-sm">power_settings_new</span>
+                </button>
+                <button (click)="eliminarPerfil(perfil.id!)"
+                  class="p-2 text-red-600 hover:bg-red-100 rounded-lg transition-colors cursor-pointer"
+                  title="Eliminar">
+                  <span class="material-symbols-outlined text-sm">delete</span>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="5" class="px-6 py-12 text-center">
+              <div class="flex flex-col items-center gap-2 text-gray-400">
+                <span class="material-symbols-outlined text-4xl">folder_open</span>
+                <p class="text-sm">No se encontraron perfiles registrados.</p>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
     </div>
+  </div>
 </div>
+
+<p-dialog header="{{ editando ? 'Editar Perfil' : 'Agregar Perfil' }}"
+  [(visible)]="modalVisible" [modal]="true" [closable]="false"
+  [draggable]="false" [resizable]="false"
+  [style]="{ width: '520px' }" styleClass="rounded-xl">
+  <div class="space-y-4">
+    <div class="flex flex-col gap-1.5">
+      <label class="text-sm font-semibold text-gray-700">Nombre del Perfil</label>
+      <input pInputText [(ngModel)]="formPerfil.nombre" placeholder="Nombre del perfil"
+        class="w-full" />
+    </div>
+    <div class="flex flex-col gap-1.5">
+      <label class="text-sm font-semibold text-gray-700">Descripción</label>
+      <textarea [(ngModel)]="formPerfil.descripcion" placeholder="Descripción del perfil"
+        class="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#0D72C5] focus:border-transparent transition-all resize-none"
+        rows="3"></textarea>
+    </div>
+  </div>
+  <div class="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-100">
+    <button (click)="modalVisible = false"
+      class="px-5 py-2.5 rounded-xl border-2 border-gray-200 text-gray-600 hover:bg-gray-100 transition-all cursor-pointer text-sm font-semibold">
+      Cancelar
+    </button>
+    <button (click)="guardarPerfil()"
+      class="px-5 py-2.5 rounded-xl bg-[#0D72C5] hover:bg-[#0a5a9c] text-white transition-all cursor-pointer text-sm font-semibold shadow-lg shadow-blue-200/50">
+      Guardar Perfil
+    </button>
+  </div>
+</p-dialog>
+
+<p-dialog header="Asignar Permisos"
+  [(visible)]="modalPermisosVisible" [modal]="true" [closable]="false"
+  [draggable]="false" [resizable]="false"
+  [style]="{ width: '520px' }" styleClass="rounded-xl">
+  <div class="space-y-3">
+    <p class="text-sm text-gray-600">
+      Seleccione los módulos a los que tendrá acceso el perfil
+      <strong class="text-gray-800">{{ perfilNombrePermisos }}</strong>:
+    </p>
+    <div class="space-y-1 max-h-[320px] overflow-y-auto pr-2">
+      <div *ngFor="let opcion of opciones"
+        class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
+        (click)="toggleOpcion(opcion.id)">
+        <input type="checkbox" [checked]="opcionesSeleccionadas.has(opcion.id)"
+          class="w-4 h-4 rounded border-gray-300 text-[#0D72C5] focus:ring-[#0D72C5] cursor-pointer" />
+        <span class="text-sm font-medium text-gray-700">{{ opcion.nombre }}</span>
+      </div>
+    </div>
+    <p class="text-xs text-gray-400 pt-2">
+      {{ opcionesSeleccionadas.size }} de {{ opciones.length }} módulos seleccionados
+    </p>
+  </div>
+  <div class="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-100">
+    <button (click)="modalPermisosVisible = false"
+      class="px-5 py-2.5 rounded-xl border-2 border-gray-200 text-gray-600 hover:bg-gray-100 transition-all cursor-pointer text-sm font-semibold">
+      Cancelar
+    </button>
+    <button (click)="guardarPermisos()"
+      class="px-5 py-2.5 rounded-xl bg-[#0D72C5] hover:bg-[#0a5a9c] text-white transition-all cursor-pointer text-sm font-semibold shadow-lg shadow-blue-200/50">
+      Guardar Permisos
+    </button>
+  </div>
+</p-dialog>

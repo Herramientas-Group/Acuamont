@@ -35,6 +35,9 @@ public class SecurityConfig {
                 .requestMatchers("/productos/api/listar", "/productos/api/categorias").permitAll()
                 .requestMatchers("/categorias/api/activas").permitAll()
                 .requestMatchers("/slides/api/listar-urls").permitAll()
+                .requestMatchers("/redes/api/activas").permitAll()
+                .requestMatchers("/comentarios/api/**").permitAll()
+                .requestMatchers("/clientes/api/buscar-documento/**").permitAll()
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

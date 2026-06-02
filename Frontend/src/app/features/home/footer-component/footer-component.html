@@ -3,14 +3,22 @@
         <div class="flex flex-col md:flex-row items-center justify-between gap-6">
 
             <div class="text-[10px] uppercase tracking-[0.3em] text-gray-500 text-center md:text-left">
-                <p>© 2026 Acuamont System. Todos los derechos reservados.</p>
+                <p>&copy; 2026 Acuamont System. Todos los derechos reservados.</p>
             </div>
 
-            <div class="flex items-center gap-8 text-[10px] uppercase tracking-[0.3em] text-gray-500">
+            <div class="flex items-center gap-6 text-[10px] uppercase tracking-[0.3em] text-gray-500">
+                <div class="flex items-center gap-3">
+                    <span class="text-gray-400">Redes:</span>
+                    <a *ngFor="let red of redes" [href]="red.url" target="_blank" rel="noopener noreferrer"
+                      class="text-gray-600 hover:text-[#0D72C5] transition-colors text-lg"
+                      [attr.aria-label]="red.nombre">
+                      <i [class]="red.icono"></i>
+                    </a>
+                </div>
+                <span class="text-gray-300">|</span>
                 <a href="#" class="hover:text-blue-600 transition-colors">Privacidad</a>
                 <a href="#" class="hover:text-blue-600 transition-colors">Términos</a>
-
-                <a routerLink="/login" class="flex items-center justify-center text-gray-700"
+                <a [routerLink]="loginLink" class="flex items-center justify-center text-gray-700"
                     aria-label="administrador">
                     <i class="bi bi-box-arrow-in-right"></i>
                 </a>
