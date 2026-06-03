@@ -34,12 +34,18 @@ interface CuotaForm {
   selector: 'app-ventas-component',
   standalone: true,
   imports: [
-    CommonModule, FormsModule, TableModule, SelectModule, InputTextModule,
-    InputNumberModule, DialogModule, AutoCompleteModule,
-    TagModule, ConfirmDialogModule
+    CommonModule,
+    FormsModule,
+    TableModule,
+    SelectModule,
+    InputTextModule,
+    InputNumberModule,
+    DialogModule,
+    AutoCompleteModule,
+    TagModule,
+    ConfirmDialogModule,
   ],
-  providers: [ConfirmationService],
-  templateUrl: './ventas-component.html'
+  templateUrl: './ventas-component.html',
 })
 export class VentasComponent implements OnInit {
   @ViewChild('dt') dt: any;
@@ -48,7 +54,7 @@ export class VentasComponent implements OnInit {
     { label: 'Todos', value: null },
     { label: 'Activo', value: 1 },
     { label: 'Pendiente', value: 0 },
-    { label: 'Anulado', value: 2 }
+    { label: 'Anulado', value: 2 },
   ];
 
   isSorted: boolean | null = null;
@@ -108,8 +114,8 @@ export class VentasComponent implements OnInit {
     private authService: AuthService,
     private loaderService: LoaderService,
     private confirmationService: ConfirmationService,
-    private cdr: ChangeDetectorRef
-  ) { }
+    private cdr: ChangeDetectorRef,
+  ) {}
 
   ngOnInit(): void {
     this.cargarDatosIniciales();
@@ -123,19 +129,28 @@ export class VentasComponent implements OnInit {
         this.isSorted = null;
         this.cdr.detectChanges();
       },
-      error: (err) => console.error(err)
+      error: (err) => console.error(err),
     });
     this.ventasService.listarFormasPago().subscribe({
-      next: (data) => { this.formasPago = data; this.cdr.detectChanges(); },
-      error: (err) => console.error(err)
+      next: (data) => {
+        this.formasPago = data;
+        this.cdr.detectChanges();
+      },
+      error: (err) => console.error(err),
     });
     this.ventasService.listarSeriesComprobante().subscribe({
-      next: (data) => { this.seriesComprobante = data; this.cdr.detectChanges(); },
-      error: (err) => console.error(err)
+      next: (data) => {
+        this.seriesComprobante = data;
+        this.cdr.detectChanges();
+      },
+      error: (err) => console.error(err),
     });
     this.productoService.listarProductos().subscribe({
-      next: (data) => { this.todosProductos = data.filter(p => p.estado === 1); this.cdr.detectChanges(); },
-      error: (err) => console.error(err)
+      next: (data) => {
+        this.todosProductos = data.filter((p) => p.estado === 1);
+        this.cdr.detectChanges();
+      },
+      error: (err) => console.error(err),
     });
   }
 
@@ -152,7 +167,9 @@ export class VentasComponent implements OnInit {
       this.resetting = true;
       this.aplicarFiltros();
       this.dt.reset();
-      setTimeout(() => { this.resetting = false; }, 0);
+      setTimeout(() => {
+        this.resetting = false;
+      }, 0);
     }
   }
 
@@ -173,8 +190,9 @@ export class VentasComponent implements OnInit {
 
   aplicarFiltros(): void {
     this.isSorted = null;
-    this.filteredVentas = this.ventas.filter(v => {
-      const coincideNombre = !this.filtroNombre ||
+    this.filteredVentas = this.ventas.filter((v) => {
+      const coincideNombre =
+        !this.filtroNombre ||
         (v.cliente?.nombre?.toLowerCase().includes(this.filtroNombre.toLowerCase()) ?? false);
       const coincideEstado = this.filtroEstado === null || v.estado === this.filtroEstado;
       return coincideNombre && coincideEstado;
@@ -188,7 +206,7 @@ export class VentasComponent implements OnInit {
   }
 
   getTotalVenta(): number {
-    return this.detalles.reduce((sum, d) => sum + (d.cantidad * d.precioUnitario), 0);
+    return this.detalles.reduce((sum, d) => sum + d.cantidad * d.precioUnitario, 0);
   }
 
   abrirModalNuevaVenta(): void {
@@ -211,7 +229,7 @@ export class VentasComponent implements OnInit {
   }
 
   onSerieComprobanteChange(): void {
-    const serie = this.seriesComprobante.find(s => s.id === this.serieComprobanteId);
+    const serie = this.seriesComprobante.find((s) => s.id === this.serieComprobanteId);
     if (serie) {
       this.correlativoVisual = `${serie.serie} - ${serie.correlativo_actual + 1}`;
     } else {
@@ -220,7 +238,7 @@ export class VentasComponent implements OnInit {
   }
 
   onFormaPagoChange(): void {
-    const fp = this.formasPago.find(f => f.id === this.formaPagoId);
+    const fp = this.formasPago.find((f) => f.id === this.formaPagoId);
     this.esCredito = fp?.nombre?.toLowerCase().includes('credito') ?? false;
     if (!this.esCredito) {
       this.montoInicial = null;
@@ -242,27 +260,28 @@ export class VentasComponent implements OnInit {
       },
       error: () => {
         this.buscandoCliente = false;
-      }
+      },
     });
   }
 
   filtrarProductos(event: any): void {
     const query = event.query?.toLowerCase() || '';
-    this.productosSugeridos = this.todosProductos.filter(p =>
-      p.nombre.toLowerCase().includes(query) &&
-      !this.detalles.some(d => d.producto.id === p.id)
+    this.productosSugeridos = this.todosProductos.filter(
+      (p) =>
+        p.nombre.toLowerCase().includes(query) &&
+        !this.detalles.some((d) => d.producto.id === p.id),
     );
   }
 
   onProductoSelect(event: any): void {
     const prod: Producto = event.value || event;
     if (!prod?.id) return;
-    if (this.detalles.some(d => d.producto.id === prod.id)) return;
+    if (this.detalles.some((d) => d.producto.id === prod.id)) return;
     this.detalles.push({
       producto: prod,
       cantidad: 1,
       precioUnitario: prod.precioVenta,
-      subtotal: prod.precioVenta
+      subtotal: prod.precioVenta,
     });
     this.busquedaProducto = '';
     this.productoSeleccionado = null;
@@ -282,7 +301,7 @@ export class VentasComponent implements OnInit {
     if (!this.nuevaCuotaMonto || !this.nuevaCuotaFecha) return;
     this.planDeCuotas.push({
       monto: this.nuevaCuotaMonto,
-      fechaVencimiento: this.nuevaCuotaFecha
+      fechaVencimiento: this.nuevaCuotaFecha,
     });
     this.nuevaCuotaMonto = null;
     this.nuevaCuotaFecha = '';
@@ -293,24 +312,33 @@ export class VentasComponent implements OnInit {
   }
 
   guardarVenta(): void {
-    if (!this.clienteId || !this.serieComprobanteId || !this.formaPagoId || this.detalles.length === 0) return;
+    if (
+      !this.clienteId ||
+      !this.serieComprobanteId ||
+      !this.formaPagoId ||
+      this.detalles.length === 0
+    )
+      return;
 
     const usuarioId = this.authService.getUsuarioId();
-    if (!usuarioId) { console.error('No se encontró el usuario logueado'); return; }
+    if (!usuarioId) {
+      console.error('No se encontró el usuario logueado');
+      return;
+    }
 
     const dto: VentaDTO = {
       clienteId: this.clienteId,
       usuarioId: usuarioId,
       serieComprobanteId: this.serieComprobanteId,
       formaPagoId: this.formaPagoId,
-      detalles: this.detalles.map(d => ({ productoId: d.producto.id!, cantidad: d.cantidad }))
+      detalles: this.detalles.map((d) => ({ productoId: d.producto.id!, cantidad: d.cantidad })),
     };
 
     if (this.esCredito) {
       dto.montoInicial = this.montoInicial ?? 0;
-      dto.planDeCuotas = this.planDeCuotas.map(c => ({
+      dto.planDeCuotas = this.planDeCuotas.map((c) => ({
         monto: c.monto,
-        fechaVencimiento: c.fechaVencimiento
+        fechaVencimiento: c.fechaVencimiento,
       }));
     }
 
@@ -328,7 +356,7 @@ export class VentasComponent implements OnInit {
       error: (err) => {
         console.error(err);
         this.guardando = false;
-      }
+      },
     });
   }
 
@@ -338,13 +366,17 @@ export class VentasComponent implements OnInit {
       header: 'Anular Venta',
       icon: 'pi pi-exclamation-triangle',
       acceptLabel: 'Sí, anular',
+      acceptButtonStyleClass: 'p-button-danger p-button-text',
+
       rejectLabel: 'Cancelar',
+      rejectButtonStyleClass: 'p-button-secondary p-button-text',
+
       accept: () => {
         this.ventasService.eliminarVenta(venta.id).subscribe({
           next: () => this.cargarDatosIniciales(),
-          error: (err) => console.error(err)
+          error: (err) => console.error(err),
         });
-      }
+      },
     });
   }
 
@@ -355,8 +387,11 @@ export class VentasComponent implements OnInit {
     this.cuotas = [];
     this.cuotasModalVisible = true;
     this.ventasService.listarCuotas(venta.id).subscribe({
-      next: (data) => { this.cuotas = data; this.cdr.detectChanges(); },
-      error: (err) => console.error(err)
+      next: (data) => {
+        this.cuotas = data;
+        this.cdr.detectChanges();
+      },
+      error: (err) => console.error(err),
     });
   }
 
@@ -366,8 +401,11 @@ export class VentasComponent implements OnInit {
     this.pagos = [];
     this.pagosModalVisible = true;
     this.ventasService.listarPagos(venta.id).subscribe({
-      next: (data) => { this.pagos = data; this.cdr.detectChanges(); },
-      error: (err) => console.error(err)
+      next: (data) => {
+        this.pagos = data;
+        this.cdr.detectChanges();
+      },
+      error: (err) => console.error(err),
     });
   }
 
@@ -380,23 +418,29 @@ export class VentasComponent implements OnInit {
 
   registrarPago(): void {
     if (!this.selectedCuota || !this.pagoMetodo) return;
-    this.ventasService.registrarPago({
-      cuotaId: this.selectedCuota.id,
-      montoPagado: this.selectedCuota.saldo,
-      comentario: this.pagoComentario,
-      metodoPago: this.pagoMetodo
-    }).subscribe({
-      next: () => {
-        this.registrarPagoModalVisible = false;
-        if (this.cuotasVentaId) {
-          this.ventasService.listarCuotas(this.cuotasVentaId).subscribe({
-            next: (data) => { this.cuotas = data; this.cdr.detectChanges(); this.cargarDatosIniciales(); },
-            error: (err) => console.error(err)
-          });
-        }
-      },
-      error: (err) => console.error(err)
-    });
+    this.ventasService
+      .registrarPago({
+        cuotaId: this.selectedCuota.id,
+        montoPagado: this.selectedCuota.saldo,
+        comentario: this.pagoComentario,
+        metodoPago: this.pagoMetodo,
+      })
+      .subscribe({
+        next: () => {
+          this.registrarPagoModalVisible = false;
+          if (this.cuotasVentaId) {
+            this.ventasService.listarCuotas(this.cuotasVentaId).subscribe({
+              next: (data) => {
+                this.cuotas = data;
+                this.cdr.detectChanges();
+                this.cargarDatosIniciales();
+              },
+              error: (err) => console.error(err),
+            });
+          }
+        },
+        error: (err) => console.error(err),
+      });
   }
 
   descargarPDF(id: number): void {
@@ -406,7 +450,7 @@ export class VentasComponent implements OnInit {
   enviarCorreo(event: Event, id: number): void {
     event.stopPropagation();
     this.ventasService.enviarBoletaCorreo(id).subscribe({
-      error: (err) => console.error(err)
+      error: (err) => console.error(err),
     });
   }
 

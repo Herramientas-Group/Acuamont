@@ -1,5 +1,12 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { RouterOutlet, Router, NavigationEnd, ActivatedRoute, RouterLink, RouterLinkActive } from '@angular/router';
+import {
+  RouterOutlet,
+  Router,
+  NavigationEnd,
+  ActivatedRoute,
+  RouterLink,
+  RouterLinkActive,
+} from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { filter, map, mergeMap } from 'rxjs/operators';
 import { AuthService } from '../../../core/services/auth-service';
@@ -21,33 +28,37 @@ export class DashboardLayout implements OnInit {
     private router: Router,
     private activatedRoute: ActivatedRoute,
     private cdr: ChangeDetectorRef,
-    private authService: AuthService
-  ) { }
+    private authService: AuthService,
+  ) {}
 
   ngOnInit(): void {
     this.menuOpciones = this.transformarRutas(this.authService.getOpciones());
     this.nombreUsuario = this.authService.getNombre() || '';
     this.perfilUsuario = this.authService.getPerfil() || '';
 
-    this.authService.opciones$.subscribe(opciones => {
+    this.authService.opciones$.subscribe((opciones) => {
       this.menuOpciones = this.transformarRutas(opciones);
       this.nombreUsuario = this.authService.getNombre() || '';
       this.perfilUsuario = this.authService.getPerfil() || '';
-      this.cdr.detectChanges();
+      // ✅ markForCheck en lugar de detectChanges
+      // No fuerza un ciclo inmediato, solo marca el componente como sucio
+      this.cdr.markForCheck();
     });
 
-    this.router.events.pipe(
-      filter(event => event instanceof NavigationEnd),
-      map(() => this.activatedRoute),
-      map(route => {
-        while (route.firstChild) route = route.firstChild;
-        return route;
-      }),
-      mergeMap(route => route.data)
-    ).subscribe(data => {
-      this.titulo = data['title'] || 'Panel Administrativo';
-      this.cdr.detectChanges();
-    });
+    this.router.events
+      .pipe(
+        filter((event) => event instanceof NavigationEnd),
+        map(() => this.activatedRoute),
+        map((route) => {
+          while (route.firstChild) route = route.firstChild;
+          return route;
+        }),
+        mergeMap((route) => route.data),
+      )
+      .subscribe((data) => {
+        this.titulo = data['title'] || 'Panel Administrativo';
+        this.cdr.markForCheck();
+      });
 
     this.actualizarTituloManual();
   }
@@ -55,16 +66,16 @@ export class DashboardLayout implements OnInit {
   private actualizarTituloManual(): void {
     let route = this.activatedRoute.root;
     while (route.firstChild) route = route.firstChild;
-    route.data.subscribe(data => {
+    route.data.subscribe((data) => {
       this.titulo = data['title'] || 'Panel Administrativo';
-      this.cdr.detectChanges();
+      this.cdr.markForCheck();
     });
   }
 
   private transformarRutas(opciones: Opcion[]): Opcion[] {
-    return opciones.map(op => ({
+    return opciones.map((op) => ({
       ...op,
-      ruta: op.ruta === '/' ? '/admin/dashboard' : '/admin' + op.ruta
+      ruta: op.ruta === '/' ? '/admin/dashboard' : '/admin' + op.ruta,
     }));
   }
 
