@@ -1,20 +1,29 @@
-import { Component, OnInit, ChangeDetectorRef, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TableModule } from 'primeng/table';
 import { SelectModule } from 'primeng/select';
 import { InputTextModule } from 'primeng/inputtext';
 import { DialogModule } from 'primeng/dialog';
-import { SortEvent } from 'primeng/api';
+import { ConfirmationService, SortEvent } from 'primeng/api';
 import { UsuarioService } from '../../../core/services/usuario-service';
 import { LoaderService } from '../../../core/services/loader-service';
 import { Usuario, Perfil } from '../../../shared/interfaces/perfil';
+import { ConfirmDialog } from 'primeng/confirmdialog';
 
 @Component({
   selector: 'app-usuarios',
   standalone: true,
-  imports: [CommonModule, FormsModule, TableModule, SelectModule, InputTextModule, DialogModule],
-  templateUrl: './usuario-component.html'
+  imports: [
+    CommonModule,
+    FormsModule,
+    TableModule,
+    SelectModule,
+    InputTextModule,
+    DialogModule,
+    ConfirmDialog,
+  ],
+  templateUrl: './usuario-component.html',
 })
 export class UsuarioComponent implements OnInit {
   @ViewChild('dt') dt: any;
@@ -29,7 +38,7 @@ export class UsuarioComponent implements OnInit {
   estadosFiltro = [
     { label: 'Todos', value: null },
     { label: 'Activo', value: 1 },
-    { label: 'Inactivo', value: 0 }
+    { label: 'Inactivo', value: 0 },
   ];
 
   perfilesFiltro: { label: string; value: string | null }[] = [];
@@ -39,8 +48,19 @@ export class UsuarioComponent implements OnInit {
 
   modalVisible = false;
   editando = false;
-  formUsuario: { id?: number; nombre: string; usuario: string; clave: string; correo: string; perfil: Perfil | null } = {
-    nombre: '', usuario: '', clave: '', correo: '', perfil: null
+  formUsuario: {
+    id?: number;
+    nombre: string;
+    usuario: string;
+    clave: string;
+    correo: string;
+    perfil: Perfil | null;
+  } = {
+    nombre: '',
+    usuario: '',
+    clave: '',
+    correo: '',
+    perfil: null,
   };
   perfiles: Perfil[] = [];
 
@@ -53,8 +73,9 @@ export class UsuarioComponent implements OnInit {
   constructor(
     private usuarioService: UsuarioService,
     private loaderService: LoaderService,
-    private cdr: ChangeDetectorRef
-  ) { }
+    private cdr: ChangeDetectorRef,
+    private confirmationService: ConfirmationService
+  ) {}
 
   ngOnInit(): void {
     this.obtenerUsuarios();
@@ -68,18 +89,20 @@ export class UsuarioComponent implements OnInit {
         this.isSorted = null;
         this.perfilesFiltro = [
           { label: 'Todos', value: null },
-          ...Array.from(new Set(data.map(u => u.perfil?.nombre).filter(Boolean))).map(nombre => ({
-            label: nombre,
-            value: nombre
-          }))
+          ...Array.from(new Set(data.map((u) => u.perfil?.nombre).filter(Boolean))).map(
+            (nombre) => ({
+              label: nombre,
+              value: nombre,
+            }),
+          ),
         ];
         this.loaderService.hide();
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
       error: (err) => {
         console.error(err);
         this.loaderService.hide();
-      }
+      },
     });
   }
 
@@ -96,7 +119,9 @@ export class UsuarioComponent implements OnInit {
       this.resetting = true;
       this.aplicarFiltros();
       this.dt.reset();
-      setTimeout(() => { this.resetting = false; }, 0);
+      setTimeout(() => {
+        this.resetting = false;
+      }, 0);
     }
   }
 
@@ -117,9 +142,9 @@ export class UsuarioComponent implements OnInit {
 
   aplicarFiltros(): void {
     this.isSorted = null;
-    this.filteredUsuarios = this.usuarios.filter(user => {
-      const coincideNombre = !this.filtroNombre ||
-        user.nombre.toLowerCase().includes(this.filtroNombre.toLowerCase());
+    this.filteredUsuarios = this.usuarios.filter((user) => {
+      const coincideNombre =
+        !this.filtroNombre || user.nombre.toLowerCase().includes(this.filtroNombre.toLowerCase());
       const coincideEstado = this.filtroEstado === null || user.estado === this.filtroEstado;
       const coincidePerfil = !this.filtroPerfil || user.perfil?.nombre === this.filtroPerfil;
       return coincideNombre && coincideEstado && coincidePerfil;
@@ -142,19 +167,36 @@ export class UsuarioComponent implements OnInit {
         usuario: usuario.usuario,
         clave: '',
         correo: usuario.correo,
-        perfil: usuario.perfil
+        perfil: usuario.perfil,
       };
     } else {
       this.editando = false;
       this.formUsuario = { nombre: '', usuario: '', clave: '', correo: '', perfil: null };
     }
-    this.modalVisible = true;
+    Promise.resolve().then(() => {
+      this.modalVisible = true;
+      this.cdr.markForCheck();
+    });
     this.usuarioService.listarPerfiles().subscribe({
       next: (perfiles) => {
         this.perfiles = perfiles;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
-      error: () => {}
+      error: () => {},
+    });
+  }
+
+  cerrarModal(): void {
+    Promise.resolve().then(() => {
+      this.modalVisible = false;
+      this.cdr.markForCheck();
+    });
+  }
+
+  cerrarModal2FA(): void {
+    Promise.resolve().then(() => {
+      this.modal2FAVisible = false;
+      this.cdr.markForCheck();
     });
   }
 
@@ -163,7 +205,7 @@ export class UsuarioComponent implements OnInit {
       nombre: this.formUsuario.nombre,
       usuario: this.formUsuario.usuario,
       correo: this.formUsuario.correo,
-      perfil: this.formUsuario.perfil
+      perfil: this.formUsuario.perfil,
     };
     if (this.editando) {
       payload.id = this.formUsuario.id;
@@ -176,24 +218,37 @@ export class UsuarioComponent implements OnInit {
 
     this.usuarioService.guardarUsuario(payload).subscribe({
       next: () => {
-        this.modalVisible = false;
+        this.cerrarModal();
         this.obtenerUsuarios();
       },
-      error: (err) => console.error(err)
+      error: (err) => console.error(err),
     });
   }
 
   toggleEstado(id: number): void {
     this.usuarioService.cambiarEstado(id).subscribe({
       next: () => this.obtenerUsuarios(),
-      error: (err) => console.error(err)
+      error: (err) => console.error(err),
     });
   }
 
   eliminarUsuario(id: number): void {
-    if (confirm('¿Estás seguro de que deseas eliminar este usuario?')) {
-      this.usuarioService.eliminarUsuario(id).subscribe(() => this.obtenerUsuarios());
-    }
+    this.confirmationService.confirm({
+      message: '¿Estás seguro de que deseas eliminar este usuario?',
+      header: 'Confirmar Eliminación',
+      icon: 'pi pi-exclamation-triangle',
+
+      // Estilos de botones de PrimeNG
+      acceptLabel: 'Sí, eliminar',
+      acceptButtonStyleClass: 'p-button-danger p-button-text',
+      rejectLabel: 'Cancelar',
+      rejectButtonStyleClass: 'p-button-secondary p-button-text',
+
+      // Acción si el usuario acepta
+      accept: () => {
+        this.usuarioService.eliminarUsuario(id).subscribe(() => this.obtenerUsuarios());
+      },
+    });
   }
 
   abrirModal2FA(usuario: Usuario): void {
@@ -201,7 +256,10 @@ export class UsuarioComponent implements OnInit {
     this.qrCodeSrc = '';
     this.secretKey = '';
     this.codigo2FA = '';
-    this.modal2FAVisible = true;
+    Promise.resolve().then(() => {
+      this.modal2FAVisible = true;
+      this.cdr.markForCheck();
+    });
     this.generar2FA();
   }
 
@@ -211,24 +269,26 @@ export class UsuarioComponent implements OnInit {
       next: (res) => {
         this.qrCodeSrc = (res as any).qrCode || (res as any).qrCodeUri || '';
         this.secretKey = (res as any).secret || '';
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
-      error: (err) => console.error(err)
+      error: (err) => console.error(err),
     });
   }
 
   verificar2FA(): void {
     if (!this.usuario2FAId || !this.codigo2FA || !this.secretKey) return;
-    this.usuarioService.verificar2FA({
-      id: this.usuario2FAId,
-      codigo: this.codigo2FA,
-      secreto: this.secretKey
-    }).subscribe({
-      next: () => {
-        this.modal2FAVisible = false;
-        this.obtenerUsuarios();
-      },
-      error: (err) => console.error(err)
-    });
+    this.usuarioService
+      .verificar2FA({
+        id: this.usuario2FAId,
+        codigo: this.codigo2FA,
+        secreto: this.secretKey,
+      })
+      .subscribe({
+        next: () => {
+          this.cerrarModal2FA();
+          this.obtenerUsuarios();
+        },
+        error: (err) => console.error(err),
+      });
   }
 }

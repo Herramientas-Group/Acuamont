@@ -1,20 +1,29 @@
-import { Component, OnInit, ChangeDetectorRef, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TableModule } from 'primeng/table';
 import { SelectModule } from 'primeng/select';
 import { InputTextModule } from 'primeng/inputtext';
 import { DialogModule } from 'primeng/dialog';
-import { SortEvent } from 'primeng/api';
+import { ConfirmationService, SortEvent } from 'primeng/api';
 import { Proveedor } from '../../../shared/interfaces/proveedor';
 import { ProveedoresService } from '../../../core/services/proveedores-service';
 import { LoaderService } from '../../../core/services/loader-service';
+import { ConfirmDialog } from 'primeng/confirmdialog';
 
 @Component({
   selector: 'app-proveedores-component',
   standalone: true,
-  imports: [CommonModule, FormsModule, TableModule, SelectModule, InputTextModule, DialogModule],
-  templateUrl: './proveedores-component.html'
+  imports: [
+    CommonModule,
+    FormsModule,
+    TableModule,
+    SelectModule,
+    InputTextModule,
+    DialogModule,
+    ConfirmDialog,
+  ],
+  templateUrl: './proveedores-component.html',
 })
 export class ProveedoresComponent implements OnInit {
   @ViewChild('dt') dt: any;
@@ -28,7 +37,7 @@ export class ProveedoresComponent implements OnInit {
   estadosFiltro = [
     { label: 'Todos', value: null },
     { label: 'Activo', value: 1 },
-    { label: 'Inactivo', value: 0 }
+    { label: 'Inactivo', value: 0 },
   ];
 
   isSorted: boolean | null = null;
@@ -42,8 +51,9 @@ export class ProveedoresComponent implements OnInit {
   constructor(
     private proveedoresService: ProveedoresService,
     private loaderService: LoaderService,
-    private cdr: ChangeDetectorRef
-  ) { }
+    private confirmationService: ConfirmationService,
+    private cdr: ChangeDetectorRef,
+  ) {}
 
   ngOnInit(): void {
     this.obtenerProveedores();
@@ -56,12 +66,13 @@ export class ProveedoresComponent implements OnInit {
         this.filteredProveedores = [...data];
         this.isSorted = null;
         this.loaderService.hide();
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
       error: (err) => {
         console.error(err);
         this.loaderService.hide();
-      }
+        this.cdr.markForCheck();
+      },
     });
   }
 
@@ -104,9 +115,9 @@ export class ProveedoresComponent implements OnInit {
 
   aplicarFiltros(): void {
     this.isSorted = null;
-    this.filteredProveedores = this.proveedores.filter(p => {
-      const coincideNombre = !this.filtroNombre ||
-        p.nombre.toLowerCase().includes(this.filtroNombre.toLowerCase());
+    this.filteredProveedores = this.proveedores.filter((p) => {
+      const coincideNombre =
+        !this.filtroNombre || p.nombre.toLowerCase().includes(this.filtroNombre.toLowerCase());
       const coincideEstado = this.filtroEstado === null || p.estado === this.filtroEstado;
       return coincideNombre && coincideEstado;
     });
@@ -126,7 +137,19 @@ export class ProveedoresComponent implements OnInit {
       this.editando = false;
       this.formProveedor = { nombre: '', documento: '', telefono: '', correo: '', estado: 1 };
     }
-    this.modalVisible = true;
+    // ✅ Diferir la apertura del dialog para que PrimeNG no colisione con el ciclo actual
+    Promise.resolve().then(() => {
+      this.modalVisible = true;
+      this.cdr.markForCheck();
+    });
+  }
+
+  cerrarModal(): void {
+    // ✅ Diferir el cierre para evitar el conflicto con [(visible)] de PrimeNG
+    Promise.resolve().then(() => {
+      this.modalVisible = false;
+      this.cdr.markForCheck();
+    });
   }
 
   buscarDocumento(): void {
@@ -142,10 +165,12 @@ export class ProveedoresComponent implements OnInit {
           this.formProveedor.correo = res.data.correo;
         }
         this.buscandoDocumento = false;
+        this.cdr.markForCheck();
       },
       error: () => {
         this.buscandoDocumento = false;
-      }
+        this.cdr.markForCheck();
+      },
     });
   }
 
@@ -154,26 +179,38 @@ export class ProveedoresComponent implements OnInit {
 
     this.proveedoresService.guardarProveedor(this.formProveedor).subscribe({
       next: () => {
-        this.modalVisible = false;
+        this.cerrarModal();
         this.obtenerProveedores();
       },
-      error: (err) => console.error(err)
+      error: (err) => console.error(err),
     });
   }
 
   eliminarProveedor(id: number): void {
-    if (confirm('¿Estás seguro de eliminar este proveedor?')) {
-      this.proveedoresService.eliminarProveedor(id).subscribe({
-        next: () => this.obtenerProveedores(),
-        error: (err) => console.error(err)
-      });
-    }
+    this.confirmationService.confirm({
+      message: `¿Estás seguro de eliminar al proveedor con ID # ${id}?`, // Ajustado el mensaje
+      header: 'Eliminar Proveedor',
+      icon: 'pi pi-exclamation-triangle',
+
+      acceptLabel: 'Sí, eliminar',
+      acceptButtonStyleClass: 'p-button-danger p-button-text',
+
+      rejectLabel: 'Cancelar',
+      rejectButtonStyleClass: 'p-button-secondary p-button-text',
+
+      accept: () => {
+        this.proveedoresService.eliminarProveedor(id).subscribe({
+          next: () => this.obtenerProveedores(),
+          error: (err) => console.error(err),
+        });
+      },
+    });
   }
 
   toggleEstado(id: number): void {
     this.proveedoresService.cambiarEstado(id).subscribe({
       next: () => this.obtenerProveedores(),
-      error: (err) => console.error(err)
+      error: (err) => console.error(err),
     });
   }
 }

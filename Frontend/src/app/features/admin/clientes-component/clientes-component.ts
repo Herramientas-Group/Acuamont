@@ -5,16 +5,26 @@ import { TableModule } from 'primeng/table';
 import { SelectModule } from 'primeng/select';
 import { InputTextModule } from 'primeng/inputtext';
 import { DialogModule } from 'primeng/dialog';
-import { SortEvent } from 'primeng/api';
+import { ConfirmationService, SortEvent } from 'primeng/api';
 import { Cliente } from '../../../shared/interfaces/cliente';
 import { ClientesService } from '../../../core/services/clientes-service';
 import { LoaderService } from '../../../core/services/loader-service';
+import { ConfirmDialog } from 'primeng/confirmdialog';
 
 @Component({
   selector: 'app-clientes-component',
   standalone: true,
-  imports: [CommonModule, FormsModule, TableModule, SelectModule, InputTextModule, DialogModule],
-  templateUrl: './clientes-component.html'
+  imports: [
+    CommonModule,
+    FormsModule,
+    TableModule,
+    SelectModule,
+    InputTextModule,
+    DialogModule,
+    ConfirmDialog,
+  ],
+  templateUrl: './clientes-component.html',
+  providers: [ConfirmationService],
 })
 export class ClientesComponent implements OnInit {
   @ViewChild('dt') dt: any;
@@ -28,7 +38,7 @@ export class ClientesComponent implements OnInit {
   estadosFiltro = [
     { label: 'Todos', value: null },
     { label: 'Activo', value: 1 },
-    { label: 'Inactivo', value: 0 }
+    { label: 'Inactivo', value: 0 },
   ];
 
   isSorted: boolean | null = null;
@@ -42,8 +52,9 @@ export class ClientesComponent implements OnInit {
   constructor(
     private clientesService: ClientesService,
     private loaderService: LoaderService,
-    private cdr: ChangeDetectorRef
-  ) { }
+    private cdr: ChangeDetectorRef,
+    private confirmationService: ConfirmationService,
+  ) {}
 
   ngOnInit(): void {
     this.obtenerClientes();
@@ -56,12 +67,13 @@ export class ClientesComponent implements OnInit {
         this.filteredClientes = [...data];
         this.isSorted = null;
         this.loaderService.hide();
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
       error: (err) => {
         console.error(err);
         this.loaderService.hide();
-      }
+        this.cdr.markForCheck();
+      },
     });
   }
 
@@ -104,9 +116,9 @@ export class ClientesComponent implements OnInit {
 
   aplicarFiltros(): void {
     this.isSorted = null;
-    this.filteredClientes = this.clientes.filter(c => {
-      const coincideNombre = !this.filtroNombre ||
-        c.nombre.toLowerCase().includes(this.filtroNombre.toLowerCase());
+    this.filteredClientes = this.clientes.filter((c) => {
+      const coincideNombre =
+        !this.filtroNombre || c.nombre.toLowerCase().includes(this.filtroNombre.toLowerCase());
       const coincideEstado = this.filtroEstado === null || c.estado === this.filtroEstado;
       return coincideNombre && coincideEstado;
     });
@@ -126,7 +138,17 @@ export class ClientesComponent implements OnInit {
       this.editando = false;
       this.formCliente = { nombre: '', documento: '', telefono: '', correo: '', estado: 1 };
     }
-    this.modalVisible = true;
+    Promise.resolve().then(() => {
+      this.modalVisible = true;
+      this.cdr.markForCheck();
+    });
+  }
+
+  cerrarModal(): void {
+    Promise.resolve().then(() => {
+      this.modalVisible = false;
+      this.cdr.markForCheck();
+    });
   }
 
   buscarDocumento(): void {
@@ -142,10 +164,12 @@ export class ClientesComponent implements OnInit {
           this.formCliente.correo = res.data.correo;
         }
         this.buscandoDocumento = false;
+        this.cdr.markForCheck();
       },
       error: () => {
         this.buscandoDocumento = false;
-      }
+        this.cdr.markForCheck();
+      },
     });
   }
 
@@ -154,26 +178,39 @@ export class ClientesComponent implements OnInit {
 
     this.clientesService.guardarCliente(this.formCliente).subscribe({
       next: () => {
-        this.modalVisible = false;
+        this.cerrarModal();
         this.obtenerClientes();
       },
-      error: (err) => console.error(err)
+      error: (err) => console.error(err),
     });
   }
 
   eliminarCliente(id: number): void {
-    if (confirm('¿Estás seguro de eliminar este cliente?')) {
-      this.clientesService.eliminarCliente(id).subscribe({
-        next: () => this.obtenerClientes(),
-        error: (err) => console.error(err)
-      });
-    }
+    this.confirmationService.confirm({
+      message: '¿Estás seguro de eliminar este cliente?',
+      header: 'Confirmar Eliminación',
+      icon: 'pi pi-exclamation-triangle',
+
+      // Estilos para los botones
+      acceptLabel: 'Sí, eliminar',
+      acceptButtonStyleClass: 'p-button-danger p-button-text',
+      rejectLabel: 'Cancelar',
+      rejectButtonStyleClass: 'p-button-secondary p-button-text',
+
+      // Acción si el usuario confirma
+      accept: () => {
+        this.clientesService.eliminarCliente(id).subscribe({
+          next: () => this.obtenerClientes(),
+          error: (err) => console.error(err),
+        });
+      },
+    });
   }
 
   toggleEstado(id: number): void {
     this.clientesService.cambiarEstado(id).subscribe({
       next: () => this.obtenerClientes(),
-      error: (err) => console.error(err)
+      error: (err) => console.error(err),
     });
   }
 }

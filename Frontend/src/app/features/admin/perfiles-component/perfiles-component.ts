@@ -5,15 +5,24 @@ import { TableModule } from 'primeng/table';
 import { SelectModule } from 'primeng/select';
 import { InputTextModule } from 'primeng/inputtext';
 import { DialogModule } from 'primeng/dialog';
-import { SortEvent } from 'primeng/api';
+import { ConfirmationService, SortEvent } from 'primeng/api';
 import { Perfil, Opcion } from '../../../shared/interfaces/perfil';
 import { PerfilService } from '../../../core/services/perfil-service';
 import { LoaderService } from '../../../core/services/loader-service';
+import { ConfirmDialog } from 'primeng/confirmdialog';
 
 @Component({
   selector: 'app-perfiles-component',
   standalone: true,
-  imports: [CommonModule, FormsModule, TableModule, SelectModule, InputTextModule, DialogModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    TableModule,
+    SelectModule,
+    InputTextModule,
+    DialogModule,
+    ConfirmDialog,
+  ],
   templateUrl: './perfiles-component.html',
 })
 export class PerfilesComponent implements OnInit {
@@ -28,7 +37,7 @@ export class PerfilesComponent implements OnInit {
   estadosFiltro = [
     { label: 'Todos', value: null },
     { label: 'Activo', value: 1 },
-    { label: 'Inactivo', value: 0 }
+    { label: 'Inactivo', value: 0 },
   ];
 
   isSorted: boolean | null = null;
@@ -37,7 +46,8 @@ export class PerfilesComponent implements OnInit {
   modalVisible = false;
   editando = false;
   formPerfil: { id?: number; nombre: string; descripcion: string } = {
-    nombre: '', descripcion: ''
+    nombre: '',
+    descripcion: '',
   };
 
   modalPermisosVisible = false;
@@ -49,8 +59,9 @@ export class PerfilesComponent implements OnInit {
   constructor(
     private perfilService: PerfilService,
     private loaderService: LoaderService,
-    private cdr: ChangeDetectorRef
-  ) { }
+    private cdr: ChangeDetectorRef,
+    private confirmationService: ConfirmationService,
+  ) {}
 
   ngOnInit(): void {
     this.obtenerPerfiles();
@@ -63,12 +74,13 @@ export class PerfilesComponent implements OnInit {
         this.filteredPerfiles = [...data];
         this.isSorted = null;
         this.loaderService.hide();
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
       error: (err) => {
         console.error(err);
         this.loaderService.hide();
-      }
+        this.cdr.markForCheck();
+      },
     });
   }
 
@@ -85,7 +97,9 @@ export class PerfilesComponent implements OnInit {
       this.resetting = true;
       this.aplicarFiltros();
       this.dt.reset();
-      setTimeout(() => { this.resetting = false; }, 0);
+      setTimeout(() => {
+        this.resetting = false;
+      }, 0);
     }
   }
 
@@ -106,9 +120,9 @@ export class PerfilesComponent implements OnInit {
 
   aplicarFiltros(): void {
     this.isSorted = null;
-    this.filteredPerfiles = this.perfiles.filter(p => {
-      const coincideNombre = !this.filtroNombre ||
-        p.nombre.toLowerCase().includes(this.filtroNombre.toLowerCase());
+    this.filteredPerfiles = this.perfiles.filter((p) => {
+      const coincideNombre =
+        !this.filtroNombre || p.nombre.toLowerCase().includes(this.filtroNombre.toLowerCase());
       const coincideEstado = this.filtroEstado === null || p.estado === this.filtroEstado;
       return coincideNombre && coincideEstado;
     });
@@ -126,43 +140,70 @@ export class PerfilesComponent implements OnInit {
       this.formPerfil = {
         id: perfil.id,
         nombre: perfil.nombre,
-        descripcion: perfil.descripcion || ''
+        descripcion: perfil.descripcion || '',
       };
     } else {
       this.editando = false;
       this.formPerfil = { nombre: '', descripcion: '' };
     }
-    this.modalVisible = true;
+    Promise.resolve().then(() => {
+      this.modalVisible = true;
+      this.cdr.markForCheck();
+    });
+  }
+
+  cerrarModal(): void {
+    Promise.resolve().then(() => {
+      this.modalVisible = false;
+      this.cdr.markForCheck();
+    });
   }
 
   guardarPerfil(): void {
     if (!this.formPerfil.nombre.trim()) return;
     this.perfilService.guardarPerfil(this.formPerfil).subscribe({
       next: () => {
-        this.modalVisible = false;
+        this.cerrarModal();
         this.obtenerPerfiles();
       },
-      error: (err) => console.error(err)
+      error: (err) => console.error(err),
     });
   }
 
   toggleEstado(id: number): void {
     this.perfilService.cambiarEstado(id).subscribe({
       next: () => this.obtenerPerfiles(),
-      error: (err) => console.error(err)
+      error: (err) => console.error(err),
     });
   }
 
   eliminarPerfil(id: number): void {
-    if (confirm('¿Estás seguro de eliminar este perfil?')) {
-      this.perfilService.eliminarPerfil(id).subscribe({
-        next: () => this.obtenerPerfiles(),
-        error: (err) => {
-          console.error(err);
-          alert(err.error?.message || 'No se puede eliminar el perfil porque tiene usuarios activos asignados.');
-        }
-      });
-    }
+    this.confirmationService.confirm({
+      message: '¿Estás seguro de eliminar este perfil?',
+      header: 'Confirmar Eliminación',
+      icon: 'pi pi-exclamation-triangle',
+
+      // Estilos de botones de PrimeNG
+      acceptLabel: 'Sí, eliminar',
+      acceptButtonStyleClass: 'p-button-danger p-button-text',
+      rejectLabel: 'Cancelar',
+      rejectButtonStyleClass: 'p-button-secondary p-button-text',
+
+      // Acción si el usuario acepta
+      accept: () => {
+        this.perfilService.eliminarPerfil(id).subscribe({
+          next: () => this.obtenerPerfiles(),
+          error: (err) => {
+            console.error(err);
+            // Mantenemos tu alert nativo para el error
+            alert(
+              err.error?.message ||
+                'No se puede eliminar el perfil porque tiene usuarios activos asignados.',
+            );
+          },
+        });
+      },
+    });
   }
 
   abrirModalPermisos(perfil: Perfil): void {
@@ -170,20 +211,23 @@ export class PerfilesComponent implements OnInit {
     this.perfilNombrePermisos = perfil.nombre;
     this.opciones = [];
     this.opcionesSeleccionadas = new Set();
-    this.modalPermisosVisible = true;
+    Promise.resolve().then(() => {
+      this.modalPermisosVisible = true;
+      this.cdr.markForCheck();
+    });
     this.perfilService.listarOpciones().subscribe({
       next: (opciones) => {
         this.opciones = opciones;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
         this.perfilService.obtenerPerfil(perfil.id!).subscribe({
           next: (data) => {
             this.opcionesSeleccionadas = new Set<number>(data.opciones || data.opcionIds || []);
-            this.cdr.detectChanges();
+            this.cdr.markForCheck();
           },
-          error: () => {}
+          error: () => {},
         });
       },
-      error: () => {}
+      error: () => {},
     });
   }
 
@@ -195,18 +239,25 @@ export class PerfilesComponent implements OnInit {
     }
   }
 
+  cerrarModalPermisos(): void {
+    Promise.resolve().then(() => {
+      this.modalPermisosVisible = false;
+      this.cdr.markForCheck();
+    });
+  }
+
   guardarPermisos(): void {
     if (!this.perfilIdPermisos) return;
     const payload = {
       id: this.perfilIdPermisos,
-      opciones: Array.from(this.opcionesSeleccionadas).map(id => ({ id }))
+      opciones: Array.from(this.opcionesSeleccionadas).map((id) => ({ id })),
     };
     this.perfilService.guardarPerfil(payload).subscribe({
       next: () => {
-        this.modalPermisosVisible = false;
+        this.cerrarModalPermisos();
         this.obtenerPerfiles();
       },
-      error: (err) => console.error(err)
+      error: (err) => console.error(err),
     });
   }
 }

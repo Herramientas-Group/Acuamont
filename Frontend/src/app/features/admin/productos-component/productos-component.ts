@@ -6,17 +6,27 @@ import { SelectModule } from 'primeng/select';
 import { InputTextModule } from 'primeng/inputtext';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { DialogModule } from 'primeng/dialog';
-import { SortEvent } from 'primeng/api';
+import { ConfirmationService, SortEvent } from 'primeng/api';
 import { Producto } from '../../../shared/interfaces/producto';
 import { Categoria } from '../../../shared/interfaces/categoria';
 import { ProductoService } from '../../../core/services/producto-service';
 import { LoaderService } from '../../../core/services/loader-service';
+import { ConfirmDialog } from 'primeng/confirmdialog';
 
 @Component({
   selector: 'app-productos-component',
   standalone: true,
-  imports: [CommonModule, FormsModule, TableModule, SelectModule, InputTextModule, InputNumberModule, DialogModule],
-  templateUrl: './productos-component.html'
+  imports: [
+    CommonModule,
+    FormsModule,
+    TableModule,
+    SelectModule,
+    InputTextModule,
+    InputNumberModule,
+    DialogModule,
+    ConfirmDialog,
+  ],
+  templateUrl: './productos-component.html',
 })
 export class ProductosComponent implements OnInit {
   @ViewChild('dt') dt: any;
@@ -31,7 +41,7 @@ export class ProductosComponent implements OnInit {
   estadosFiltro = [
     { label: 'Todos', value: null },
     { label: 'Activo', value: 1 },
-    { label: 'Inactivo', value: 0 }
+    { label: 'Inactivo', value: 0 },
   ];
 
   categoriasFiltro: { label: string; value: number | null }[] = [];
@@ -49,7 +59,7 @@ export class ProductosComponent implements OnInit {
     precioVenta: 0,
     stock: 0,
     stockSeguridad: 0,
-    id_categoria: null as number | null
+    id_categoria: null as number | null,
   };
   nuevasImagenes: File[] = [];
   imagenesPreview: string[] = [];
@@ -59,8 +69,9 @@ export class ProductosComponent implements OnInit {
   constructor(
     private productoService: ProductoService,
     private loaderService: LoaderService,
-    private cdr: ChangeDetectorRef
-  ) { }
+    private cdr: ChangeDetectorRef,
+    private confirmationService: ConfirmationService,
+  ) {}
 
   ngOnInit(): void {
     this.obtenerProductos();
@@ -73,22 +84,23 @@ export class ProductosComponent implements OnInit {
         this.filteredProductos = [...data];
         this.isSorted = null;
         this.loaderService.hide();
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
       error: (err) => {
         console.error(err);
         this.loaderService.hide();
-      }
+        this.cdr.markForCheck();
+      },
     });
     this.productoService.listarCategoriasActivas().subscribe({
       next: (cats) => {
         this.categoriasFiltro = [
           { label: 'Todos', value: null },
-          ...cats.map(c => ({ label: c.nombre, value: c.id as number }))
+          ...cats.map((c) => ({ label: c.nombre, value: c.id as number })),
         ];
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
-      error: (err) => console.error(err)
+      error: (err) => console.error(err),
     });
   }
 
@@ -131,11 +143,12 @@ export class ProductosComponent implements OnInit {
 
   aplicarFiltros(): void {
     this.isSorted = null;
-    this.filteredProductos = this.productos.filter(p => {
-      const coincideNombre = !this.filtroNombre ||
-        p.nombre.toLowerCase().includes(this.filtroNombre.toLowerCase());
+    this.filteredProductos = this.productos.filter((p) => {
+      const coincideNombre =
+        !this.filtroNombre || p.nombre.toLowerCase().includes(this.filtroNombre.toLowerCase());
       const coincideEstado = this.filtroEstado === null || p.estado === this.filtroEstado;
-      const coincideCategoria = this.filtroCategoria === null || p.categoria?.id === this.filtroCategoria;
+      const coincideCategoria =
+        this.filtroCategoria === null || p.categoria?.id === this.filtroCategoria;
       return coincideNombre && coincideEstado && coincideCategoria;
     });
   }
@@ -178,18 +191,37 @@ export class ProductosComponent implements OnInit {
         precioVenta: producto.precioVenta,
         stock: producto.stock,
         stockSeguridad: producto.stockSeguridad,
-        id_categoria: producto.categoria?.id ?? null
+        id_categoria: producto.categoria?.id ?? null,
       };
       this.imagenesExistentes = this.obtenerImagenes(producto);
     } else {
       this.editando = false;
-      this.formProducto = { id: null, nombre: '', descripcion: '', precioCompra: 0, precioVenta: 0, stock: 0, stockSeguridad: 0, id_categoria: null };
+      this.formProducto = {
+        id: null,
+        nombre: '',
+        descripcion: '',
+        precioCompra: 0,
+        precioVenta: 0,
+        stock: 0,
+        stockSeguridad: 0,
+        id_categoria: null,
+      };
       this.imagenesExistentes = [];
     }
     this.nuevasImagenes = [];
     this.imagenesPreview = [];
     this.imagenesAEliminar = [];
-    this.modalVisible = true;
+    Promise.resolve().then(() => {
+      this.modalVisible = true;
+      this.cdr.markForCheck();
+    });
+  }
+
+  cerrarModal(): void {
+    Promise.resolve().then(() => {
+      this.modalVisible = false;
+      this.cdr.markForCheck();
+    });
   }
 
   onFilesSelected(event: Event): void {
@@ -203,7 +235,7 @@ export class ProductosComponent implements OnInit {
       const reader = new FileReader();
       reader.onload = (e) => {
         this.imagenesPreview.push(e.target?.result as string);
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       };
       reader.readAsDataURL(file);
     }
@@ -219,9 +251,9 @@ export class ProductosComponent implements OnInit {
     if (this.formProducto.id != null) {
       this.productoService.eliminarImagen(this.formProducto.id, url).subscribe({
         next: () => {
-          this.imagenesExistentes = this.imagenesExistentes.filter(u => u !== url);
+          this.imagenesExistentes = this.imagenesExistentes.filter((u) => u !== url);
         },
-        error: (err) => console.error(err)
+        error: (err) => console.error(err),
       });
     }
   }
@@ -242,30 +274,43 @@ export class ProductosComponent implements OnInit {
       formData.append('id_categoria', this.formProducto.id_categoria.toString());
     }
 
-    this.nuevasImagenes.forEach(file => formData.append('imagenes', file));
+    this.nuevasImagenes.forEach((file) => formData.append('imagenes', file));
 
     this.productoService.guardarProducto(formData).subscribe({
       next: () => {
-        this.modalVisible = false;
+        this.cerrarModal();
         this.obtenerProductos();
       },
-      error: (err) => console.error(err)
+      error: (err) => console.error(err),
     });
   }
 
   eliminarProducto(id: number): void {
-    if (confirm('¿Estás seguro de eliminar este producto?')) {
-      this.productoService.eliminarProducto(id).subscribe({
-        next: () => this.obtenerProductos(),
-        error: (err) => console.error(err)
-      });
-    }
+    this.confirmationService.confirm({
+      message: '¿Estás seguro de eliminar este producto?',
+      header: 'Confirmar Eliminación',
+      icon: 'pi pi-exclamation-triangle',
+
+      // Estilos visuales de PrimeNG para los botones
+      acceptLabel: 'Sí, eliminar',
+      acceptButtonStyleClass: 'p-button-danger p-button-text',
+      rejectLabel: 'Cancelar',
+      rejectButtonStyleClass: 'p-button-secondary p-button-text',
+
+      // Ejecución si el usuario acepta
+      accept: () => {
+        this.productoService.eliminarProducto(id).subscribe({
+          next: () => this.obtenerProductos(),
+          error: (err) => console.error(err),
+        });
+      },
+    });
   }
 
   toggleEstado(id: number): void {
     this.productoService.cambiarEstado(id).subscribe({
       next: () => this.obtenerProductos(),
-      error: (err) => console.error(err)
+      error: (err) => console.error(err),
     });
   }
 }

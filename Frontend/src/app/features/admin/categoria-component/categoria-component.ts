@@ -5,16 +5,25 @@ import { TableModule } from 'primeng/table';
 import { SelectModule } from 'primeng/select';
 import { InputTextModule } from 'primeng/inputtext';
 import { DialogModule } from 'primeng/dialog';
-import { SortEvent } from 'primeng/api';
+import { ConfirmationService, SortEvent } from 'primeng/api';
 import { Categoria } from '../../../shared/interfaces/categoria';
 import { CategoriaService } from '../../../core/services/categoria-service';
 import { LoaderService } from '../../../core/services/loader-service';
+import { ConfirmDialog } from 'primeng/confirmdialog';
 
 @Component({
   selector: 'app-categoria-component',
   standalone: true,
-  imports: [CommonModule, FormsModule, TableModule, SelectModule, InputTextModule, DialogModule],
-  templateUrl: './categoria-component.html'
+  imports: [
+    CommonModule,
+    FormsModule,
+    TableModule,
+    SelectModule,
+    InputTextModule,
+    DialogModule,
+    ConfirmDialog,
+  ],
+  templateUrl: './categoria-component.html',
 })
 export class CategoriaComponent implements OnInit {
   @ViewChild('dt') dt: any;
@@ -28,7 +37,7 @@ export class CategoriaComponent implements OnInit {
   estadosFiltro = [
     { label: 'Todos', value: null },
     { label: 'Activo', value: 1 },
-    { label: 'Inactivo', value: 0 }
+    { label: 'Inactivo', value: 0 },
   ];
 
   isSorted: boolean | null = null;
@@ -41,8 +50,9 @@ export class CategoriaComponent implements OnInit {
   constructor(
     private categoriaService: CategoriaService,
     private loaderService: LoaderService,
-    private cdr: ChangeDetectorRef
-  ) { }
+    private cdr: ChangeDetectorRef,
+    private confirmationService: ConfirmationService,
+  ) {}
 
   ngOnInit(): void {
     this.obtenerCategorias();
@@ -55,12 +65,13 @@ export class CategoriaComponent implements OnInit {
         this.filteredCategorias = [...data];
         this.isSorted = null;
         this.loaderService.hide();
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
       error: (err) => {
         console.error(err);
         this.loaderService.hide();
-      }
+        this.cdr.markForCheck();
+      },
     });
   }
 
@@ -103,9 +114,9 @@ export class CategoriaComponent implements OnInit {
 
   aplicarFiltros(): void {
     this.isSorted = null;
-    this.filteredCategorias = this.categorias.filter(c => {
-      const coincideNombre = !this.filtroNombre ||
-        c.nombre.toLowerCase().includes(this.filtroNombre.toLowerCase());
+    this.filteredCategorias = this.categorias.filter((c) => {
+      const coincideNombre =
+        !this.filtroNombre || c.nombre.toLowerCase().includes(this.filtroNombre.toLowerCase());
       const coincideEstado = this.filtroEstado === null || c.estado === this.filtroEstado;
       return coincideNombre && coincideEstado;
     });
@@ -125,33 +136,56 @@ export class CategoriaComponent implements OnInit {
       this.editando = false;
       this.formCategoria = { nombre: '', estado: 1 };
     }
-    this.modalVisible = true;
+    Promise.resolve().then(() => {
+      this.modalVisible = true;
+      this.cdr.markForCheck();
+    });
+  }
+
+  cerrarModal(): void {
+    Promise.resolve().then(() => {
+      this.modalVisible = false;
+      this.cdr.markForCheck();
+    });
   }
 
   guardarCategoria(): void {
     if (!this.formCategoria.nombre?.trim()) return;
     this.categoriaService.guardarCategoria(this.formCategoria).subscribe({
       next: () => {
-        this.modalVisible = false;
+        this.cerrarModal();
         this.obtenerCategorias();
       },
-      error: (err) => console.error(err)
+      error: (err) => console.error(err),
     });
   }
 
   eliminarCategoria(id: number): void {
-    if (confirm('¿Estás seguro de eliminar esta categoría?')) {
-      this.categoriaService.eliminarCategoria(id).subscribe({
-        next: () => this.obtenerCategorias(),
-        error: (err) => console.error(err)
-      });
-    }
+    this.confirmationService.confirm({
+      message: '¿Estás seguro de eliminar esta categoría?',
+      header: 'Confirmar Eliminación',
+      icon: 'pi pi-exclamation-triangle',
+
+      // Estilos de botones para mantener la consistencia
+      acceptLabel: 'Sí, eliminar',
+      acceptButtonStyleClass: 'p-button-danger p-button-text',
+      rejectLabel: 'Cancelar',
+      rejectButtonStyleClass: 'p-button-secondary p-button-text',
+
+      // Acción en caso de éxito
+      accept: () => {
+        this.categoriaService.eliminarCategoria(id).subscribe({
+          next: () => this.obtenerCategorias(),
+          error: (err) => console.error(err),
+        });
+      },
+    });
   }
 
   toggleEstado(id: number): void {
     this.categoriaService.cambiarEstado(id).subscribe({
       next: () => this.obtenerCategorias(),
-      error: (err) => console.error(err)
+      error: (err) => console.error(err),
     });
   }
 }
