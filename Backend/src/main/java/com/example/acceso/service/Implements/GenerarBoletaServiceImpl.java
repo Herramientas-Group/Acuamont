@@ -14,6 +14,7 @@ import org.xhtmlrenderer.pdf.ITextRenderer;
 import java.io.ByteArrayOutputStream;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import jakarta.mail.internet.MimeMessage;
@@ -33,6 +34,7 @@ public class GenerarBoletaServiceImpl implements GenerarBoletaService {
     @Value("${mail.fromName}")
     private String mailFromName;
 
+    @Transactional(readOnly = true)
     public byte[] generarBoletaPdf(Long ventaId) throws Exception {
 
         Venta venta = ventaService.obtenerVenta(ventaId);
@@ -65,19 +67,16 @@ public class GenerarBoletaServiceImpl implements GenerarBoletaService {
         String correlativoFormateado = String.format("%09d", venta.getCorrelativo());
         String numeroBoleta = venta.getSerieComprobante().getSerie() + "-" + correlativoFormateado;
 
-        Context context = new Context();
-        context.setVariable("venta", venta);
+        byte[] pdfBytes = generarBoletaPdf(ventaId);
 
         MimeMessage message = mailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message, false, "UTF-8");
+        MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
         helper.setFrom(mailFrom, mailFromName);
         helper.setTo(correoCliente);
         helper.setSubject("Comprobante de Venta Acuamont: " + numeroBoleta);
-
-        String htmlBody = templateEngine.process("Boleta/plantilla_Comprobante", context);
-
-        helper.setText(htmlBody, true);
+        helper.setText("Adjuntamos su comprobante de venta en PDF.", false);
+        helper.addAttachment("boleta_" + numeroBoleta + ".pdf", new ByteArrayResource(pdfBytes));
 
         mailSender.send(message);
 

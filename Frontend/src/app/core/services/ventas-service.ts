@@ -51,22 +51,12 @@ export class VentasService {
     return this.http.get<Pago[]>(`${this.apiUrl}/pagos/${ventaId}`);
   }
 
-  descargarBoleta(ventaId: number): void {
-    this.http.get(`${this.apiUrl}/boleta/${ventaId}`, { responseType: 'blob' }).subscribe({
-      next: (blob) => {
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `boleta_${ventaId}.pdf`;
-        a.click();
-        window.URL.revokeObjectURL(url);
-      },
-      error: () => {}
-    });
+  descargarBoleta(ventaId: number): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/boleta/${ventaId}`, { responseType: 'blob' });
   }
 
   enviarBoletaCorreo(ventaId: number): Observable<any> {
-    return this.http.get(`${this.apiUrl}/envio-correo/${ventaId}`);
+    return this.http.post(`${this.apiUrl}/envio-correo/${ventaId}`, {});
   }
 
   registrarPago(pagosDTO: PagosDTO): Observable<any> {

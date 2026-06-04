@@ -8,14 +8,15 @@ import com.example.acceso.service.Interfaces.FormaPagoService;
 import com.example.acceso.service.Interfaces.GenerarBoletaService;
 import com.example.acceso.service.Interfaces.SerieComprobanteService;
 import com.example.acceso.service.Interfaces.VentaService;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -159,22 +160,22 @@ public class VentaController {
 
     @GetMapping("/api/boleta/{ventaId}")
     @PreAuthorize("hasAuthority('OPCION_8')")
-    public void descargarBoletaPDF(@PathVariable Long ventaId, HttpServletResponse response) {
+    public ResponseEntity<?> descargarBoletaPDF(@PathVariable Long ventaId) {
         try {
             byte[] pdfBytes = generarBoletaService.generarBoletaPdf(ventaId);
-            response.setContentType("application/pdf");
-            response.setHeader("Content-Disposition", "attachment; filename=\"boleta_" + ventaId + ".pdf\"");
-            try (OutputStream outputStream = response.getOutputStream()) {
-                outputStream.write(pdfBytes);
-                outputStream.flush();
-            }
+            ByteArrayResource resource = new ByteArrayResource(pdfBytes);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_PDF);
+            headers.setContentDispositionFormData("attachment", "boleta_" + ventaId + ".pdf");
+            return new ResponseEntity<>(resource, headers, HttpStatus.OK);
         } catch (Exception e) {
             log.error("Error generando boleta PDF", e);
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("success", false, "message", e.getMessage()));
         }
     }
 
-    @GetMapping("/api/envio-correo/{ventaid}")
+    @PostMapping("/api/envio-correo/{ventaid}")
     @PreAuthorize("hasAuthority('OPCION_8')")
     public ResponseEntity<?> enviarBoletaPorCorreo(@PathVariable Long ventaid) {
         Map<String, Object> response = new HashMap<>();
