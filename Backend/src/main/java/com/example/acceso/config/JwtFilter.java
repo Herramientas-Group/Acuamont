@@ -37,10 +37,11 @@ public class JwtFilter extends OncePerRequestFilter {
                 String username = jwtUtil.extraerUsername(token);
                 if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                     List<Integer> opcionIds = jwtUtil.extraerOpciones(token);
-                    log.debug("Opciones extraídas del token para '{}': {}", username, opcionIds);
                     List<SimpleGrantedAuthority> authorities = opcionIds != null
                             ? opcionIds.stream().map(id -> new SimpleGrantedAuthority("OPCION_" + id)).toList()
                             : List.of();
+                    log.debug("Usuario '{}' - opciones extraídas: {}, authorities generadas: {}",
+                            username, opcionIds, authorities);
 
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                             username, null, authorities);

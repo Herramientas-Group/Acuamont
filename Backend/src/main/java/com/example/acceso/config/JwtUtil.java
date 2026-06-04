@@ -4,6 +4,7 @@ import com.example.acceso.model.Usuario;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -13,6 +14,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
+@Slf4j
 @Component
 public class JwtUtil {
 
@@ -63,14 +65,27 @@ public class JwtUtil {
     }
 
     public List<Integer> extraerOpciones(String token) {
-        Object raw = getClaims(token).get("opciones");
-        if (raw instanceof List<?> list) {
-            return list.stream()
-                    .map(e -> e instanceof Number n ? n.intValue() : null)
-                    .filter(Objects::nonNull)
-                    .toList();
+        try {
+            Object raw = getClaims(token).get("opciones");
+            log.debug("Tipo de claim 'opciones': {}", raw != null ? raw.getClass().getName() : "null");
+            if (raw instanceof List<?> list) {
+                List<Integer> result = list.stream()
+                        .map(e -> {
+                            if (e instanceof Number n) return n.intValue();
+                            log.warn("Elemento no-Numeric en opciones: {} ({})", e, e != null ? e.getClass().getName() : "null");
+                            return null;
+                        })
+                        .filter(Objects::nonNull)
+                        .toList();
+                log.debug("Opciones extraídas: {}", result);
+                return result;
+            }
+            log.warn("Claim 'opciones' no es una Lista, tipo: {}", raw != null ? raw.getClass().getName() : "null");
+            return List.of();
+        } catch (Exception e) {
+            log.error("Error extrayendo opciones del token", e);
+            return List.of();
         }
-        return List.of();
     }
 
     public boolean validarToken(String token) {
