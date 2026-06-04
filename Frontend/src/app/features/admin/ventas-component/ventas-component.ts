@@ -8,8 +8,9 @@ import { InputNumberModule } from 'primeng/inputnumber';
 import { DialogModule } from 'primeng/dialog';
 import { AutoCompleteModule } from 'primeng/autocomplete';
 import { TagModule } from 'primeng/tag';
+import { ToastModule } from 'primeng/toast';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { SortEvent, ConfirmationService } from 'primeng/api';
+import { SortEvent, ConfirmationService, MessageService } from 'primeng/api';
 import { Venta, SerieComprobante, FormaPago, Cuota, Pago, VentaDTO, CuotasProgramadasDTO } from '../../../shared/interfaces/venta';
 import { Producto } from '../../../shared/interfaces/producto';
 import { VentasService } from '../../../core/services/ventas-service';
@@ -43,6 +44,7 @@ interface CuotaForm {
     DialogModule,
     AutoCompleteModule,
     TagModule,
+    ToastModule,
     ConfirmDialogModule,
   ],
   templateUrl: './ventas-component.html',
@@ -114,6 +116,7 @@ export class VentasComponent implements OnInit {
     private authService: AuthService,
     private loaderService: LoaderService,
     private confirmationService: ConfirmationService,
+    private messageService: MessageService,
     private cdr: ChangeDetectorRef,
   ) {}
 
@@ -444,13 +447,37 @@ export class VentasComponent implements OnInit {
   }
 
   descargarPDF(id: number): void {
-    this.ventasService.descargarBoleta(id);
+    this.loaderService.show();
+    this.ventasService.descargarBoleta(id).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `boleta_${id}.pdf`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+        this.loaderService.hide();
+        this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Boleta descargada correctamente' });
+      },
+      error: (err) => {
+        this.loaderService.hide();
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: err.error?.message || 'No se pudo descargar la boleta' });
+      },
+    });
   }
 
   enviarCorreo(event: Event, id: number): void {
     event.stopPropagation();
+    this.loaderService.show();
     this.ventasService.enviarBoletaCorreo(id).subscribe({
-      error: (err) => console.error(err),
+      next: (res) => {
+        this.loaderService.hide();
+        this.messageService.add({ severity: 'success', summary: 'Correo enviado', detail: res.message });
+      },
+      error: (err) => {
+        this.loaderService.hide();
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: err.error?.message || 'No se pudo enviar el correo' });
+      },
     });
   }
 
