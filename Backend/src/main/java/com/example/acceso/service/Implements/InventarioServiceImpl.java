@@ -1,7 +1,7 @@
 package com.example.acceso.service.Implements;
 
+import com.example.acceso.DTO.MovimientoProductoDTO;
 import com.example.acceso.model.TipoMovimiento;
-import com.example.acceso.model.Venta;
 import com.example.acceso.repository.TipoMovimientoRepository;
 import com.example.acceso.repository.VentaRepository;
 import com.example.acceso.service.Interfaces.InventarioService;
@@ -21,8 +21,17 @@ public class InventarioServiceImpl implements InventarioService {
     private final TipoMovimientoRepository tipoMovimeintoRepository;
 
     @Transactional(readOnly = true)
-    public List<Venta> listarMovimientosPorProducto(Long productoId) {
-        return ventaRepository.findVentasByProductoId(productoId);
+    public List<MovimientoProductoDTO> listarMovimientosPorProducto(Long productoId) {
+        return ventaRepository.findVentasByProductoId(productoId).stream()
+                .flatMap(v -> v.getDetalleVentas().stream()
+                        .map(d -> new MovimientoProductoDTO(
+                                v.getFecha(),
+                                v.getSerieComprobante().getSerie() + "-" + v.getCorrelativo(),
+                                d.getPrecioUnitario(),
+                                d.getCantidad(),
+                                d.getSubtotal()
+                        )))
+                .toList();
     }
 
     @Transactional(readOnly = true)

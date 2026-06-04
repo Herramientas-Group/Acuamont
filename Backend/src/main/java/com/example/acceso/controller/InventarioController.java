@@ -1,10 +1,10 @@
 package com.example.acceso.controller;
 
 import com.example.acceso.DTO.AjusteInventarioDTO;
+import com.example.acceso.DTO.MovimientoProductoDTO;
 import com.example.acceso.model.AjusteInventario;
 import com.example.acceso.model.Producto;
 import com.example.acceso.model.TipoMovimiento;
-import com.example.acceso.model.Venta;
 import com.example.acceso.service.Interfaces.AjusteInventarioService;
 import com.example.acceso.service.Interfaces.InventarioService;
 import com.example.acceso.service.Interfaces.ProductoService;
@@ -40,7 +40,7 @@ public class InventarioController {
     @GetMapping("/api/movimientos/{productoId}")
     @PreAuthorize("hasAuthority('OPCION_9')")
     public ResponseEntity<?> obtenerMovimientos(@PathVariable Long productoId) {
-        List<Venta> movimientos = inventarioService.listarMovimientosPorProducto(productoId);
+        List<MovimientoProductoDTO> movimientos = inventarioService.listarMovimientosPorProducto(productoId);
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
         response.put("data", movimientos);
