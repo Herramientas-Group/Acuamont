@@ -57,7 +57,7 @@ pipeline {
         stage('5. Ejecutar Tests') {
             steps {
                 dir('Backend') {
-                    bat 'mvnw.cmd test -B'
+                    bat 'mvnw test -DargLine="-XX:+EnableDynamicAgentLoading" -B'
                 }
             }
             post {
