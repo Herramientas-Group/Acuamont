@@ -1,0 +1,140 @@
+pipeline {
+    agent any
+
+    tools {
+        jdk 'Java21'
+    }
+
+    environment {
+        GITHUB_TOKEN = credentials('github-credential')
+        REPO_OWNER   = 'Herramientas-Group'
+        REPO_NAME    = 'Acuamont'
+    }
+
+    stages {
+        stage('1. Inicializar Estado') {
+            steps {
+                sh """
+                    curl -s -X POST -H "Authorization: token ${GITHUB_TOKEN}" \
+                    -H "Accept: application/vnd.github.v3+json" \
+                    https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/statuses/${env.GIT_COMMIT} \
+                    -d '{"state": "pending", "target_url": "${env.BUILD_URL}", "description": "Jenkins está ejecutando las pruebas...", "context": "CI / Jenkins Backend"}'
+                """
+            }
+        }
+
+        stage('2. Preparar Entorno') {
+            steps {
+                withCredentials([file(credentialsId: 'acuamont-env-file', variable: 'ENV_FILE')]) {
+                    script {
+                        readFile(ENV_FILE).eachLine { line ->
+                            def trimmed = line.trim()
+                            if (trimmed && !trimmed.startsWith('#') && trimmed.contains('=')) {
+                                def sepIndex = trimmed.indexOf('=')
+                                def key = trimmed.substring(0, sepIndex).trim()
+                                def value = trimmed.substring(sepIndex + 1).trim()
+                                env[key] = value
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('3. Instalar Dependencias') {
+            steps {
+                dir('Backend') {
+                    sh 'chmod +x mvnw'
+                    sh './mvnw dependency:resolve -B'
+                }
+            }
+        }
+
+        stage('4. Compilar') {
+            steps {
+                dir('Backend') {
+                    sh './mvnw compile -B'
+                }
+            }
+        }
+
+        stage('5. Ejecutar Tests') {
+            steps {
+                dir('Backend') {
+                    sh './mvnw test -B'
+                }
+            }
+            post {
+                always {
+                    junit allowEmptyResults: true, testResults: 'Backend/target/surefire-reports/*.xml'
+                }
+            }
+        }
+
+        stage('6. Empaquetar') {
+            steps {
+                dir('Backend') {
+                    sh './mvnw package -DskipTests -B'
+                }
+            }
+        }
+
+        stage('7. Archivar Artifact') {
+            steps {
+                archiveArtifacts artifacts: 'Backend/target/*.jar', fingerprint: true
+            }
+        }
+    }
+
+    post {
+        success {
+            sh """
+                curl -s -X POST -H "Authorization: token ${GITHUB_TOKEN}" \
+                -H "Accept: application/vnd.github.v3+json" \
+                https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/statuses/${env.GIT_COMMIT} \
+                -d '{"state": "success", "target_url": "${env.BUILD_URL}", "description": "Todos los tests pasaron exitosamente", "context": "CI / Jenkins Backend"}'
+            """
+            script {
+                if (env.CHANGE_ID) {
+                    sh """
+                        curl -s -X POST -H "Authorization: token ${GITHUB_TOKEN}" \
+                        -H "Accept: application/vnd.github.v3+json" \
+                        https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/issues/${env.CHANGE_ID}/comments \
+                        -d '{"body": "### 🚀 Reporte de Integración Continua\\n- **Estado:** EXITOSO ✅\\n- **Rama:** `${env.BRANCH_NAME}`\\n\\nTodas las pruebas unitarias y reglas de arquitectura de ArchUnit pasaron correctamente. El código es seguro para ser fusionado."}'
+                    """
+                    sh """
+                        curl -s -X POST -H "Authorization: token ${GITHUB_TOKEN}" \
+                        -H "Accept: application/vnd.github.v3+json" \
+                        https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/pulls/${env.CHANGE_ID}/reviews \
+                        -d '{"event": "APPROVE", "body": "✅ Todos los tests pasaron correctamente. Código listo para merge."}'
+                    """
+                }
+            }
+        }
+
+        failure {
+            sh """
+                curl -s -X POST -H "Authorization: token ${GITHUB_TOKEN}" \
+                -H "Accept: application/vnd.github.v3+json" \
+                https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/statuses/${env.GIT_COMMIT} \
+                -d '{"state": "failure", "target_url": "${env.BUILD_URL}", "description": "El build o los tests fallaron", "context": "CI / Jenkins Backend"}'
+            """
+            script {
+                if (env.CHANGE_ID) {
+                    sh """
+                        curl -s -X POST -H "Authorization: token ${GITHUB_TOKEN}" \
+                        -H "Accept: application/vnd.github.v3+json" \
+                        https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/issues/${env.CHANGE_ID}/comments \
+                        -d '{"body": "### ⚠️ ¡Alerta de Fallo en CI!\\n- **Estado:** FALLIDO ❌\\n- **Rama:** `${env.BRANCH_NAME}`\\n\\nEl pipeline se detuvo porque algunas pruebas fallaron o se rompieron las reglas de arquitectura de capas en el Backend. Por favor, revisa los logs de ejecución en Jenkins antes de reintentar."}'
+                    """
+                    sh """
+                        curl -s -X POST -H "Authorization: token ${GITHUB_TOKEN}" \
+                        -H "Accept: application/vnd.github.v3+json" \
+                        https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/pulls/${env.CHANGE_ID}/reviews \
+                        -d '{"event": "REQUEST_CHANGES", "body": "❌ Jenkins solicita cambios. Los tests fallaron. Revisar los logs y corregir antes de fusionar."}'
+                    """
+                }
+            }
+        }
+    }
+}
