@@ -14,7 +14,7 @@ pipeline {
     stages {
         stage('1. Inicializar Estado') {
             steps {
-                sh """
+                bat """
                     curl -s -X POST -H "Authorization: token ${GITHUB_TOKEN}" \
                     -H "Accept: application/vnd.github.v3+json" \
                     https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/statuses/${env.GIT_COMMIT} \
@@ -44,8 +44,8 @@ pipeline {
         stage('3. Instalar Dependencias') {
             steps {
                 dir('Backend') {
-                    sh 'chmod +x mvnw'
-                    sh './mvnw dependency:resolve -B'
+                    bat 'chmod +x mvnw'
+                    bat './mvnw dependency:resolve -B'
                 }
             }
         }
@@ -53,7 +53,7 @@ pipeline {
         stage('4. Compilar') {
             steps {
                 dir('Backend') {
-                    sh './mvnw compile -B'
+                    bat './mvnw compile -B'
                 }
             }
         }
@@ -61,7 +61,7 @@ pipeline {
         stage('5. Ejecutar Tests') {
             steps {
                 dir('Backend') {
-                    sh './mvnw test -B'
+                    bat './mvnw test -B'
                 }
             }
             post {
@@ -74,7 +74,7 @@ pipeline {
         stage('6. Empaquetar') {
             steps {
                 dir('Backend') {
-                    sh './mvnw package -DskipTests -B'
+                    bat './mvnw package -DskipTests -B'
                 }
             }
         }
@@ -88,7 +88,7 @@ pipeline {
 
     post {
         success {
-            sh """
+            bat """
                 curl -s -X POST -H "Authorization: token ${GITHUB_TOKEN}" \
                 -H "Accept: application/vnd.github.v3+json" \
                 https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/statuses/${env.GIT_COMMIT} \
@@ -96,13 +96,13 @@ pipeline {
             """
             script {
                 if (env.CHANGE_ID) {
-                    sh """
+                    bat """
                         curl -s -X POST -H "Authorization: token ${GITHUB_TOKEN}" \
                         -H "Accept: application/vnd.github.v3+json" \
                         https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/issues/${env.CHANGE_ID}/comments \
                         -d '{"body": "### 🚀 Reporte de Integración Continua\\n- **Estado:** EXITOSO ✅\\n- **Rama:** `${env.BRANCH_NAME}`\\n\\nTodas las pruebas unitarias y reglas de arquitectura de ArchUnit pasaron correctamente. El código es seguro para ser fusionado."}'
                     """
-                    sh """
+                    bat """
                         curl -s -X POST -H "Authorization: token ${GITHUB_TOKEN}" \
                         -H "Accept: application/vnd.github.v3+json" \
                         https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/pulls/${env.CHANGE_ID}/reviews \
@@ -113,7 +113,7 @@ pipeline {
         }
 
         failure {
-            sh """
+            bat """
                 curl -s -X POST -H "Authorization: token ${GITHUB_TOKEN}" \
                 -H "Accept: application/vnd.github.v3+json" \
                 https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/statuses/${env.GIT_COMMIT} \
@@ -121,13 +121,13 @@ pipeline {
             """
             script {
                 if (env.CHANGE_ID) {
-                    sh """
+                    bat """
                         curl -s -X POST -H "Authorization: token ${GITHUB_TOKEN}" \
                         -H "Accept: application/vnd.github.v3+json" \
                         https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/issues/${env.CHANGE_ID}/comments \
                         -d '{"body": "### ⚠️ ¡Alerta de Fallo en CI!\\n- **Estado:** FALLIDO ❌\\n- **Rama:** `${env.BRANCH_NAME}`\\n\\nEl pipeline se detuvo porque algunas pruebas fallaron o se rompieron las reglas de arquitectura de capas en el Backend. Por favor, revisa los logs de ejecución en Jenkins antes de reintentar."}'
                     """
-                    sh """
+                    bat """
                         curl -s -X POST -H "Authorization: token ${GITHUB_TOKEN}" \
                         -H "Accept: application/vnd.github.v3+json" \
                         https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/pulls/${env.CHANGE_ID}/reviews \
