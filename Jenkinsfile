@@ -15,10 +15,7 @@ pipeline {
         stage('1. Inicializar Estado') {
             steps {
                 bat """
-                    curl -s -X POST -H "Authorization: token ${GITHUB_TOKEN}" \
-                    -H "Accept: application/vnd.github.v3+json" \
-                    https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/statuses/${env.GIT_COMMIT} \
-                    -d '{"state": "pending", "target_url": "${env.BUILD_URL}", "description": "Jenkins está ejecutando las pruebas...", "context": "CI / Jenkins Backend"}'
+                    curl.exe -s -X POST -H "Authorization: token ${GITHUB_TOKEN}" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/statuses/${env.GIT_COMMIT} -d "{\"state\": \"pending\", \"target_url\": \"${env.BUILD_URL}\", \"description\": \"Jenkins esta ejecutando las pruebas...\", \"context\": \"CI / Jenkins Backend\"}"
                 """
             }
         }
@@ -44,8 +41,7 @@ pipeline {
         stage('3. Instalar Dependencias') {
             steps {
                 dir('Backend') {
-                    bat 'chmod +x mvnw'
-                    bat './mvnw dependency:resolve -B'
+                    bat 'mvnw.cmd dependency:resolve -B'
                 }
             }
         }
@@ -53,7 +49,7 @@ pipeline {
         stage('4. Compilar') {
             steps {
                 dir('Backend') {
-                    bat './mvnw compile -B'
+                    bat 'mvnw.cmd compile -B'
                 }
             }
         }
@@ -61,7 +57,7 @@ pipeline {
         stage('5. Ejecutar Tests') {
             steps {
                 dir('Backend') {
-                    bat './mvnw test -B'
+                    bat 'mvnw.cmd test -B'
                 }
             }
             post {
@@ -74,7 +70,7 @@ pipeline {
         stage('6. Empaquetar') {
             steps {
                 dir('Backend') {
-                    bat './mvnw package -DskipTests -B'
+                    bat 'mvnw.cmd package -DskipTests -B'
                 }
             }
         }
@@ -89,24 +85,15 @@ pipeline {
     post {
         success {
             bat """
-                curl -s -X POST -H "Authorization: token ${GITHUB_TOKEN}" \
-                -H "Accept: application/vnd.github.v3+json" \
-                https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/statuses/${env.GIT_COMMIT} \
-                -d '{"state": "success", "target_url": "${env.BUILD_URL}", "description": "Todos los tests pasaron exitosamente", "context": "CI / Jenkins Backend"}'
+                curl.exe -s -X POST -H "Authorization: token ${GITHUB_TOKEN}" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/statuses/${env.GIT_COMMIT} -d "{\"state\": \"success\", \"target_url\": \"${env.BUILD_URL}\", \"description\": \"Todos los tests pasaron exitosamente\", \"context\": \"CI / Jenkins Backend\"}"
             """
             script {
                 if (env.CHANGE_ID) {
                     bat """
-                        curl -s -X POST -H "Authorization: token ${GITHUB_TOKEN}" \
-                        -H "Accept: application/vnd.github.v3+json" \
-                        https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/issues/${env.CHANGE_ID}/comments \
-                        -d '{"body": "### 🚀 Reporte de Integración Continua\\n- **Estado:** EXITOSO ✅\\n- **Rama:** `${env.BRANCH_NAME}`\\n\\nTodas las pruebas unitarias y reglas de arquitectura de ArchUnit pasaron correctamente. El código es seguro para ser fusionado."}'
+                        curl.exe -s -X POST -H "Authorization: token ${GITHUB_TOKEN}" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/issues/${env.CHANGE_ID}/comments -d "{\"body\": \"### Reporte de Integracion Continua\\n- **Estado:** EXITOSO\\n- **Rama:** ${env.BRANCH_NAME}\\n\\nTodas las pruebas unitarias y reglas de arquitectura de ArchUnit pasaron correctamente. El codigo es seguro para ser fusionado.\"}"
                     """
                     bat """
-                        curl -s -X POST -H "Authorization: token ${GITHUB_TOKEN}" \
-                        -H "Accept: application/vnd.github.v3+json" \
-                        https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/pulls/${env.CHANGE_ID}/reviews \
-                        -d '{"event": "APPROVE", "body": "✅ Todos los tests pasaron correctamente. Código listo para merge."}'
+                        curl.exe -s -X POST -H "Authorization: token ${GITHUB_TOKEN}" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/pulls/${env.CHANGE_ID}/reviews -d "{\"event\": \"APPROVE\", \"body\": \"Todos los tests pasaron correctamente. Codigo listo para merge.\"}"
                     """
                 }
             }
@@ -114,24 +101,15 @@ pipeline {
 
         failure {
             bat """
-                curl -s -X POST -H "Authorization: token ${GITHUB_TOKEN}" \
-                -H "Accept: application/vnd.github.v3+json" \
-                https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/statuses/${env.GIT_COMMIT} \
-                -d '{"state": "failure", "target_url": "${env.BUILD_URL}", "description": "El build o los tests fallaron", "context": "CI / Jenkins Backend"}'
+                curl.exe -s -X POST -H "Authorization: token ${GITHUB_TOKEN}" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/statuses/${env.GIT_COMMIT} -d "{\"state\": \"failure\", \"target_url\": \"${env.BUILD_URL}\", \"description\": \"El build o los tests fallaron\", \"context\": \"CI / Jenkins Backend\"}"
             """
             script {
                 if (env.CHANGE_ID) {
                     bat """
-                        curl -s -X POST -H "Authorization: token ${GITHUB_TOKEN}" \
-                        -H "Accept: application/vnd.github.v3+json" \
-                        https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/issues/${env.CHANGE_ID}/comments \
-                        -d '{"body": "### ⚠️ ¡Alerta de Fallo en CI!\\n- **Estado:** FALLIDO ❌\\n- **Rama:** `${env.BRANCH_NAME}`\\n\\nEl pipeline se detuvo porque algunas pruebas fallaron o se rompieron las reglas de arquitectura de capas en el Backend. Por favor, revisa los logs de ejecución en Jenkins antes de reintentar."}'
+                        curl.exe -s -X POST -H "Authorization: token ${GITHUB_TOKEN}" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/issues/${env.CHANGE_ID}/comments -d "{\"body\": \"### Alerta de Fallo en CI!\\n- **Estado:** FALLIDO\\n- **Rama:** ${env.BRANCH_NAME}\\n\\nEl pipeline se detuvo porque algunas pruebas fallaron o se rompieron las reglas de arquitectura de capas en el Backend. Por favor, revisa los logs de ejecucion en Jenkins antes de reintentar.\"}"
                     """
                     bat """
-                        curl -s -X POST -H "Authorization: token ${GITHUB_TOKEN}" \
-                        -H "Accept: application/vnd.github.v3+json" \
-                        https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/pulls/${env.CHANGE_ID}/reviews \
-                        -d '{"event": "REQUEST_CHANGES", "body": "❌ Jenkins solicita cambios. Los tests fallaron. Revisar los logs y corregir antes de fusionar."}'
+                        curl.exe -s -X POST -H "Authorization: token ${GITHUB_TOKEN}" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/pulls/${env.CHANGE_ID}/reviews -d "{\"event\": \"REQUEST_CHANGES\", \"body\": \"Jenkins solicita cambios. Los tests fallaron. Revisar los logs y corregir antes de fusionar.\"}"
                     """
                 }
             }
