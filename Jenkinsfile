@@ -134,7 +134,27 @@ powershell -NoProfile -Command "$r = Get-ChildItem Backend/target/surefire-repor
             }
             post {
                 always {
-                    junit allowEmptyResults: true, testResults: 'Frontend/test-results/*.xml'
+                    junit allowEmptyResults: true, testResults: 'Frontend/test-results/junit.xml'
+                    script {
+                        bat '''
+powershell -NoProfile -Command "if (Test-Path Frontend/test-results/junit.xml) { [xml]$c = Get-Content -Raw Frontend/test-results/junit.xml; $suites = $c.testsuites.testsuite; if ($suites -isnot [array]) { $suites = @($suites) }; $r = $suites | ForEach-Object { [PSCustomObject]@{name=$_.name.Split('.')[-1]; tests=[int]$_.tests; failures=([int]$_.failures + [int]$_.errors); skipped=[int]$_.skipped} }; ConvertTo-Json $r -Compress | Out-File -FilePath ci-frontend-results.json -Encoding ASCII } else { '[]' | Out-File -FilePath ci-frontend-results.json -Encoding ASCII }"
+'''
+                        def fReports = readJSON(file: 'ci-frontend-results.json')
+                        if (!(fReports instanceof List)) { fReports = [fReports] }
+                        def fTotal = 0, fPassed = 0, fFailed = 0, fSkipped = 0
+                        def fTable = ""
+                        fReports.each { r ->
+                            def t = r.tests; def f = r.failures; def s = r.skipped; def p = t - f - s
+                            fTotal += t; fPassed += p; fFailed += f; fSkipped += s
+                            def icon = f == 0 ? "✅" : "❌"
+                            fTable += "| ${icon} ${r.name} | ${t} | ${p} | ${f} | ${s} |\n"
+                        }
+                        env.FRONTEND_TESTS_TABLE   = fTable
+                        env.FRONTEND_TESTS_TOTAL   = fTotal.toString()
+                        env.FRONTEND_TESTS_PASSED  = fPassed.toString()
+                        env.FRONTEND_TESTS_FAILED  = fFailed.toString()
+                        env.FRONTEND_TESTS_SKIPPED = fSkipped.toString()
+                    }
                 }
             }
         }
@@ -150,11 +170,18 @@ powershell -NoProfile -Command "$r = Get-ChildItem Backend/target/surefire-repor
                     def comment = """### CI Exitoso
 - **Estado:** PAS\u00d3
 - **Rama:** ${env.BRANCH_NAME}
-- **Tests:** ${env.TESTS_PASSED ?: '0'} pasaron / ${env.TESTS_FAILED ?: '0'} fallaron / ${env.TESTS_SKIPPED ?: '0'} omitidos
+- **Backend:** ${env.TESTS_PASSED ?: '0'} pasaron / ${env.TESTS_FAILED ?: '0'} fallaron
+- **Frontend:** ${env.FRONTEND_TESTS_PASSED ?: '0'} pasaron / ${env.FRONTEND_TESTS_FAILED ?: '0'} fallaron
 
+**Backend Tests:**
 | Clase de Test | Tests | Pasaron | Fallaron | Omitidos |
 |---|---|---|---|---|
 ${env.TESTS_TABLE ?: ''}| **TOTAL** | **${env.TESTS_TOTAL ?: '0'}** | **${env.TESTS_PASSED ?: '0'}** | **${env.TESTS_FAILED ?: '0'}** | **${env.TESTS_SKIPPED ?: '0'}** |
+
+**Frontend Tests:**
+| Test | Tests | Pasaron | Fallaron | Omitidos |
+|---|---|---|---|---|
+${env.FRONTEND_TESTS_TABLE ?: ''}| **TOTAL** | **${env.FRONTEND_TESTS_TOTAL ?: '0'}** | **${env.FRONTEND_TESTS_PASSED ?: '0'}** | **${env.FRONTEND_TESTS_FAILED ?: '0'}** | **${env.FRONTEND_TESTS_SKIPPED ?: '0'}** |
 
 [Ver build en Jenkins](${env.BUILD_URL})"""
 
@@ -178,11 +205,18 @@ ${env.TESTS_TABLE ?: ''}| **TOTAL** | **${env.TESTS_TOTAL ?: '0'}** | **${env.TE
                     def comment = """### Fallo en CI
 - **Estado:** FALL\u00d3
 - **Rama:** ${env.BRANCH_NAME}
-- **Tests:** ${env.TESTS_PASSED ?: '0'} pasaron / ${env.TESTS_FAILED ?: '0'} fallaron / ${env.TESTS_SKIPPED ?: '0'} omitidos
+- **Backend:** ${env.TESTS_PASSED ?: '0'} pasaron / ${env.TESTS_FAILED ?: '0'} fallaron
+- **Frontend:** ${env.FRONTEND_TESTS_PASSED ?: '0'} pasaron / ${env.FRONTEND_TESTS_FAILED ?: '0'} fallaron
 
+**Backend Tests:**
 | Clase de Test | Tests | Pasaron | Fallaron | Omitidos |
 |---|---|---|---|---|
 ${env.TESTS_TABLE ?: ''}| **TOTAL** | **${env.TESTS_TOTAL ?: '0'}** | **${env.TESTS_PASSED ?: '0'}** | **${env.TESTS_FAILED ?: '0'}** | **${env.TESTS_SKIPPED ?: '0'}** |
+
+**Frontend Tests:**
+| Test | Tests | Pasaron | Fallaron | Omitidos |
+|---|---|---|---|---|
+${env.FRONTEND_TESTS_TABLE ?: ''}| **TOTAL** | **${env.FRONTEND_TESTS_TOTAL ?: '0'}** | **${env.FRONTEND_TESTS_PASSED ?: '0'}** | **${env.FRONTEND_TESTS_FAILED ?: '0'}** | **${env.FRONTEND_TESTS_SKIPPED ?: '0'}** |
 
 [Ver logs en Jenkins](${env.BUILD_URL}console)"""
 
