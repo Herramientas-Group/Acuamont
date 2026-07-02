@@ -1,0 +1,522 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites name="vitest tests" tests="68" failures="0" errors="0" time="13.4431145">
+    <testsuite name="src/app/app.spec.ts" timestamp="2026-07-02T08:35:13.915Z" hostname="JohnCh-Lenovo" tests="2" failures="0" errors="0" skipped="0" time="0.0270916">
+        <testcase classname="src/app/app.spec.ts" name="App &gt; should create the app" time="0.0100923">
+        </testcase>
+        <testcase classname="src/app/app.spec.ts" name="App &gt; should render router outlet" time="0.0167698">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/app/core/guards/auth.guard.spec.ts" timestamp="2026-07-02T08:35:13.919Z" hostname="JohnCh-Lenovo" tests="8" failures="0" errors="0" skipped="0" time="0.0285822">
+        <testcase classname="src/app/core/guards/auth.guard.spec.ts" name="authGuard - Route Protection &gt; Authentication Check &gt; should allow access when user is logged in" time="0.005005">
+        </testcase>
+        <testcase classname="src/app/core/guards/auth.guard.spec.ts" name="authGuard - Route Protection &gt; Authentication Check &gt; should redirect to login when user is not logged in" time="0.0045991">
+        </testcase>
+        <testcase classname="src/app/core/guards/auth.guard.spec.ts" name="authGuard - Route Protection &gt; Authorization Check (RBAC) &gt; should allow access when user has required permission" time="0.0026653">
+        </testcase>
+        <testcase classname="src/app/core/guards/auth.guard.spec.ts" name="authGuard - Route Protection &gt; Authorization Check (RBAC) &gt; should deny access when user lacks required permission" time="0.003702">
+        </testcase>
+        <testcase classname="src/app/core/guards/auth.guard.spec.ts" name="authGuard - Route Protection &gt; Authorization Check (RBAC) &gt; should allow access when no opcionId is required" time="0.0035569">
+        </testcase>
+        <testcase classname="src/app/core/guards/auth.guard.spec.ts" name="authGuard - Route Protection &gt; Authorization Check (RBAC) &gt; should handle multiple permissions correctly" time="0.0027386">
+        </testcase>
+        <testcase classname="src/app/core/guards/auth.guard.spec.ts" name="authGuard - Route Protection &gt; Edge Cases &gt; should handle empty route data" time="0.0021209">
+        </testcase>
+        <testcase classname="src/app/core/guards/auth.guard.spec.ts" name="authGuard - Route Protection &gt; Edge Cases &gt; should reject when auth service throws" time="0.003635">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/app/core/services/auth-service.spec.ts" timestamp="2026-07-02T08:35:13.924Z" hostname="JohnCh-Lenovo" tests="1" failures="0" errors="0" skipped="0" time="0.0093824">
+        <testcase classname="src/app/core/services/auth-service.spec.ts" name="AuthService &gt; should be created" time="0.0091832">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/app/core/services/categoria-service.spec.ts" timestamp="2026-07-02T08:35:13.925Z" hostname="JohnCh-Lenovo" tests="1" failures="0" errors="0" skipped="0" time="0.0031953">
+        <testcase classname="src/app/core/services/categoria-service.spec.ts" name="CategoriaService &gt; should be created" time="0.0030615">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/app/core/services/clientes-service.spec.ts" timestamp="2026-07-02T08:35:13.926Z" hostname="JohnCh-Lenovo" tests="1" failures="0" errors="0" skipped="0" time="0.0040774">
+        <testcase classname="src/app/core/services/clientes-service.spec.ts" name="ClientesService &gt; should be created" time="0.0039006">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/app/core/services/gestionweb-service.spec.ts" timestamp="2026-07-02T08:35:13.926Z" hostname="JohnCh-Lenovo" tests="1" failures="0" errors="0" skipped="0" time="0.0037852">
+        <testcase classname="src/app/core/services/gestionweb-service.spec.ts" name="GestionwebService &gt; should be created" time="0.0036357">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/app/core/services/inventario-service.spec.ts" timestamp="2026-07-02T08:35:13.927Z" hostname="JohnCh-Lenovo" tests="1" failures="0" errors="0" skipped="0" time="0.0050742">
+        <testcase classname="src/app/core/services/inventario-service.spec.ts" name="InventarioService &gt; should be created" time="0.0043449">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/app/core/services/loader-service.spec.ts" timestamp="2026-07-02T08:35:13.929Z" hostname="JohnCh-Lenovo" tests="1" failures="0" errors="0" skipped="0" time="0.0035534">
+        <testcase classname="src/app/core/services/loader-service.spec.ts" name="LoaderService &gt; should be created" time="0.0033916">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/app/core/services/perfil-service.spec.ts" timestamp="2026-07-02T08:35:13.930Z" hostname="JohnCh-Lenovo" tests="1" failures="0" errors="0" skipped="0" time="0.0028194">
+        <testcase classname="src/app/core/services/perfil-service.spec.ts" name="PerfilService &gt; should be created" time="0.0026939">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/app/core/services/producto-service.spec.ts" timestamp="2026-07-02T08:35:13.930Z" hostname="JohnCh-Lenovo" tests="1" failures="0" errors="0" skipped="0" time="0.0028527">
+        <testcase classname="src/app/core/services/producto-service.spec.ts" name="ProductoService &gt; should be created" time="0.0027118">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/app/core/services/proveedores-service.spec.ts" timestamp="2026-07-02T08:35:13.931Z" hostname="JohnCh-Lenovo" tests="1" failures="0" errors="0" skipped="0" time="0.0030219">
+        <testcase classname="src/app/core/services/proveedores-service.spec.ts" name="ProveedoresService &gt; should be created" time="0.0028552">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/app/core/services/usuario-service.spec.ts" timestamp="2026-07-02T08:35:13.932Z" hostname="JohnCh-Lenovo" tests="1" failures="0" errors="0" skipped="0" time="0.0032925">
+        <testcase classname="src/app/core/services/usuario-service.spec.ts" name="UsuarioService &gt; should be created" time="0.0031564">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/app/core/services/utilidades-service.spec.ts" timestamp="2026-07-02T08:35:13.932Z" hostname="JohnCh-Lenovo" tests="1" failures="0" errors="0" skipped="0" time="0.0032617">
+        <testcase classname="src/app/core/services/utilidades-service.spec.ts" name="UtilidadesService &gt; should be created" time="0.00315">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/app/core/services/ventas-service.spec.ts" timestamp="2026-07-02T08:35:13.934Z" hostname="JohnCh-Lenovo" tests="1" failures="0" errors="0" skipped="0" time="0.0027622">
+        <testcase classname="src/app/core/services/ventas-service.spec.ts" name="VentasService &gt; should be created" time="0.0025144">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/app/features/home/home-component.spec.ts" timestamp="2026-07-02T08:35:13.936Z" hostname="JohnCh-Lenovo" tests="1" failures="0" errors="0" skipped="0" time="0.1814059">
+        <testcase classname="src/app/features/home/home-component.spec.ts" name="HomeComponent &gt; should create" time="0.181197">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/app/core/interceptors/auth-interceptor.spec.ts" timestamp="2026-07-02T08:35:13.936Z" hostname="JohnCh-Lenovo" tests="9" failures="0" errors="0" skipped="0" time="0.0308822">
+        <testcase classname="src/app/core/interceptors/auth-interceptor.spec.ts" name="authInterceptor - Token Security &gt; should be created" time="0.0031875">
+        </testcase>
+        <testcase classname="src/app/core/interceptors/auth-interceptor.spec.ts" name="authInterceptor - Token Security &gt; Token Injection &gt; should attach Bearer token to non-public requests" time="0.0042382">
+        </testcase>
+        <testcase classname="src/app/core/interceptors/auth-interceptor.spec.ts" name="authInterceptor - Token Security &gt; Token Injection &gt; should not attach token to auth endpoint" time="0.0034642">
+        </testcase>
+        <testcase classname="src/app/core/interceptors/auth-interceptor.spec.ts" name="authInterceptor - Token Security &gt; Token Injection &gt; should not attach token to public API paths" time="0.0024126">
+        </testcase>
+        <testcase classname="src/app/core/interceptors/auth-interceptor.spec.ts" name="authInterceptor - Token Security &gt; Token Injection &gt; should not attach token when no token is stored" time="0.0025791">
+        </testcase>
+        <testcase classname="src/app/core/interceptors/auth-interceptor.spec.ts" name="authInterceptor - Token Security &gt; Error Handling &gt; should call logout on 401 response" time="0.0031154">
+        </testcase>
+        <testcase classname="src/app/core/interceptors/auth-interceptor.spec.ts" name="authInterceptor - Token Security &gt; Error Handling &gt; should not call logout on non-401 errors" time="0.0025896">
+        </testcase>
+        <testcase classname="src/app/core/interceptors/auth-interceptor.spec.ts" name="authInterceptor - Token Security &gt; Security: Token Header Format &gt; should format Bearer token correctly" time="0.0060898">
+        </testcase>
+        <testcase classname="src/app/core/interceptors/auth-interceptor.spec.ts" name="authInterceptor - Token Security &gt; Security: Token Header Format &gt; should not expose token in URL" time="0.0027583">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/app/shared/pipes/sanitize-html.spec.ts" timestamp="2026-07-02T08:35:13.938Z" hostname="JohnCh-Lenovo" tests="8" failures="0" errors="0" skipped="0" time="0.0332103">
+        <testcase classname="src/app/shared/pipes/sanitize-html.spec.ts" name="HTML Sanitization - XSS Prevention &gt; Script Tag Injection &gt; should sanitize innerHTML with script tags" time="0.0033837">
+        </testcase>
+        <testcase classname="src/app/shared/pipes/sanitize-html.spec.ts" name="HTML Sanitization - XSS Prevention &gt; Script Tag Injection &gt; should sanitize img tag with onerror handler" time="0.0049059">
+        </testcase>
+        <testcase classname="src/app/shared/pipes/sanitize-html.spec.ts" name="HTML Sanitization - XSS Prevention &gt; Script Tag Injection &gt; should sanitize anchor with javascript: URI" time="0.0051443">
+            <system-err>
+WARNING: sanitizing unsafe URL value &lt;a href=&quot;javascript:alert(1)&quot;&gt;Click&lt;/a&gt; (see https://angular.dev/best-practices/security#preventing-cross-site-scripting-xss)
+
+            </system-err>
+        </testcase>
+        <testcase classname="src/app/shared/pipes/sanitize-html.spec.ts" name="HTML Sanitization - XSS Prevention &gt; bypassSecurityTrustHtml &gt; bypassing sanitization should still mark content as safe" time="0.0028714">
+        </testcase>
+        <testcase classname="src/app/shared/pipes/sanitize-html.spec.ts" name="HTML Sanitization - XSS Prevention &gt; Safe HTML Preservation &gt; should keep safe HTML tags when sanitized" time="0.0023791">
+        </testcase>
+        <testcase classname="src/app/shared/pipes/sanitize-html.spec.ts" name="HTML Sanitization - XSS Prevention &gt; URL Sanitization &gt; should sanitize javascript: URLs" time="0.005936">
+        </testcase>
+        <testcase classname="src/app/shared/pipes/sanitize-html.spec.ts" name="HTML Sanitization - XSS Prevention &gt; URL Sanitization &gt; should allow safe https URLs" time="0.0051153">
+        </testcase>
+        <testcase classname="src/app/shared/pipes/sanitize-html.spec.ts" name="HTML Sanitization - XSS Prevention &gt; URL Sanitization &gt; should sanitize data: URLs with HTML" time="0.0027326">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/app/features/admin/categoria-component/categoria-component.spec.ts" timestamp="2026-07-02T08:35:13.942Z" hostname="JohnCh-Lenovo" tests="1" failures="0" errors="0" skipped="0" time="1.6299671">
+        <testcase classname="src/app/features/admin/categoria-component/categoria-component.spec.ts" name="CategoriaComponent &gt; should create" time="1.6245128">
+            <system-err>
+HttpErrorResponse {
+  headers: HttpHeaders {
+    headers: Map(0) {},
+    normalizedNames: Map(0) {},
+    lazyInit: [90mundefined[39m,
+    lazyUpdate: [1mnull[22m
+  },
+  status: [33m0[39m,
+  statusText: [32m&apos;Unknown Error&apos;[39m,
+  url: [32m&apos;http://localhost:8080/categorias/api/listar&apos;[39m,
+  ok: [33mfalse[39m,
+  type: [90mundefined[39m,
+  redirected: [90mundefined[39m,
+  responseType: [90mundefined[39m,
+  name: [32m&apos;HttpErrorResponse&apos;[39m,
+  message: [32m&apos;Http failure response for http://localhost:8080/categorias/api/listar: 0 Unknown Error&apos;[39m,
+  error: ProgressEvent { isTrusted: [36m[Getter][39m }
+}
+
+            </system-err>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/app/features/admin/clientes-component/clientes-component.spec.ts" timestamp="2026-07-02T08:35:13.943Z" hostname="JohnCh-Lenovo" tests="1" failures="0" errors="0" skipped="0" time="1.0088184">
+        <testcase classname="src/app/features/admin/clientes-component/clientes-component.spec.ts" name="ClientesComponent &gt; should create" time="1.0085393">
+            <system-err>
+HttpErrorResponse {
+  headers: HttpHeaders {
+    headers: Map(0) {},
+    normalizedNames: Map(0) {},
+    lazyInit: [90mundefined[39m,
+    lazyUpdate: [1mnull[22m
+  },
+  status: [33m0[39m,
+  statusText: [32m&apos;Unknown Error&apos;[39m,
+  url: [32m&apos;http://localhost:8080/clientes/api/listar&apos;[39m,
+  ok: [33mfalse[39m,
+  type: [90mundefined[39m,
+  redirected: [90mundefined[39m,
+  responseType: [90mundefined[39m,
+  name: [32m&apos;HttpErrorResponse&apos;[39m,
+  message: [32m&apos;Http failure response for http://localhost:8080/clientes/api/listar: 0 Unknown Error&apos;[39m,
+  error: ProgressEvent { isTrusted: [36m[Getter][39m }
+}
+
+            </system-err>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/app/features/admin/dashboard-component/dashboard-component.spec.ts" timestamp="2026-07-02T08:35:13.944Z" hostname="JohnCh-Lenovo" tests="1" failures="0" errors="0" skipped="0" time="0.0605757">
+        <testcase classname="src/app/features/admin/dashboard-component/dashboard-component.spec.ts" name="DashboardComponent &gt; should create" time="0.0603898">
+            <system-err>
+Error al cargar dashboard: HttpErrorResponse {
+  headers: HttpHeaders {
+    headers: Map(0) {},
+    normalizedNames: Map(0) {},
+    lazyInit: [90mundefined[39m,
+    lazyUpdate: [1mnull[22m
+  },
+  status: [33m0[39m,
+  statusText: [32m&apos;Unknown Error&apos;[39m,
+  url: [32m&apos;http://localhost:8080/dashboard/api/resumen&apos;[39m,
+  ok: [33mfalse[39m,
+  type: [90mundefined[39m,
+  redirected: [90mundefined[39m,
+  responseType: [90mundefined[39m,
+  name: [32m&apos;HttpErrorResponse&apos;[39m,
+  message: [32m&apos;Http failure response for http://localhost:8080/dashboard/api/resumen: 0 Unknown Error&apos;[39m,
+  error: ProgressEvent { isTrusted: [36m[Getter][39m }
+}
+
+            </system-err>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/app/features/admin/dashboard-layout/dashboard-layout.spec.ts" timestamp="2026-07-02T08:35:13.945Z" hostname="JohnCh-Lenovo" tests="1" failures="0" errors="0" skipped="0" time="0.0273327">
+        <testcase classname="src/app/features/admin/dashboard-layout/dashboard-layout.spec.ts" name="DashboardLayout &gt; should create" time="0.0272133">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/app/features/admin/inventario-component/inventario-component.spec.ts" timestamp="2026-07-02T08:35:13.946Z" hostname="JohnCh-Lenovo" tests="1" failures="0" errors="0" skipped="0" time="1.5255293">
+        <testcase classname="src/app/features/admin/inventario-component/inventario-component.spec.ts" name="InventarioComponent &gt; should create" time="1.522288">
+            <system-err>
+HttpErrorResponse {
+  headers: HttpHeaders {
+    headers: Map(0) {},
+    normalizedNames: Map(0) {},
+    lazyInit: [90mundefined[39m,
+    lazyUpdate: [1mnull[22m
+  },
+  status: [33m0[39m,
+  statusText: [32m&apos;Unknown Error&apos;[39m,
+  url: [32m&apos;http://localhost:8080/inventario/api/tipoMovimientos&apos;[39m,
+  ok: [33mfalse[39m,
+  type: [90mundefined[39m,
+  redirected: [90mundefined[39m,
+  responseType: [90mundefined[39m,
+  name: [32m&apos;HttpErrorResponse&apos;[39m,
+  message: [32m&apos;Http failure response for http://localhost:8080/inventario/api/tipoMovimientos: 0 Unknown Error&apos;[39m,
+  error: ProgressEvent { isTrusted: [36m[Getter][39m }
+}
+
+HttpErrorResponse {
+  headers: HttpHeaders {
+    headers: Map(0) {},
+    normalizedNames: Map(0) {},
+    lazyInit: [90mundefined[39m,
+    lazyUpdate: [1mnull[22m
+  },
+  status: [33m0[39m,
+  statusText: [32m&apos;Unknown Error&apos;[39m,
+  url: [32m&apos;http://localhost:8080/inventario/api/listar&apos;[39m,
+  ok: [33mfalse[39m,
+  type: [90mundefined[39m,
+  redirected: [90mundefined[39m,
+  responseType: [90mundefined[39m,
+  name: [32m&apos;HttpErrorResponse&apos;[39m,
+  message: [32m&apos;Http failure response for http://localhost:8080/inventario/api/listar: 0 Unknown Error&apos;[39m,
+  error: ProgressEvent { isTrusted: [36m[Getter][39m }
+}
+
+            </system-err>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/app/features/admin/perfiles-component/perfiles-component.spec.ts" timestamp="2026-07-02T08:35:13.947Z" hostname="JohnCh-Lenovo" tests="1" failures="0" errors="0" skipped="0" time="0.3706424">
+        <testcase classname="src/app/features/admin/perfiles-component/perfiles-component.spec.ts" name="PerfilesComponent &gt; should create" time="0.3702273">
+            <system-err>
+HttpErrorResponse {
+  headers: HttpHeaders {
+    headers: Map(0) {},
+    normalizedNames: Map(0) {},
+    lazyInit: [90mundefined[39m,
+    lazyUpdate: [1mnull[22m
+  },
+  status: [33m0[39m,
+  statusText: [32m&apos;Unknown Error&apos;[39m,
+  url: [32m&apos;http://localhost:8080/perfiles/api/listar&apos;[39m,
+  ok: [33mfalse[39m,
+  type: [90mundefined[39m,
+  redirected: [90mundefined[39m,
+  responseType: [90mundefined[39m,
+  name: [32m&apos;HttpErrorResponse&apos;[39m,
+  message: [32m&apos;Http failure response for http://localhost:8080/perfiles/api/listar: 0 Unknown Error&apos;[39m,
+  error: ProgressEvent { isTrusted: [36m[Getter][39m }
+}
+
+            </system-err>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/app/features/admin/productos-component/productos-component.spec.ts" timestamp="2026-07-02T08:35:13.948Z" hostname="JohnCh-Lenovo" tests="1" failures="0" errors="0" skipped="0" time="1.5927514">
+        <testcase classname="src/app/features/admin/productos-component/productos-component.spec.ts" name="ProductosComponent - XSS Prevention &gt; should create" time="1.5905713">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/app/features/admin/proveedores-component/proveedores-component.spec.ts" timestamp="2026-07-02T08:35:13.949Z" hostname="JohnCh-Lenovo" tests="1" failures="0" errors="0" skipped="0" time="1.6745918">
+        <testcase classname="src/app/features/admin/proveedores-component/proveedores-component.spec.ts" name="ProveedoresComponent &gt; should create" time="1.6706532">
+            <system-err>
+HttpErrorResponse {
+  headers: HttpHeaders {
+    headers: Map(0) {},
+    normalizedNames: Map(0) {},
+    lazyInit: [90mundefined[39m,
+    lazyUpdate: [1mnull[22m
+  },
+  status: [33m0[39m,
+  statusText: [32m&apos;Unknown Error&apos;[39m,
+  url: [32m&apos;http://localhost:8080/proveedores/api/listar&apos;[39m,
+  ok: [33mfalse[39m,
+  type: [90mundefined[39m,
+  redirected: [90mundefined[39m,
+  responseType: [90mundefined[39m,
+  name: [32m&apos;HttpErrorResponse&apos;[39m,
+  message: [32m&apos;Http failure response for http://localhost:8080/proveedores/api/listar: 0 Unknown Error&apos;[39m,
+  error: ProgressEvent { isTrusted: [36m[Getter][39m }
+}
+
+            </system-err>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/app/features/admin/usuario-component/usuario-component.spec.ts" timestamp="2026-07-02T08:35:13.950Z" hostname="JohnCh-Lenovo" tests="1" failures="0" errors="0" skipped="0" time="1.8065146">
+        <testcase classname="src/app/features/admin/usuario-component/usuario-component.spec.ts" name="UsuarioComponent &gt; should create" time="1.8043132">
+            <system-err>
+HttpErrorResponse {
+  headers: HttpHeaders {
+    headers: Map(0) {},
+    normalizedNames: Map(0) {},
+    lazyInit: [90mundefined[39m,
+    lazyUpdate: [1mnull[22m
+  },
+  status: [33m0[39m,
+  statusText: [32m&apos;Unknown Error&apos;[39m,
+  url: [32m&apos;http://localhost:8080/usuarios/api/listar&apos;[39m,
+  ok: [33mfalse[39m,
+  type: [90mundefined[39m,
+  redirected: [90mundefined[39m,
+  responseType: [90mundefined[39m,
+  name: [32m&apos;HttpErrorResponse&apos;[39m,
+  message: [32m&apos;Http failure response for http://localhost:8080/usuarios/api/listar: 0 Unknown Error&apos;[39m,
+  error: ProgressEvent { isTrusted: [36m[Getter][39m }
+}
+
+            </system-err>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/app/features/admin/utilidades-component/utilidades-component.spec.ts" timestamp="2026-07-02T08:35:13.950Z" hostname="JohnCh-Lenovo" tests="1" failures="0" errors="0" skipped="0" time="0.0695356">
+        <testcase classname="src/app/features/admin/utilidades-component/utilidades-component.spec.ts" name="UtilidadesComponent &gt; should create" time="0.0692431">
+            <system-err>
+Failed to create chart: can&apos;t acquire context from the given item
+
+HttpErrorResponse {
+  headers: HttpHeaders {
+    headers: Map(0) {},
+    normalizedNames: Map(0) {},
+    lazyInit: [90mundefined[39m,
+    lazyUpdate: [1mnull[22m
+  },
+  status: [33m0[39m,
+  statusText: [32m&apos;Unknown Error&apos;[39m,
+  url: [32m&apos;http://localhost:8080/reportes/api/utilidad-ventas&apos;[39m,
+  ok: [33mfalse[39m,
+  type: [90mundefined[39m,
+  redirected: [90mundefined[39m,
+  responseType: [90mundefined[39m,
+  name: [32m&apos;HttpErrorResponse&apos;[39m,
+  message: [32m&apos;Http failure response for http://localhost:8080/reportes/api/utilidad-ventas: 0 Unknown Error&apos;[39m,
+  error: ProgressEvent { isTrusted: [36m[Getter][39m }
+}
+
+HttpErrorResponse {
+  headers: HttpHeaders {
+    headers: Map(0) {},
+    normalizedNames: Map(0) {},
+    lazyInit: [90mundefined[39m,
+    lazyUpdate: [1mnull[22m
+  },
+  status: [33m0[39m,
+  statusText: [32m&apos;Unknown Error&apos;[39m,
+  url: [32m&apos;http://localhost:8080/reportes/api/utilidad-usuarios&apos;[39m,
+  ok: [33mfalse[39m,
+  type: [90mundefined[39m,
+  redirected: [90mundefined[39m,
+  responseType: [90mundefined[39m,
+  name: [32m&apos;HttpErrorResponse&apos;[39m,
+  message: [32m&apos;Http failure response for http://localhost:8080/reportes/api/utilidad-usuarios: 0 Unknown Error&apos;[39m,
+  error: ProgressEvent { isTrusted: [36m[Getter][39m }
+}
+
+HttpErrorResponse {
+  headers: HttpHeaders {
+    headers: Map(0) {},
+    normalizedNames: Map(0) {},
+    lazyInit: [90mundefined[39m,
+    lazyUpdate: [1mnull[22m
+  },
+  status: [33m0[39m,
+  statusText: [32m&apos;Unknown Error&apos;[39m,
+  url: [32m&apos;http://localhost:8080/reportes/api/utilidad-producto&apos;[39m,
+  ok: [33mfalse[39m,
+  type: [90mundefined[39m,
+  redirected: [90mundefined[39m,
+  responseType: [90mundefined[39m,
+  name: [32m&apos;HttpErrorResponse&apos;[39m,
+  message: [32m&apos;Http failure response for http://localhost:8080/reportes/api/utilidad-producto: 0 Unknown Error&apos;[39m,
+  error: ProgressEvent { isTrusted: [36m[Getter][39m }
+}
+
+            </system-err>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/app/features/admin/ventas-component/ventas-component.spec.ts" timestamp="2026-07-02T08:35:13.953Z" hostname="JohnCh-Lenovo" tests="1" failures="0" errors="0" skipped="0" time="2.0083196">
+        <testcase classname="src/app/features/admin/ventas-component/ventas-component.spec.ts" name="VentasComponent &gt; should create" time="2.0060079">
+            <system-err>
+HttpErrorResponse {
+  headers: HttpHeaders {
+    headers: Map(0) {},
+    normalizedNames: Map(0) {},
+    lazyInit: [90mundefined[39m,
+    lazyUpdate: [1mnull[22m
+  },
+  status: [33m0[39m,
+  statusText: [32m&apos;Unknown Error&apos;[39m,
+  url: [32m&apos;http://localhost:8080/ventas/api/formaPago&apos;[39m,
+  ok: [33mfalse[39m,
+  type: [90mundefined[39m,
+  redirected: [90mundefined[39m,
+  responseType: [90mundefined[39m,
+  name: [32m&apos;HttpErrorResponse&apos;[39m,
+  message: [32m&apos;Http failure response for http://localhost:8080/ventas/api/formaPago: 0 Unknown Error&apos;[39m,
+  error: ProgressEvent { isTrusted: [36m[Getter][39m }
+}
+
+HttpErrorResponse {
+  headers: HttpHeaders {
+    headers: Map(0) {},
+    normalizedNames: Map(0) {},
+    lazyInit: [90mundefined[39m,
+    lazyUpdate: [1mnull[22m
+  },
+  status: [33m0[39m,
+  statusText: [32m&apos;Unknown Error&apos;[39m,
+  url: [32m&apos;http://localhost:8080/ventas/api/serieComprobante&apos;[39m,
+  ok: [33mfalse[39m,
+  type: [90mundefined[39m,
+  redirected: [90mundefined[39m,
+  responseType: [90mundefined[39m,
+  name: [32m&apos;HttpErrorResponse&apos;[39m,
+  message: [32m&apos;Http failure response for http://localhost:8080/ventas/api/serieComprobante: 0 Unknown Error&apos;[39m,
+  error: ProgressEvent { isTrusted: [36m[Getter][39m }
+}
+
+HttpErrorResponse {
+  headers: HttpHeaders {
+    headers: Map(0) {},
+    normalizedNames: Map(0) {},
+    lazyInit: [90mundefined[39m,
+    lazyUpdate: [1mnull[22m
+  },
+  status: [33m0[39m,
+  statusText: [32m&apos;Unknown Error&apos;[39m,
+  url: [32m&apos;http://localhost:8080/productos/api/listar&apos;[39m,
+  ok: [33mfalse[39m,
+  type: [90mundefined[39m,
+  redirected: [90mundefined[39m,
+  responseType: [90mundefined[39m,
+  name: [32m&apos;HttpErrorResponse&apos;[39m,
+  message: [32m&apos;Http failure response for http://localhost:8080/productos/api/listar: 0 Unknown Error&apos;[39m,
+  error: ProgressEvent { isTrusted: [36m[Getter][39m }
+}
+
+HttpErrorResponse {
+  headers: HttpHeaders {
+    headers: Map(0) {},
+    normalizedNames: Map(0) {},
+    lazyInit: [90mundefined[39m,
+    lazyUpdate: [1mnull[22m
+  },
+  status: [33m0[39m,
+  statusText: [32m&apos;Unknown Error&apos;[39m,
+  url: [32m&apos;http://localhost:8080/ventas/api/listar&apos;[39m,
+  ok: [33mfalse[39m,
+  type: [90mundefined[39m,
+  redirected: [90mundefined[39m,
+  responseType: [90mundefined[39m,
+  name: [32m&apos;HttpErrorResponse&apos;[39m,
+  message: [32m&apos;Http failure response for http://localhost:8080/ventas/api/listar: 0 Unknown Error&apos;[39m,
+  error: ProgressEvent { isTrusted: [36m[Getter][39m }
+}
+
+            </system-err>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/app/features/admin/web-component/web-component.spec.ts" timestamp="2026-07-02T08:35:13.954Z" hostname="JohnCh-Lenovo" tests="1" failures="0" errors="0" skipped="0" time="0.1600254">
+        <testcase classname="src/app/features/admin/web-component/web-component.spec.ts" name="WebComponent &gt; should create" time="0.159799">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/app/features/auth/login-component/login-component.spec.ts" timestamp="2026-07-02T08:35:13.955Z" hostname="JohnCh-Lenovo" tests="1" failures="0" errors="0" skipped="0" time="0.0279748">
+        <testcase classname="src/app/features/auth/login-component/login-component.spec.ts" name="LoginComponent &gt; should create" time="0.0277376">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/app/features/home/comentarios-component/comentarios-component.spec.ts" timestamp="2026-07-02T08:35:13.957Z" hostname="JohnCh-Lenovo" tests="9" failures="0" errors="0" skipped="0" time="0.8954386">
+        <testcase classname="src/app/features/home/comentarios-component/comentarios-component.spec.ts" name="ComentariosComponent - XSS Prevention &gt; should create" time="0.327392">
+        </testcase>
+        <testcase classname="src/app/features/home/comentarios-component/comentarios-component.spec.ts" name="ComentariosComponent - XSS Prevention &gt; Input Validation &gt; should not allow empty name to be submitted" time="0.0832358">
+        </testcase>
+        <testcase classname="src/app/features/home/comentarios-component/comentarios-component.spec.ts" name="ComentariosComponent - XSS Prevention &gt; Input Validation &gt; should not allow empty message to be submitted" time="0.0561469">
+        </testcase>
+        <testcase classname="src/app/features/home/comentarios-component/comentarios-component.spec.ts" name="ComentariosComponent - XSS Prevention &gt; XSS Prevention - Input Display &gt; should store form values safely without HTML injection" time="0.0649441">
+        </testcase>
+        <testcase classname="src/app/features/home/comentarios-component/comentarios-component.spec.ts" name="ComentariosComponent - XSS Prevention &gt; XSS Prevention - Input Display &gt; initial extraction from name should ignore HTML" time="0.079216">
+        </testcase>
+        <testcase classname="src/app/features/home/comentarios-component/comentarios-component.spec.ts" name="ComentariosComponent - XSS Prevention &gt; XSS Prevention - Input Display &gt; should reject empty names in getInitial" time="0.0406597">
+        </testcase>
+        <testcase classname="src/app/features/home/comentarios-component/comentarios-component.spec.ts" name="ComentariosComponent - XSS Prevention &gt; Image Error Handling &gt; should handle image load errors gracefully" time="0.0778395">
+        </testcase>
+        <testcase classname="src/app/features/home/comentarios-component/comentarios-component.spec.ts" name="ComentariosComponent - XSS Prevention &gt; Date Formatting &gt; should format dates in Spanish locale" time="0.1040924">
+        </testcase>
+        <testcase classname="src/app/features/home/comentarios-component/comentarios-component.spec.ts" name="ComentariosComponent - XSS Prevention &gt; Date Formatting &gt; should handle null dates" time="0.0592059">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/app/features/home/contacto-component/contacto-component.spec.ts" timestamp="2026-07-02T08:35:13.966Z" hostname="JohnCh-Lenovo" tests="1" failures="0" errors="0" skipped="0" time="0.0256222">
+        <testcase classname="src/app/features/home/contacto-component/contacto-component.spec.ts" name="ContactoComponent &gt; should create" time="0.0254154">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/app/features/home/footer-component/footer-component.spec.ts" timestamp="2026-07-02T08:35:13.969Z" hostname="JohnCh-Lenovo" tests="1" failures="0" errors="0" skipped="0" time="0.0254424">
+        <testcase classname="src/app/features/home/footer-component/footer-component.spec.ts" name="FooterComponent &gt; should create" time="0.0252511">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/app/features/home/navbar-component/navbar-component.spec.ts" timestamp="2026-07-02T08:35:13.971Z" hostname="JohnCh-Lenovo" tests="1" failures="0" errors="0" skipped="0" time="0.0316541">
+        <testcase classname="src/app/features/home/navbar-component/navbar-component.spec.ts" name="NavbarComponent &gt; should create" time="0.0313976">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/app/features/home/productos-page/productos-page.spec.ts" timestamp="2026-07-02T08:35:13.971Z" hostname="JohnCh-Lenovo" tests="1" failures="0" errors="0" skipped="0" time="0.0882987">
+        <testcase classname="src/app/features/home/productos-page/productos-page.spec.ts" name="ProductosPage &gt; should create" time="0.0880143">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/app/features/home/servicios-page/servicios-page.spec.ts" timestamp="2026-07-02T08:35:13.972Z" hostname="JohnCh-Lenovo" tests="1" failures="0" errors="0" skipped="0" time="0.0422696">
+        <testcase classname="src/app/features/home/servicios-page/servicios-page.spec.ts" name="ServiciosPage &gt; should create" time="0.0419586">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/app/shared/components/loader-component/loader-component.spec.ts" timestamp="2026-07-02T08:35:13.972Z" hostname="JohnCh-Lenovo" tests="1" failures="0" errors="0" skipped="0" time="0.0235596">
+        <testcase classname="src/app/shared/components/loader-component/loader-component.spec.ts" name="LoaderComponent &gt; should create" time="0.0234015">
+        </testcase>
+    </testsuite>
+</testsuites>

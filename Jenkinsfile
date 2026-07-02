@@ -78,6 +78,7 @@ powershell -NoProfile -Command "$r = Get-ChildItem Backend/target/surefire-repor
 
                         def total = 0, passed = 0, failed = 0, skipped = 0
                         def table = ""
+                        def failedTable = ""
                         reports.each { r ->
                             def t = r.tests
                             def f = r.failures
@@ -86,13 +87,17 @@ powershell -NoProfile -Command "$r = Get-ChildItem Backend/target/surefire-repor
                             total += t; passed += p; failed += f; skipped += s
                             def icon = f == 0 ? "✅" : "❌"
                             table += "| ${icon} ${r.name} | ${t} | ${p} | ${f} | ${s} |\n"
+                            if (f > 0) {
+                                failedTable += "| ${icon} ${r.name} | ${t} | ${p} | ${f} | ${s} |\n"
+                            }
                         }
 
-                        env.TESTS_TABLE   = table
-                        env.TESTS_TOTAL   = total.toString()
-                        env.TESTS_PASSED  = passed.toString()
-                        env.TESTS_FAILED  = failed.toString()
-                        env.TESTS_SKIPPED = skipped.toString()
+                        env.TESTS_TABLE       = table
+                        env.TESTS_FAILED_TABLE = failedTable
+                        env.TESTS_TOTAL       = total.toString()
+                        env.TESTS_PASSED      = passed.toString()
+                        env.TESTS_FAILED      = failed.toString()
+                        env.TESTS_SKIPPED     = skipped.toString()
                     }
                 }
             }
@@ -137,23 +142,28 @@ powershell -NoProfile -Command "$r = Get-ChildItem Backend/target/surefire-repor
                     junit allowEmptyResults: true, testResults: 'Frontend/test-results/junit.xml'
                     script {
                         bat '''
-powershell -NoProfile -Command "if (Test-Path Frontend/test-results/junit.xml) { [xml]$c = Get-Content -Raw Frontend/test-results/junit.xml; $suites = $c.testsuites.testsuite; if ($suites -isnot [array]) { $suites = @($suites) }; $r = $suites | ForEach-Object { [PSCustomObject]@{name=$_.name.Split('.')[-1]; tests=[int]$_.tests; failures=([int]$_.failures + [int]$_.errors); skipped=[int]$_.skipped} }; ConvertTo-Json $r -Compress | Out-File -FilePath ci-frontend-results.json -Encoding ASCII } else { '[]' | Out-File -FilePath ci-frontend-results.json -Encoding ASCII }"
+powershell -NoProfile -Command "if (Test-Path Frontend/test-results/junit.xml) { [xml]$c = Get-Content -Raw Frontend/test-results/junit.xml; $suites = $c.testsuites.testsuite; if ($suites -isnot [array]) { $suites = @($suites) }; $r = $suites | ForEach-Object { [PSCustomObject]@{name=$_.name.Split('/')[-1].Split('.')[0]; tests=[int]$_.tests; failures=([int]$_.failures + [int]$_.errors); skipped=[int]$_.skipped} }; ConvertTo-Json $r -Compress | Out-File -FilePath ci-frontend-results.json -Encoding ASCII } else { '[]' | Out-File -FilePath ci-frontend-results.json -Encoding ASCII }"
 '''
                         def fReports = readJSON(file: 'ci-frontend-results.json')
                         if (!(fReports instanceof List)) { fReports = [fReports] }
                         def fTotal = 0, fPassed = 0, fFailed = 0, fSkipped = 0
                         def fTable = ""
+                        def fFailedTable = ""
                         fReports.each { r ->
                             def t = r.tests; def f = r.failures; def s = r.skipped; def p = t - f - s
                             fTotal += t; fPassed += p; fFailed += f; fSkipped += s
                             def icon = f == 0 ? "✅" : "❌"
                             fTable += "| ${icon} ${r.name} | ${t} | ${p} | ${f} | ${s} |\n"
+                            if (f > 0) {
+                                fFailedTable += "| ${icon} ${r.name} | ${t} | ${p} | ${f} | ${s} |\n"
+                            }
                         }
-                        env.FRONTEND_TESTS_TABLE   = fTable
-                        env.FRONTEND_TESTS_TOTAL   = fTotal.toString()
-                        env.FRONTEND_TESTS_PASSED  = fPassed.toString()
-                        env.FRONTEND_TESTS_FAILED  = fFailed.toString()
-                        env.FRONTEND_TESTS_SKIPPED = fSkipped.toString()
+                        env.FRONTEND_TESTS_TABLE       = fTable
+                        env.FRONTEND_TESTS_FAILED_TABLE = fFailedTable
+                        env.FRONTEND_TESTS_TOTAL       = fTotal.toString()
+                        env.FRONTEND_TESTS_PASSED      = fPassed.toString()
+                        env.FRONTEND_TESTS_FAILED      = fFailed.toString()
+                        env.FRONTEND_TESTS_SKIPPED     = fSkipped.toString()
                     }
                 }
             }
@@ -172,16 +182,6 @@ powershell -NoProfile -Command "if (Test-Path Frontend/test-results/junit.xml) {
 - **Rama:** ${env.BRANCH_NAME}
 - **Backend:** ${env.TESTS_PASSED ?: '0'} pasaron / ${env.TESTS_FAILED ?: '0'} fallaron
 - **Frontend:** ${env.FRONTEND_TESTS_PASSED ?: '0'} pasaron / ${env.FRONTEND_TESTS_FAILED ?: '0'} fallaron
-
-**Backend Tests:**
-| Clase de Test | Tests | Pasaron | Fallaron | Omitidos |
-|---|---|---|---|---|
-${env.TESTS_TABLE ?: ''}| **TOTAL** | **${env.TESTS_TOTAL ?: '0'}** | **${env.TESTS_PASSED ?: '0'}** | **${env.TESTS_FAILED ?: '0'}** | **${env.TESTS_SKIPPED ?: '0'}** |
-
-**Frontend Tests:**
-| Test | Tests | Pasaron | Fallaron | Omitidos |
-|---|---|---|---|---|
-${env.FRONTEND_TESTS_TABLE ?: ''}| **TOTAL** | **${env.FRONTEND_TESTS_TOTAL ?: '0'}** | **${env.FRONTEND_TESTS_PASSED ?: '0'}** | **${env.FRONTEND_TESTS_FAILED ?: '0'}** | **${env.FRONTEND_TESTS_SKIPPED ?: '0'}** |
 
 [Ver build en Jenkins](${env.BUILD_URL})"""
 
@@ -202,21 +202,33 @@ ${env.FRONTEND_TESTS_TABLE ?: ''}| **TOTAL** | **${env.FRONTEND_TESTS_TOTAL ?: '
             '''
             script {
                 if (env.CHANGE_ID) {
+                    def backendFailed = (env.TESTS_FAILED ?: '0') != '0'
+                    def frontendFailed = (env.FRONTEND_TESTS_FAILED ?: '0') != '0'
+
+                    def backendSection = ""
+                    if (backendFailed) {
+                        backendSection = """
+**Tests fallidos - Backend:**
+| Clase de Test | Tests | Pasaron | Fallaron | Omitidos |
+|---|---|---|---|---|
+${env.TESTS_FAILED_TABLE ?: ''}"""
+                    }
+
+                    def frontendSection = ""
+                    if (frontendFailed) {
+                        frontendSection = """
+**Tests fallidos - Frontend:**
+| Test | Tests | Pasaron | Fallaron | Omitidos |
+|---|---|---|---|---|
+${env.FRONTEND_TESTS_FAILED_TABLE ?: ''}"""
+                    }
+
                     def comment = """### Fallo en CI
 - **Estado:** FALL\u00d3
 - **Rama:** ${env.BRANCH_NAME}
 - **Backend:** ${env.TESTS_PASSED ?: '0'} pasaron / ${env.TESTS_FAILED ?: '0'} fallaron
 - **Frontend:** ${env.FRONTEND_TESTS_PASSED ?: '0'} pasaron / ${env.FRONTEND_TESTS_FAILED ?: '0'} fallaron
-
-**Backend Tests:**
-| Clase de Test | Tests | Pasaron | Fallaron | Omitidos |
-|---|---|---|---|---|
-${env.TESTS_TABLE ?: ''}| **TOTAL** | **${env.TESTS_TOTAL ?: '0'}** | **${env.TESTS_PASSED ?: '0'}** | **${env.TESTS_FAILED ?: '0'}** | **${env.TESTS_SKIPPED ?: '0'}** |
-
-**Frontend Tests:**
-| Test | Tests | Pasaron | Fallaron | Omitidos |
-|---|---|---|---|---|
-${env.FRONTEND_TESTS_TABLE ?: ''}| **TOTAL** | **${env.FRONTEND_TESTS_TOTAL ?: '0'}** | **${env.FRONTEND_TESTS_PASSED ?: '0'}** | **${env.FRONTEND_TESTS_FAILED ?: '0'}** | **${env.FRONTEND_TESTS_SKIPPED ?: '0'}** |
+${backendSection}${frontendSection}
 
 [Ver logs en Jenkins](${env.BUILD_URL}console)"""
 
