@@ -9,6 +9,7 @@ pipeline {
         GITHUB_TOKEN = credentials('github-credential')
         REPO_OWNER   = 'Herramientas-Group'
         REPO_NAME    = 'Acuamont'
+        AZURE_VM_IP  = credentials('azure-vm-ip')
     }
 
     stages {
@@ -16,7 +17,7 @@ pipeline {
             when { changeset "**" }
             steps {
                 bat '''
-                    curl.exe -s -X POST -H "Authorization: token %GITHUB_TOKEN_PSW%" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/%REPO_OWNER%/%REPO_NAME%/statuses/%GIT_COMMIT% -d "{\\"state\\": \\"pending\\", \\"target_url\\": \\"%BUILD_URL%\\", \\"description\\": \\"Jenkins esta ejecutando las pruebas...\\", \\"context\\": \\"CI / Jenkins Backend\\"}"
+                    curl.exe -s -X POST -H "Authorization: token %GITHUB_TOKEN_PSW%" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/%REPO_OWNER%/%REPO_NAME%/statuses/%GIT_COMMIT% -d "{\\"state\\": \\"pending\\", \\"target_url\\": \\"%BUILD_URL%\\", \\"description\\": \\"Jenkins esta ejecutando las pruebas...\\", \\"context\\": \\"CI/CD / Jenkins\\"}"
                 '''
             }
         }
@@ -119,6 +120,20 @@ powershell -NoProfile -Command "$r = Get-ChildItem Backend/target/surefire-repor
             }
         }
 
+        stage('10. Backend: Deploy a Azure') {
+            when { branch 'main' }
+            steps {
+                dir('Backend') {
+                    sshagent(credentials: ['azure-vm-prod-key']) {
+                        echo 'Subiendo .jar a Azure VM...'
+                        bat "scp -o StrictHostKeyChecking=no target/*.jar azureuser@%AZURE_VM_IP%:/home/azureuser/acuamont/backend/acuamont-backend.jar"
+                        echo 'Reiniciando servicio...'
+                        bat "ssh -o StrictHostKeyChecking=no azureuser@%AZURE_VM_IP% \"sudo systemctl restart acuamont-backend.service\""
+                    }
+                }
+            }
+        }
+
         stage('8. Frontend: Dependencias') {
             when { anyOf { changeset "Frontend/**"; changeset "package.json"; changeset "Jenkinsfile" } }
             steps {
@@ -173,7 +188,7 @@ powershell -NoProfile -Command "if (Test-Path Frontend/test-results/junit.xml) {
     post {
         success {
             bat '''
-                curl.exe -s -X POST -H "Authorization: token %GITHUB_TOKEN_PSW%" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/%REPO_OWNER%/%REPO_NAME%/statuses/%GIT_COMMIT% -d "{\\"state\\": \\"success\\", \\"target_url\\": \\"%BUILD_URL%\\", \\"description\\": \\"Tests exitosos\\", \\"context\\": \\"CI / Jenkins Backend\\"}"
+                curl.exe -s -X POST -H "Authorization: token %GITHUB_TOKEN_PSW%" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/%REPO_OWNER%/%REPO_NAME%/statuses/%GIT_COMMIT% -d "{\\"state\\": \\"success\\", \\"target_url\\": \\"%BUILD_URL%\\", \\"description\\": \\"Tests exitosos\\", \\"context\\": \\"CI/CD / Jenkins\\"}"
             '''
             script {
                 if (env.CHANGE_ID) {
@@ -198,7 +213,7 @@ powershell -NoProfile -Command "if (Test-Path Frontend/test-results/junit.xml) {
 
         unstable {
             bat '''
-                curl.exe -s -X POST -H "Authorization: token %GITHUB_TOKEN_PSW%" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/%REPO_OWNER%/%REPO_NAME%/statuses/%GIT_COMMIT% -d "{\\"state\\": \\"failure\\", \\"target_url\\": \\"%BUILD_URL%\\", \\"description\\": \\"Tests fallaron\\", \\"context\\": \\"CI / Jenkins Backend\\"}"
+                curl.exe -s -X POST -H "Authorization: token %GITHUB_TOKEN_PSW%" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/%REPO_OWNER%/%REPO_NAME%/statuses/%GIT_COMMIT% -d "{\\"state\\": \\"failure\\", \\"target_url\\": \\"%BUILD_URL%\\", \\"description\\": \\"Tests fallaron\\", \\"context\\": \\"CI/CD / Jenkins\\"}"
             '''
             script {
                 if (env.CHANGE_ID) {
@@ -245,7 +260,7 @@ ${backendSection}${frontendSection}
 
         failure {
             bat '''
-                curl.exe -s -X POST -H "Authorization: token %GITHUB_TOKEN_PSW%" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/%REPO_OWNER%/%REPO_NAME%/statuses/%GIT_COMMIT% -d "{\\"state\\": \\"error\\", \\"target_url\\": \\"%BUILD_URL%\\", \\"description\\": \\"Error en la ejecucion del pipeline\\", \\"context\\": \\"CI / Jenkins Backend\\"}"
+                curl.exe -s -X POST -H "Authorization: token %GITHUB_TOKEN_PSW%" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/%REPO_OWNER%/%REPO_NAME%/statuses/%GIT_COMMIT% -d "{\\"state\\": \\"error\\", \\"target_url\\": \\"%BUILD_URL%\\", \\"description\\": \\"Error en la ejecucion del pipeline\\", \\"context\\": \\"CI/CD / Jenkins\\"}"
             '''
         }
     }
