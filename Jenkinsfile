@@ -124,11 +124,15 @@ powershell -NoProfile -Command "$r = Get-ChildItem Backend/target/surefire-repor
             when { branch 'main' }
             steps {
                 dir('Backend') {
-                    sshagent(credentials: ['azure-vm-prod-key']) {
+                    withCredentials([sshUserPrivateKey(
+                        credentialsId: 'azure-vm-prod-key',
+                        keyFileVariable: 'SSH_KEY',
+                        usernameVariable: 'SSH_USER'
+                    )]) {
                         echo 'Subiendo .jar a Azure VM...'
-                        bat "scp -o StrictHostKeyChecking=no target/*.jar azureuser@%AZURE_VM_IP%:/home/azureuser/acuamont/backend/acuamont-backend.jar"
+                        bat "scp -i %SSH_KEY% -o StrictHostKeyChecking=no target/*.jar %SSH_USER%@%AZURE_VM_IP%:/home/azureuser/acuamont/backend/acuamont-backend.jar"
                         echo 'Reiniciando servicio...'
-                        bat "ssh -o StrictHostKeyChecking=no azureuser@%AZURE_VM_IP% \"sudo systemctl restart acuamont-backend.service\""
+                        bat "ssh -i %SSH_KEY% -o StrictHostKeyChecking=no %SSH_USER%@%AZURE_VM_IP% \"sudo systemctl restart acuamont-backend.service\""
                     }
                 }
             }
