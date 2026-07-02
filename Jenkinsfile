@@ -129,7 +129,7 @@ powershell -NoProfile -Command "$r = Get-ChildItem Backend/target/surefire-repor
                         keyFileVariable: 'SSH_KEY',
                         usernameVariable: 'SSH_USER'
                     )]) {
-                        bat "icacls \"%SSH_KEY%\" /inheritance:r /grant:r \"%USERNAME%:F\""
+                        bat 'powershell -NoProfile -Command "$key=\'%SSH_KEY%\'; $acl=Get-Acl $key; $acl.SetAccessRuleProtection($true,$false); $identity=[System.Security.Principal.WindowsIdentity]::GetCurrent().Name; $rule=New-Object System.Security.AccessControl.FileSystemAccessRule($identity,\'FullControl\',\'Allow\'); $acl.SetAccessRule($rule); Set-Acl $key $acl"'
                         echo 'Subiendo .jar a Azure VM...'
                         bat "scp -i %SSH_KEY% -o StrictHostKeyChecking=no target/*.jar %SSH_USER%@%AZURE_VM_IP%:/home/azureuser/acuamont/backend/acuamont-backend.jar"
                         echo 'Reiniciando servicio...'
