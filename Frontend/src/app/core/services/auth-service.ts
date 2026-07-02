@@ -4,10 +4,11 @@ import { Router } from '@angular/router';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { LoginResponse, Opcion } from '../../shared/interfaces/perfil';
+import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private apiUrl = 'http://localhost:8080/api/auth';
+  private apiUrl = `${environment.apiUrl}/api/auth`;
   private opcionesSubject = new BehaviorSubject<Opcion[]>(this.cargarOpcionesStorage());
 
   opciones$: Observable<Opcion[]> = this.opcionesSubject.asObservable();

@@ -2,13 +2,14 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { Venta, SerieComprobante, FormaPago, Cuota, Pago, VentaDTO, PagosDTO } from '../../shared/interfaces/venta';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class VentasService {
-  private apiUrl = 'http://localhost:8080/ventas/api';
-  private pagosUrl = 'http://localhost:8080/pagos/api';
+  private apiUrl = `${environment.apiUrl}/ventas/api`;
+  private pagosUrl = `${environment.apiUrl}/pagos/api`;
 
   constructor(private http: HttpClient) { }
 

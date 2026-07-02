@@ -6,12 +6,13 @@ import { TipoMovimiento } from '../../shared/interfaces/inventario';
 import { AjusteInventario } from '../../shared/interfaces/inventario';
 import { AjusteInventarioDTO } from '../../shared/interfaces/inventario';
 import { MovimientoProducto } from '../../shared/interfaces/inventario';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class InventarioService {
-  private apiUrl = 'http://localhost:8080/inventario/api';
+  private apiUrl = `${environment.apiUrl}/inventario/api`;
 
   constructor(private http: HttpClient) { }
 

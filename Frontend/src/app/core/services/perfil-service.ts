@@ -2,12 +2,13 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { Perfil, Opcion } from '../../shared/interfaces/perfil';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class PerfilService {
-  private apiUrl = 'http://localhost:8080/perfiles';
+  private apiUrl = `${environment.apiUrl}/perfiles`;
 
   constructor(private http: HttpClient) { }
 

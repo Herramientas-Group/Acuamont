@@ -14,11 +14,7 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowedOrigins(
                         "http://localhost:4200",
                         "http://localhost:8080",
-                        "http://localhost:3001",
-                        "http://localhost:3002",
-                        "https://acuamont-system-ek2h.onrender.com",
-                        "https://acuamont-system-1.onrender.com",
-                        "https://acuamont-system.onrender.com"
+                        "https://acuamont.jacm.pro/"
                 )
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
