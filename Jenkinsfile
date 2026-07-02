@@ -129,6 +129,7 @@ powershell -NoProfile -Command "$r = Get-ChildItem Backend/target/surefire-repor
                         keyFileVariable: 'SSH_KEY',
                         usernameVariable: 'SSH_USER'
                     )]) {
+                        bat "icacls \"%SSH_KEY%\" /inheritance:r /grant:r \"%USERNAME%:F\""
                         echo 'Subiendo .jar a Azure VM...'
                         bat "scp -i %SSH_KEY% -o StrictHostKeyChecking=no target/*.jar %SSH_USER%@%AZURE_VM_IP%:/home/azureuser/acuamont/backend/acuamont-backend.jar"
                         echo 'Reiniciando servicio...'
