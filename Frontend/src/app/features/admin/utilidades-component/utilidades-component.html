@@ -86,8 +86,8 @@
 
     <div class="bg-white rounded-xl shadow-sm border border-blue-100/50 p-6 backdrop-blur-sm">
       <h4 class="text-lg font-bold text-gray-800 mb-4 text-center">Tendencia de Ventas vs. Utilidad</h4>
-      <div class="chart-container" style="height: 350px">
-        <p-chart #chartVentas type="bar" [data]="ventasChartData" [options]="ventasChartOptions" />
+      <div class="chart-container" style="height: 450px">
+        <p-chart #chartVentas type="bar" [data]="ventasChartData" [options]="ventasChartOptions" [style]="{'height': '100%', 'width': '100%'}" />
       </div>
     </div>
   </div>
@@ -142,8 +142,8 @@
 
     <div class="bg-white rounded-xl shadow-sm border border-blue-100/50 p-6 backdrop-blur-sm">
       <h4 class="text-lg font-bold text-gray-800 mb-4 text-center">Ranking de Utilidad por Vendedor</h4>
-      <div class="chart-container" style="height: 350px">
-        <p-chart #chartUsuarios type="bar" [data]="usuariosChartData" [options]="usuariosChartOptions" />
+      <div class="chart-container" style="height: 450px">
+        <p-chart #chartUsuarios type="bar" [data]="usuariosChartData" [options]="usuariosChartOptions" [style]="{'height': '100%', 'width': '100%'}" />
       </div>
     </div>
   </div>
@@ -200,8 +200,8 @@
 
     <div class="bg-white rounded-xl shadow-sm border border-blue-100/50 p-6 backdrop-blur-sm">
       <h4 class="text-lg font-bold text-gray-800 mb-4 text-center">Utilidad por Producto (TOP 10)</h4>
-      <div class="chart-container" style="height: 350px">
-        <p-chart #chartProductos type="bar" [data]="productosChartData" [options]="productosChartOptions" />
+      <div class="chart-container" style="height: 450px">
+        <p-chart #chartProductos type="bar" [data]="productosChartData" [options]="productosChartOptions" [style]="{'height': '100%', 'width': '100%'}" />
       </div>
     </div>
   </div>
