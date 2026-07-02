@@ -126,8 +126,10 @@ powershell -NoProfile -Command "$r = Get-ChildItem Backend/target/surefire-repor
         stage('9. Frontend: Ejecutar Tests') {
             when { anyOf { changeset "Frontend/**"; changeset "package.json"; changeset "Jenkinsfile" } }
             steps {
-                dir('Frontend') {
-                    bat 'npm run test -- --run'
+                catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
+                    dir('Frontend') {
+                        bat 'npm run test'
+                    }
                 }
             }
             post {

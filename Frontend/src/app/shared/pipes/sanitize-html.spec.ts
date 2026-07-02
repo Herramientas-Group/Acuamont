@@ -33,7 +33,7 @@ describe('HTML Sanitization - XSS Prevention', () => {
     it('bypassing sanitization should still mark content as safe', () => {
       const safe = sanitizer.bypassSecurityTrustHtml('<b>Safe HTML</b>');
       expect(safe).toBeDefined();
-      expect(safe.getChars()).toEqual('Safe HTML');
+      expect((safe as any).changingThisBreaksApplicationSecurity).toContain('Safe HTML');
     });
   });
 

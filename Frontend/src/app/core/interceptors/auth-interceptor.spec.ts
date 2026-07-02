@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { HttpInterceptorFn, HttpRequest, HttpHandlerFn, HttpErrorResponse } from '@angular/common/http';
+import { HttpInterceptorFn } from '@angular/common/http';
 import { provideHttpClient, HttpClient } from '@angular/common/http';
 import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
 
@@ -9,11 +9,11 @@ import { AuthService } from '../services/auth-service';
 describe('authInterceptor - Token Security', () => {
   let httpMock: HttpTestingController;
   let httpClient: HttpClient;
-  let mockAuthService: jasmine.SpyObj<AuthService>;
+  let mockAuthService: { getToken: ReturnType<typeof vi.fn>; logout: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
-    mockAuthService = jasmine.createSpyObj('AuthService', ['getToken', 'logout']);
-    mockAuthService.getToken.and.returnValue('test-jwt-token');
+    mockAuthService = { getToken: vi.fn(), logout: vi.fn() };
+    mockAuthService.getToken.mockReturnValue('test-jwt-token');
 
     TestBed.configureTestingModule({
       providers: [
@@ -50,7 +50,7 @@ describe('authInterceptor - Token Security', () => {
       httpClient.post('http://localhost:8080/api/auth/login', {}).subscribe();
 
       const req = httpMock.expectOne('http://localhost:8080/api/auth/login');
-      expect(req.request.headers.has('Authorization')).toBeFalse();
+      expect(req.request.headers.has('Authorization')).toBe(false);
       req.flush({});
     });
 
@@ -58,17 +58,17 @@ describe('authInterceptor - Token Security', () => {
       httpClient.get('http://localhost:8080/comentarios/api/listar').subscribe();
 
       const req = httpMock.expectOne('http://localhost:8080/comentarios/api/listar');
-      expect(req.request.headers.has('Authorization')).toBeFalse();
+      expect(req.request.headers.has('Authorization')).toBe(false);
       req.flush({});
     });
 
     it('should not attach token when no token is stored', () => {
-      mockAuthService.getToken.and.returnValue(null);
+      mockAuthService.getToken.mockReturnValue(null);
 
       httpClient.get('http://localhost:8080/productos/api/listar').subscribe();
 
       const req = httpMock.expectOne('http://localhost:8080/productos/api/listar');
-      expect(req.request.headers.has('Authorization')).toBeFalse();
+      expect(req.request.headers.has('Authorization')).toBe(false);
       req.flush({});
     });
   });

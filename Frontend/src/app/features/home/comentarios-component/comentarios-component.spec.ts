@@ -42,14 +42,14 @@ describe('ComentariosComponent - XSS Prevention', () => {
       component.formNombre = '';
       component.formMensaje = 'Mensaje válido';
       component.enviarComentario();
-      expect(component.enviando).toBeFalse();
+      expect(component.enviando).toBe(false);
     });
 
     it('should not allow empty message to be submitted', () => {
       component.formNombre = 'Nombre';
       component.formMensaje = '';
       component.enviarComentario();
-      expect(component.enviando).toBeFalse();
+      expect(component.enviando).toBe(false);
     });
   });
 
