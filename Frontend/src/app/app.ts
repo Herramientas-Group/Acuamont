@@ -12,6 +12,7 @@ import { LoaderComponent } from './shared/components/loader-component/loader-com
 })
 export class App {
 	// root component
+	// pipeline trigger v2
 	protected readonly title = signal('Acuamont-frontend');
 
 

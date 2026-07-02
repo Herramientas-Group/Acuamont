@@ -70,20 +70,22 @@ pipeline {
                 always {
                     junit allowEmptyResults: true, testResults: 'Backend/target/surefire-reports/*.xml'
                     script {
-                        def reports = findFiles(glob: 'Backend/target/surefire-reports/TEST-*.xml')
+                        bat '''
+powershell -NoProfile -Command "$r = Get-ChildItem Backend/target/surefire-reports/TEST-*.xml | ForEach-Object { [xml]$c = Get-Content -Raw $_; [PSCustomObject]@{name=$c.testsuite.name.Split('.')[-1]; tests=[int]$c.testsuite.tests; failures=([int]$c.testsuite.failures + [int]$c.testsuite.errors); skipped=[int]$c.testsuite.skipped} }; ConvertTo-Json $r -Compress | Out-File -FilePath ci-test-results.json -Encoding ASCII"
+'''
+                        def reports = readJSON(file: 'ci-test-results.json')
+                        if (!(reports instanceof List)) { reports = [reports] }
+
                         def total = 0, passed = 0, failed = 0, skipped = 0
                         def table = ""
-
-                        reports.each { file ->
-                            def xml = new XmlSlurper().parse(file)
-                            def name = xml.@name.text().split('\\.').last()
-                            def t = xml.@tests.text().toInteger()
-                            def f = xml.@failures.text().toInteger() + xml.@errors.text().toInteger()
-                            def s = xml.@skipped.text().toInteger()
+                        reports.each { r ->
+                            def t = r.tests
+                            def f = r.failures
+                            def s = r.skipped
                             def p = t - f - s
                             total += t; passed += p; failed += f; skipped += s
                             def icon = f == 0 ? "✅" : "❌"
-                            table += "| ${icon} ${name} | ${t} | ${p} | ${f} | ${s} |\n"
+                            table += "| ${icon} ${r.name} | ${t} | ${p} | ${f} | ${s} |\n"
                         }
 
                         env.TESTS_TABLE   = table
