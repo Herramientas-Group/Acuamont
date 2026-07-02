@@ -13,6 +13,7 @@ pipeline {
 
     stages {
         stage('1. Inicializar Estado') {
+            when { changeset "**" }
             steps {
                 bat '''
                     curl.exe -s -X POST -H "Authorization: token %GITHUB_TOKEN_PSW%" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/%REPO_OWNER%/%REPO_NAME%/statuses/%GIT_COMMIT% -d "{\\"state\\": \\"pending\\", \\"target_url\\": \\"%BUILD_URL%\\", \\"description\\": \\"Jenkins esta ejecutando las pruebas...\\", \\"context\\": \\"CI / Jenkins Backend\\"}"
@@ -38,7 +39,8 @@ pipeline {
             }
         }
 
-        stage('3. Instalar Dependencias') {
+        stage('3. Backend: Dependencias') {
+            when { anyOf { changeset "Backend/**"; changeset "pom.xml"; changeset "Jenkinsfile" } }
             steps {
                 dir('Backend') {
                     bat 'mvnw.cmd dependency:resolve -B'
@@ -46,7 +48,8 @@ pipeline {
             }
         }
 
-        stage('4. Compilar') {
+        stage('4. Backend: Compilar') {
+            when { anyOf { changeset "Backend/**"; changeset "pom.xml"; changeset "Jenkinsfile" } }
             steps {
                 dir('Backend') {
                     bat 'mvnw.cmd compile -B'
@@ -54,7 +57,8 @@ pipeline {
             }
         }
 
-        stage('5. Ejecutar Tests') {
+        stage('5. Backend: Ejecutar Tests') {
+            when { anyOf { changeset "Backend/**"; changeset "pom.xml"; changeset "Jenkinsfile" } }
             steps {
                 dir('Backend') {
                     bat 'mvnw.cmd test -B'
@@ -62,41 +66,39 @@ pipeline {
             }
             post {
                 always {
+                    junit allowEmptyResults: true, testResults: 'Backend/target/surefire-reports/*.xml'
                     script {
                         def testResults = currentBuild.testResults
-                        def total = 0, passed = 0, failed = 0, skipped = 0
+                        def total   = testResults?.totalCount ?: 0
+                        def passed  = testResults?.passCount ?: 0
+                        def failed  = testResults?.failCount ?: 0
+                        def skipped = testResults?.skipCount ?: 0
                         def table = ""
 
-                        if (testResults != null) {
-                            total = testResults.totalCount
-                            passed = testResults.passCount
-                            failed = testResults.failCount
-                            skipped = testResults.skipCount
-
-                            def suites = testResults.getSuites()
+                        def suites = testResults?.getSuites()
+                        if (suites) {
                             suites.each { suite ->
-                                def name = suite.getName()
                                 def t = suite.getTests()
                                 def f = suite.getFailures()
                                 def s = suite.getSkipped()
                                 def p = t - f - s
                                 def icon = (f + s) == 0 ? "✅" : "❌"
-                                table += "| ${icon} ${name} | ${t} | ${p} | ${f} | ${s} |\n"
+                                table += "| ${icon} ${suite.getName()} | ${t} | ${p} | ${f} | ${s} |\n"
                             }
                         }
 
-                        env.TESTS_TABLE = table
-                        env.TESTS_TOTAL = total.toString()
-                        env.TESTS_PASSED = passed.toString()
-                        env.TESTS_FAILED = failed.toString()
+                        env.TESTS_TABLE   = table
+                        env.TESTS_TOTAL   = total.toString()
+                        env.TESTS_PASSED  = passed.toString()
+                        env.TESTS_FAILED  = failed.toString()
                         env.TESTS_SKIPPED = skipped.toString()
                     }
-                    junit allowEmptyResults: true, testResults: 'Backend/target/surefire-reports/*.xml'
                 }
             }
         }
 
-        stage('6. Empaquetar') {
+        stage('6. Backend: Empaquetar') {
+            when { anyOf { changeset "Backend/**"; changeset "pom.xml"; changeset "Jenkinsfile" } }
             steps {
                 dir('Backend') {
                     bat 'mvnw.cmd package -DskipTests -B'
@@ -104,9 +106,33 @@ pipeline {
             }
         }
 
-        stage('7. Archivar Artifact') {
+        stage('7. Backend: Archivar') {
+            when { anyOf { changeset "Backend/**"; changeset "pom.xml"; changeset "Jenkinsfile" } }
             steps {
                 archiveArtifacts artifacts: 'Backend/target/*.jar', fingerprint: true
+            }
+        }
+
+        stage('8. Frontend: Dependencias') {
+            when { anyOf { changeset "Frontend/**"; changeset "package.json"; changeset "Jenkinsfile" } }
+            steps {
+                dir('Frontend') {
+                    bat 'npm install'
+                }
+            }
+        }
+
+        stage('9. Frontend: Ejecutar Tests') {
+            when { anyOf { changeset "Frontend/**"; changeset "package.json"; changeset "Jenkinsfile" } }
+            steps {
+                dir('Frontend') {
+                    bat 'npm run test -- --run'
+                }
+            }
+            post {
+                always {
+                    junit allowEmptyResults: true, testResults: 'Frontend/test-results/*.xml'
+                }
             }
         }
     }
@@ -121,11 +147,11 @@ pipeline {
                     def comment = """### CI Exitoso
 - **Estado:** PAS\u00d3
 - **Rama:** ${env.BRANCH_NAME}
-- **Tests:** ${env.TESTS_PASSED} pasaron / ${env.TESTS_FAILED} fallaron / ${env.TESTS_SKIPPED} omitidos
+- **Tests:** ${env.TESTS_PASSED ?: '0'} pasaron / ${env.TESTS_FAILED ?: '0'} fallaron / ${env.TESTS_SKIPPED ?: '0'} omitidos
 
 | Clase de Test | Tests | Pasaron | Fallaron | Omitidos |
 |---|---|---|---|---|
-${env.TESTS_TABLE}| **TOTAL** | **${env.TESTS_TOTAL}** | **${env.TESTS_PASSED}** | **${env.TESTS_FAILED}** | **${env.TESTS_SKIPPED}** |
+${env.TESTS_TABLE ?: ''}| **TOTAL** | **${env.TESTS_TOTAL ?: '0'}** | **${env.TESTS_PASSED ?: '0'}** | **${env.TESTS_FAILED ?: '0'}** | **${env.TESTS_SKIPPED ?: '0'}** |
 
 [Ver build en Jenkins](${env.BUILD_URL})"""
 
@@ -149,11 +175,11 @@ ${env.TESTS_TABLE}| **TOTAL** | **${env.TESTS_TOTAL}** | **${env.TESTS_PASSED}**
                     def comment = """### Fallo en CI
 - **Estado:** FALL\u00d3
 - **Rama:** ${env.BRANCH_NAME}
-- **Tests:** ${env.TESTS_PASSED} pasaron / ${env.TESTS_FAILED} fallaron / ${env.TESTS_SKIPPED} omitidos
+- **Tests:** ${env.TESTS_PASSED ?: '0'} pasaron / ${env.TESTS_FAILED ?: '0'} fallaron / ${env.TESTS_SKIPPED ?: '0'} omitidos
 
 | Clase de Test | Tests | Pasaron | Fallaron | Omitidos |
 |---|---|---|---|---|
-${env.TESTS_TABLE}| **TOTAL** | **${env.TESTS_TOTAL}** | **${env.TESTS_PASSED}** | **${env.TESTS_FAILED}** | **${env.TESTS_SKIPPED}** |
+${env.TESTS_TABLE ?: ''}| **TOTAL** | **${env.TESTS_TOTAL ?: '0'}** | **${env.TESTS_PASSED ?: '0'}** | **${env.TESTS_FAILED ?: '0'}** | **${env.TESTS_SKIPPED ?: '0'}** |
 
 [Ver logs en Jenkins](${env.BUILD_URL}console)"""
 
