@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { MessageService } from 'primeng/api';
 
 import { WebComponent } from './web-component';
 
@@ -9,6 +10,7 @@ describe('WebComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [WebComponent],
+      providers: [MessageService],
     }).compileComponents();
 
     fixture = TestBed.createComponent(WebComponent);
