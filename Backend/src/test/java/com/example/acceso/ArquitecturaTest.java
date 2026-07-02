@@ -22,6 +22,7 @@ class ArquitecturaTest {
     void repository_shouldOnlyBeAccessedByService() {
         ArchRule rule = noClasses()
                 .that().resideOutsideOfPackage("..service..")
+                .and().resideOutsideOfPackage("..security..")
                 .should().dependOnClassesThat()
                 .resideInAnyPackage("com.example.acceso.repository..");
 

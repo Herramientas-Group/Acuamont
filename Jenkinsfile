@@ -62,6 +62,35 @@ pipeline {
             }
             post {
                 always {
+                    script {
+                        def testResults = currentBuild.testResults
+                        def total = 0, passed = 0, failed = 0, skipped = 0
+                        def table = ""
+
+                        if (testResults != null) {
+                            total = testResults.totalCount
+                            passed = testResults.passCount
+                            failed = testResults.failCount
+                            skipped = testResults.skipCount
+
+                            def suites = testResults.getSuites()
+                            suites.each { suite ->
+                                def name = suite.getName()
+                                def t = suite.getTests()
+                                def f = suite.getFailures()
+                                def s = suite.getSkipped()
+                                def p = t - f - s
+                                def icon = (f + s) == 0 ? "✅" : "❌"
+                                table += "| ${icon} ${name} | ${t} | ${p} | ${f} | ${s} |\n"
+                            }
+                        }
+
+                        env.TESTS_TABLE = table
+                        env.TESTS_TOTAL = total.toString()
+                        env.TESTS_PASSED = passed.toString()
+                        env.TESTS_FAILED = failed.toString()
+                        env.TESTS_SKIPPED = skipped.toString()
+                    }
                     junit allowEmptyResults: true, testResults: 'Backend/target/surefire-reports/*.xml'
                 }
             }
@@ -89,9 +118,24 @@ pipeline {
             '''
             script {
                 if (env.CHANGE_ID) {
+                    def comment = """### CI Exitoso
+- **Estado:** PAS\u00d3
+- **Rama:** ${env.BRANCH_NAME}
+- **Tests:** ${env.TESTS_PASSED} pasaron / ${env.TESTS_FAILED} fallaron / ${env.TESTS_SKIPPED} omitidos
+
+| Clase de Test | Tests | Pasaron | Fallaron | Omitidos |
+|---|---|---|---|---|
+${env.TESTS_TABLE}| **TOTAL** | **${env.TESTS_TOTAL}** | **${env.TESTS_PASSED}** | **${env.TESTS_FAILED}** | **${env.TESTS_SKIPPED}** |
+
+[Ver build en Jenkins](${env.BUILD_URL})"""
+
+                    def payload = groovy.json.JsonOutput.toJson([body: comment])
+                    writeFile file: 'ci-comment.json', text: payload
+
                     bat '''
-                        curl.exe -s -X POST -H "Authorization: token %GITHUB_TOKEN_PSW%" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/%REPO_OWNER%/%REPO_NAME%/issues/%CHANGE_ID%/comments -d "{\\"body\\": \\"### CI Exitoso\\\\n- **Estado:** PASÓ\\\\n- **Rama:** %BRANCH_NAME%\\\\n\\\\nTodas las pruebas pasaron correctamente.\\"}"
+                        curl.exe -s -X POST -H "Authorization: token %GITHUB_TOKEN_PSW%" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/%REPO_OWNER%/%REPO_NAME%/issues/%CHANGE_ID%/comments -d @ci-comment.json
                     '''
+                    bat 'if exist ci-comment.json del ci-comment.json'
                 }
             }
         }
@@ -102,9 +146,24 @@ pipeline {
             '''
             script {
                 if (env.CHANGE_ID) {
+                    def comment = """### Fallo en CI
+- **Estado:** FALL\u00d3
+- **Rama:** ${env.BRANCH_NAME}
+- **Tests:** ${env.TESTS_PASSED} pasaron / ${env.TESTS_FAILED} fallaron / ${env.TESTS_SKIPPED} omitidos
+
+| Clase de Test | Tests | Pasaron | Fallaron | Omitidos |
+|---|---|---|---|---|
+${env.TESTS_TABLE}| **TOTAL** | **${env.TESTS_TOTAL}** | **${env.TESTS_PASSED}** | **${env.TESTS_FAILED}** | **${env.TESTS_SKIPPED}** |
+
+[Ver logs en Jenkins](${env.BUILD_URL}console)"""
+
+                    def payload = groovy.json.JsonOutput.toJson([body: comment])
+                    writeFile file: 'ci-comment.json', text: payload
+
                     bat '''
-                        curl.exe -s -X POST -H "Authorization: token %GITHUB_TOKEN_PSW%" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/%REPO_OWNER%/%REPO_NAME%/issues/%CHANGE_ID%/comments -d "{\\"body\\": \\"### Fallo en CI\\\\n- **Estado:** FALLIDO\\\\n- **Rama:** %BRANCH_NAME%\\\\n\\\\nRevisar logs en Jenkins.\\"}"
+                        curl.exe -s -X POST -H "Authorization: token %GITHUB_TOKEN_PSW%" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/%REPO_OWNER%/%REPO_NAME%/issues/%CHANGE_ID%/comments -d @ci-comment.json
                     '''
+                    bat 'if exist ci-comment.json del ci-comment.json'
                 }
             }
         }
