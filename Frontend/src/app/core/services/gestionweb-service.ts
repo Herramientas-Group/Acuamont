@@ -2,14 +2,15 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { RedSocial } from '../../shared/interfaces/gestionweb';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class GestionwebService {
-  private logoApi = 'http://localhost:8080/logo/api';
-  private redesApi = 'http://localhost:8080/redes/api';
-  private slidesApi = 'http://localhost:8080/slides/api';
+  private logoApi = `${environment.apiUrl}/logo/api`;
+  private redesApi = `${environment.apiUrl}/redes/api`;
+  private slidesApi = `${environment.apiUrl}/slides/api`;
 
   constructor(private http: HttpClient) { }
 

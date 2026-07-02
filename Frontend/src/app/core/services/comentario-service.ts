@@ -2,12 +2,13 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { Comentario } from '../../shared/interfaces/comentario';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ComentarioService {
-  private apiUrl = 'http://localhost:8080/comentarios/api';
+  private apiUrl = `${environment.apiUrl}/comentarios/api`;
 
   constructor(private http: HttpClient) { }
 

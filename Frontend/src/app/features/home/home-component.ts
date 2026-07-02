@@ -4,6 +4,7 @@ import { RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { NavbarComponent } from './navbar-component/navbar-component';
 import { FooterComponent } from './footer-component/footer-component';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-home-component',
@@ -47,7 +48,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   private cargarSlides(): void {
-    this.http.get<string[]>('http://localhost:8080/slides/api/listar-urls').subscribe({
+    this.http.get<string[]>(`${environment.apiUrl}/slides/api/listar-urls`).subscribe({
       next: (urls) => {
         this.slides = urls || [];
         this.startAutoSlide();
