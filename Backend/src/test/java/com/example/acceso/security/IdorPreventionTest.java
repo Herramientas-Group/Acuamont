@@ -18,6 +18,7 @@ class IdorPreventionTest {
     @Test
     void usuarioController_endpointsEscrituraTienenAutorizacion() {
         for (Method method : UsuarioController.class.getDeclaredMethods()) {
+            if (method.isSynthetic()) continue;
             if (isWriteOperation(method.getName())) {
                 assertTrue(
                     method.isAnnotationPresent(PreAuthorize.class),
@@ -31,6 +32,7 @@ class IdorPreventionTest {
     @Test
     void clienteController_endpointsEscrituraTienenAutorizacion() {
         for (Method method : ClienteController.class.getDeclaredMethods()) {
+            if (method.isSynthetic()) continue;
             if (isWriteOperation(method.getName())) {
                 assertTrue(
                     method.isAnnotationPresent(PreAuthorize.class),
@@ -44,6 +46,7 @@ class IdorPreventionTest {
     @Test
     void productoController_endpointsEscrituraTienenAutorizacion() {
         for (Method method : ProductoController.class.getDeclaredMethods()) {
+            if (method.isSynthetic()) continue;
             if (isWriteOperation(method.getName())) {
                 assertTrue(
                     method.isAnnotationPresent(PreAuthorize.class),
@@ -57,6 +60,7 @@ class IdorPreventionTest {
     @Test
     void ventaController_endpointsEscrituraTienenAutorizacion() {
         for (Method method : VentaController.class.getDeclaredMethods()) {
+            if (method.isSynthetic()) continue;
             if (isWriteOperation(method.getName())) {
                 assertTrue(
                     method.isAnnotationPresent(PreAuthorize.class),
@@ -70,6 +74,7 @@ class IdorPreventionTest {
     @Test
     void categoriaController_endpointsEscrituraTienenAutorizacion() {
         for (Method method : CategoriaController.class.getDeclaredMethods()) {
+            if (method.isSynthetic()) continue;
             if (isWriteOperation(method.getName())) {
                 assertTrue(
                     method.isAnnotationPresent(PreAuthorize.class),
@@ -83,6 +88,7 @@ class IdorPreventionTest {
     @Test
     void proveedorController_endpointsEscrituraTienenAutorizacion() {
         for (Method method : ProveedorController.class.getDeclaredMethods()) {
+            if (method.isSynthetic()) continue;
             if (isWriteOperation(method.getName())) {
                 assertTrue(
                     method.isAnnotationPresent(PreAuthorize.class),
@@ -96,6 +102,7 @@ class IdorPreventionTest {
     @Test
     void perfilController_endpointsEscrituraTienenAutorizacion() {
         for (Method method : PerfilController.class.getDeclaredMethods()) {
+            if (method.isSynthetic()) continue;
             if (isWriteOperation(method.getName())) {
                 assertTrue(
                     method.isAnnotationPresent(PreAuthorize.class),
@@ -109,6 +116,7 @@ class IdorPreventionTest {
     @Test
     void inventarioController_endpointsEscrituraTienenAutorizacion() {
         for (Method method : InventarioController.class.getDeclaredMethods()) {
+            if (method.isSynthetic()) continue;
             if (isWriteOperation(method.getName())) {
                 assertTrue(
                     method.isAnnotationPresent(PreAuthorize.class),

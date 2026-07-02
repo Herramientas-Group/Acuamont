@@ -60,31 +60,30 @@ pipeline {
         stage('5. Backend: Ejecutar Tests') {
             when { anyOf { changeset "Backend/**"; changeset "pom.xml"; changeset "Jenkinsfile" } }
             steps {
-                dir('Backend') {
-                    bat 'mvnw.cmd test -B'
+                catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
+                    dir('Backend') {
+                        bat 'mvnw.cmd test -B'
+                    }
                 }
             }
             post {
                 always {
                     junit allowEmptyResults: true, testResults: 'Backend/target/surefire-reports/*.xml'
                     script {
-                        def testResults = currentBuild.testResults
-                        def total   = testResults?.totalCount ?: 0
-                        def passed  = testResults?.passCount ?: 0
-                        def failed  = testResults?.failCount ?: 0
-                        def skipped = testResults?.skipCount ?: 0
+                        def reports = findFiles(glob: 'Backend/target/surefire-reports/TEST-*.xml')
+                        def total = 0, passed = 0, failed = 0, skipped = 0
                         def table = ""
 
-                        def suites = testResults?.getSuites()
-                        if (suites) {
-                            suites.each { suite ->
-                                def t = suite.getTests()
-                                def f = suite.getFailures()
-                                def s = suite.getSkipped()
-                                def p = t - f - s
-                                def icon = (f + s) == 0 ? "✅" : "❌"
-                                table += "| ${icon} ${suite.getName()} | ${t} | ${p} | ${f} | ${s} |\n"
-                            }
+                        reports.each { file ->
+                            def xml = new XmlSlurper().parse(file)
+                            def name = xml.@name.text().split('\\.').last()
+                            def t = xml.@tests.text().toInteger()
+                            def f = xml.@failures.text().toInteger() + xml.@errors.text().toInteger()
+                            def s = xml.@skipped.text().toInteger()
+                            def p = t - f - s
+                            total += t; passed += p; failed += f; skipped += s
+                            def icon = f == 0 ? "✅" : "❌"
+                            table += "| ${icon} ${name} | ${t} | ${p} | ${f} | ${s} |\n"
                         }
 
                         env.TESTS_TABLE   = table
@@ -166,7 +165,7 @@ ${env.TESTS_TABLE ?: ''}| **TOTAL** | **${env.TESTS_TOTAL ?: '0'}** | **${env.TE
             }
         }
 
-        failure {
+        unstable {
             bat '''
                 curl.exe -s -X POST -H "Authorization: token %GITHUB_TOKEN_PSW%" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/%REPO_OWNER%/%REPO_NAME%/statuses/%GIT_COMMIT% -d "{\\"state\\": \\"failure\\", \\"target_url\\": \\"%BUILD_URL%\\", \\"description\\": \\"Tests fallaron\\", \\"context\\": \\"CI / Jenkins Backend\\"}"
             '''
@@ -192,6 +191,12 @@ ${env.TESTS_TABLE ?: ''}| **TOTAL** | **${env.TESTS_TOTAL ?: '0'}** | **${env.TE
                     bat 'if exist ci-comment.json del ci-comment.json'
                 }
             }
+        }
+
+        failure {
+            bat '''
+                curl.exe -s -X POST -H "Authorization: token %GITHUB_TOKEN_PSW%" -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/%REPO_OWNER%/%REPO_NAME%/statuses/%GIT_COMMIT% -d "{\\"state\\": \\"error\\", \\"target_url\\": \\"%BUILD_URL%\\", \\"description\\": \\"Error en la ejecucion del pipeline\\", \\"context\\": \\"CI / Jenkins Backend\\"}"
+            '''
         }
     }
 }
