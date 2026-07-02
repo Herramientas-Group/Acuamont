@@ -11,7 +11,8 @@ import { LoaderComponent } from './shared/components/loader-component/loader-com
   styleUrl: './app.css'
 })
 export class App {
-  protected readonly title = signal('Acuamont-frontend');
+	// root component
+	protected readonly title = signal('Acuamont-frontend');
 
 
 }
