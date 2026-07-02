@@ -2,12 +2,10 @@
 
 Sistema web desarrollado para digitalizar y agilizar el proceso de ventas de la tienda **Acuamont**, especializada en acuarismo. Reemplaza el registro manual de ventas y cálculo de utilidades por un flujo automatizado que genera comprobantes digitales y reportes consolidados en tiempo real.
 
-> Proyecto académico del curso **Herramientas de Desarrollo (11556)** — Universidad Tecnológica del Perú (UTP), Chiclayo — 2026.
-
 ![Estado](https://img.shields.io/badge/estado-en%20desarrollo-yellow)
 ![Backend](https://img.shields.io/badge/backend-Spring%20Boot-6DB33F?logo=springboot&logoColor=white)
 ![Frontend](https://img.shields.io/badge/frontend-Angular-DD0031?logo=angular&logoColor=white)
-![DB](https://img.shields.io/badge/base%20de%20datos-MySQL-4479A1?logo=mysql&logoColor=white)
+![DB](https://img.shields.io/badge/base%20de%20datos-PostgreSQL-4169E1?logo=postgresql&logoColor=white)
 ![Licencia](https://img.shields.io/badge/licencia-académica-lightgrey)
 
 ---
@@ -72,7 +70,7 @@ Acuamont utiliza una **arquitectura desacoplada** (cliente-servidor), con separa
 
 ```
 ┌─────────────────────┐        HTTP/REST        ┌──────────────────────┐        JDBC        ┌─────────────┐
-│   Frontend (Angular) │ ───────────────────────▶ │  Backend (Spring Boot) │ ─────────────────▶ │   MySQL     │
+│   Frontend (Angular) │ ───────────────────────▶ │  Backend (Spring Boot) │ ─────────────────▶ │ PostgreSQL  │
 │  core / features /   │ ◀─────────────────────── │ controller / service / │ ◀───────────────── │  Base de    │
 │      shared          │        JSON/DTO          │  repository / model    │                    │   datos     │
 └─────────────────────┘                          └──────────────────────┘                    └─────────────┘
@@ -115,7 +113,7 @@ Backend/
 |---|---|
 | **Frontend** | Angular · TypeScript · HTML5 · CSS3 |
 | **Backend** | Java 17+ · Spring Boot · Spring Security · Spring Data JPA / Hibernate · Maven |
-| **Base de datos** | MySQL |
+| **Base de datos** | PostgreSQL |
 | **Control de versiones** | Git + GitHub (GitHub Flow) |
 | **Gestión y planificación** | ClickUp · GanttProject |
 | **Diseño y prototipado** | Draw.io |
@@ -146,7 +144,7 @@ Acuamont/
 - **Node.js** (LTS recomendado) y **npm**
 - **Angular CLI** (`npm install -g @angular/cli`)
 - **Maven**
-- **MySQL** (local o accesible remotamente)
+- **PostgreSQL** (local o accesible remotamente)
 - **Git**
 
 ---
@@ -164,8 +162,8 @@ cd Acuamont
 
 ```bash
 # Crear la base de datos y cargar el backup incluido
-mysql -u root -p -e "CREATE DATABASE acceso;"
-mysql -u root -p acceso < backup-acceso.sql
+createdb -U postgres acceso
+psql -U postgres -d acceso -f backup-acceso.sql
 ```
 
 Actualiza las credenciales de conexión en `Backend/src/main/resources/application.properties` (usuario, contraseña, URL de conexión).
