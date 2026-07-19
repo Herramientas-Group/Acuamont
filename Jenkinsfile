@@ -84,14 +84,14 @@ pipeline {
         stage('7. Docker Build Backend') {
             when { branch 'main' }
             steps {
-                bat 'docker build -t acuamont/acuamont-backend:%GIT_COMMIT% ./Backend'
+                    bat 'docker build -t spartan876/acuamont:backend-%GIT_COMMIT% ./Backend'
             }
         }
 
         stage('8. Docker Build Frontend') {
             when { branch 'main' }
             steps {
-                bat 'docker build -t acuamont/acuamont-frontend:%GIT_COMMIT% ./Frontend'
+                    bat 'docker build -t spartan876/acuamont:frontend-%GIT_COMMIT% ./Frontend'
             }
         }
 
@@ -104,12 +104,12 @@ pipeline {
                     passwordVariable: 'DOCKER_PASS'
                 )]) {
                     bat 'echo|set /p="%DOCKER_PASS%" | docker login -u %DOCKER_USER% --password-stdin'
-                    bat 'docker tag acuamont/acuamont-backend:%GIT_COMMIT% acuamont/acuamont-backend:latest'
-                    bat 'docker tag acuamont/acuamont-frontend:%GIT_COMMIT% acuamont/acuamont-frontend:latest'
-                    bat 'docker push acuamont/acuamont-backend:latest'
-                    bat 'docker push acuamont/acuamont-backend:%GIT_COMMIT%'
-                    bat 'docker push acuamont/acuamont-frontend:latest'
-                    bat 'docker push acuamont/acuamont-frontend:%GIT_COMMIT%'
+                    bat 'docker tag spartan876/acuamont:backend-%GIT_COMMIT% spartan876/acuamont:backend-latest'
+                    bat 'docker tag spartan876/acuamont:frontend-%GIT_COMMIT% spartan876/acuamont:frontend-latest'
+                    bat 'docker push spartan876/acuamont:backend-latest'
+                    bat 'docker push spartan876/acuamont:backend-%GIT_COMMIT%'
+                    bat 'docker push spartan876/acuamont:frontend-latest'
+                    bat 'docker push spartan876/acuamont:frontend-%GIT_COMMIT%'
                 }
             }
         }

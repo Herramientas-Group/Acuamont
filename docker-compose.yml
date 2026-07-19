@@ -13,7 +13,7 @@ services:
       - "127.0.0.1:5432:5432"
 
   backend:
-    image: acuamont/acuamont-backend:latest
+    image: spartan876/acuamont:backend-latest
     restart: unless-stopped
     depends_on:
       - db
@@ -37,7 +37,7 @@ services:
       - "8082:8082"
 
   frontend:
-    image: acuamont/acuamont-frontend:latest
+    image: spartan876/acuamont:frontend-latest
     restart: unless-stopped
     depends_on:
       - backend
