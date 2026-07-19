@@ -22,25 +22,7 @@ pipeline {
             }
         }
 
-        stage('2. Preparar Entorno') {
-            steps {
-                withCredentials([file(credentialsId: 'acuamont-env-file', variable: 'ENV_FILE')]) {
-                    script {
-                        readFile(ENV_FILE).eachLine { line ->
-                            def trimmed = line.trim()
-                            if (trimmed && !trimmed.startsWith('#') && trimmed.contains('=')) {
-                                def sepIndex = trimmed.indexOf('=')
-                                def key = trimmed.substring(0, sepIndex).trim()
-                                def value = trimmed.substring(sepIndex + 1).trim()
-                                env.put(key, value)
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        stage('3. Backend: Dependencias') {
+        stage('2. Backend: Dependencias') {
             when { anyOf { changeset "Backend/**"; changeset "pom.xml"; changeset "Jenkinsfile" } }
             steps {
                 dir('Backend') {
@@ -49,7 +31,7 @@ pipeline {
             }
         }
 
-        stage('4. Backend: Compilar') {
+        stage('3. Backend: Compilar') {
             when { anyOf { changeset "Backend/**"; changeset "pom.xml"; changeset "Jenkinsfile" } }
             steps {
                 dir('Backend') {
@@ -58,7 +40,7 @@ pipeline {
             }
         }
 
-        stage('5. Backend: Ejecutar Tests') {
+        stage('4. Backend: Ejecutar Tests') {
             when { anyOf { changeset "Backend/**"; changeset "pom.xml"; changeset "Jenkinsfile" } }
             steps {
                 catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
@@ -74,7 +56,7 @@ pipeline {
             }
         }
 
-        stage('6. Backend: Empaquetar') {
+        stage('5. Backend: Empaquetar') {
             when { anyOf { changeset "Backend/**"; changeset "pom.xml"; changeset "Jenkinsfile" } }
             steps {
                 dir('Backend') {
@@ -83,14 +65,14 @@ pipeline {
             }
         }
 
-        stage('7. Backend: Archivar') {
+        stage('6. Backend: Archivar') {
             when { anyOf { changeset "Backend/**"; changeset "pom.xml"; changeset "Jenkinsfile" } }
             steps {
                 archiveArtifacts artifacts: 'Backend/target/*.jar', fingerprint: true
             }
         }
 
-        stage('8. Frontend: Dependencias') {
+        stage('7. Frontend: Dependencias') {
             when { anyOf { changeset "Frontend/**"; changeset "package.json"; changeset "Jenkinsfile" } }
             steps {
                 dir('Frontend') {
@@ -99,7 +81,7 @@ pipeline {
             }
         }
 
-        stage('9. Frontend: Ejecutar Tests') {
+        stage('8. Frontend: Ejecutar Tests') {
             when { anyOf { changeset "Frontend/**"; changeset "package.json"; changeset "Jenkinsfile" } }
             steps {
                 catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
@@ -115,21 +97,21 @@ pipeline {
             }
         }
 
-        stage('11. Docker Build Backend') {
+        stage('9. Docker Build Backend') {
             when { branch 'main' }
             steps {
                 bat 'docker build -t acuamont/acuamont-backend:%GIT_COMMIT% ./Backend'
             }
         }
 
-        stage('12. Docker Build Frontend') {
+        stage('10. Docker Build Frontend') {
             when { branch 'main' }
             steps {
                 bat 'docker build -t acuamont/acuamont-frontend:%GIT_COMMIT% ./Frontend'
             }
         }
 
-        stage('13. Docker Push') {
+        stage('11. Docker Push') {
             when { branch 'main' }
             steps {
                 withCredentials([usernamePassword(
@@ -148,15 +130,19 @@ pipeline {
             }
         }
 
-        stage('14. Deploy a VPS') {
+        stage('12. Deploy a VPS') {
             when { branch 'main' }
             steps {
-                withCredentials([sshUserPrivateKey(
-                    credentialsId: 'vps-ssh-key',
-                    keyFileVariable: 'SSH_KEY',
-                    usernameVariable: 'SSH_USER'
-                )]) {
+                withCredentials([
+                    sshUserPrivateKey(
+                        credentialsId: 'vps-ssh-key',
+                        keyFileVariable: 'SSH_KEY',
+                        usernameVariable: 'SSH_USER'
+                    ),
+                    file(credentialsId: 'acuamont-env-file', variable: 'ENV_FILE')
+                ]) {
                     bat 'powershell -NoProfile -Command "$key=\'%SSH_KEY%\'; $acl=Get-Acl $key; $acl.SetAccessRuleProtection($true,$false); $identity=[System.Security.Principal.WindowsIdentity]::GetCurrent().Name; $rule=New-Object System.Security.AccessControl.FileSystemAccessRule($identity,\'FullControl\',\'Allow\'); $acl.SetAccessRule($rule); Set-Acl $key $acl"'
+                    bat 'scp -i %SSH_KEY% -o StrictHostKeyChecking=no %ENV_FILE% %SSH_USER%@%VPS_IP%:/home/acuamont/.env'
                     bat "ssh -i %SSH_KEY% -o StrictHostKeyChecking=no %SSH_USER%@%VPS_IP% \"cd /home/acuamont && docker compose pull && docker compose up -d\""
                 }
             }

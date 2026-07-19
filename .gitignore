@@ -24,3 +24,4 @@ AGENTS.md
 **/skills-lock.json
 opencode.json
 Frontend/.env
+.env
