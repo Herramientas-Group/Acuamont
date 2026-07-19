@@ -1,0 +1,48 @@
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: acceso
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./backup-acceso.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "127.0.0.1:5432:5432"
+
+  backend:
+    image: acuamont/acuamont-backend:latest
+    restart: unless-stopped
+    depends_on:
+      - db
+    environment:
+      - SERVER_PORT=8082
+      - DB_URL=jdbc:postgresql://db:5432/acceso
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - JWT_SECRET=${JWT_SECRET}
+      - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
+      - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
+      - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
+      - MAIL_USERNAME=${MAIL_USERNAME}
+      - MAIL_PASSWORD=${MAIL_PASSWORD}
+      - MAIL_FROM=${MAIL_FROM}
+      - MAIL_FROM_NAME=${MAIL_FROM_NAME}
+      - DOCUMENTO_TOKEN_CODE=${DOCUMENTO_TOKEN_CODE}
+      - DOCUMENTO_URL_DNI=${DOCUMENTO_URL_DNI}
+      - DOCUMENTO_URL_RUC=${DOCUMENTO_URL_RUC}
+    ports:
+      - "8082:8082"
+
+  frontend:
+    image: acuamont/acuamont-frontend:latest
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "4201:4201"
+
+volumes:
+  pgdata:

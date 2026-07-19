@@ -13,8 +13,10 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addMapping("/**")
                 .allowedOrigins(
                         "http://localhost:4200",
+                        "http://localhost:4201",
                         "http://localhost:8080",
-                        "https://acuamont.jacm.pro/"
+                        "http://localhost:8082",
+                        "https://acuamont.jacm.pro"
                 )
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
