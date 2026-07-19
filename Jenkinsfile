@@ -103,7 +103,7 @@ pipeline {
                     usernameVariable: 'DOCKER_USER',
                     passwordVariable: 'DOCKER_PASS'
                 )]) {
-                    bat 'echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin'
+                    bat 'echo|set /p="%DOCKER_PASS%" | docker login -u %DOCKER_USER% --password-stdin'
                     bat 'docker tag acuamont/acuamont-backend:%GIT_COMMIT% acuamont/acuamont-backend:latest'
                     bat 'docker tag acuamont/acuamont-frontend:%GIT_COMMIT% acuamont/acuamont-frontend:latest'
                     bat 'docker push acuamont/acuamont-backend:latest'
