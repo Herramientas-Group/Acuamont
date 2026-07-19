@@ -56,23 +56,7 @@ pipeline {
             }
         }
 
-        stage('5. Backend: Empaquetar') {
-            when { anyOf { changeset "Backend/**"; changeset "pom.xml"; changeset "Jenkinsfile" } }
-            steps {
-                dir('Backend') {
-                    bat 'mvnw.cmd package -DskipTests -B'
-                }
-            }
-        }
-
-        stage('6. Backend: Archivar') {
-            when { anyOf { changeset "Backend/**"; changeset "pom.xml"; changeset "Jenkinsfile" } }
-            steps {
-                archiveArtifacts artifacts: 'Backend/target/*.jar', fingerprint: true
-            }
-        }
-
-        stage('7. Frontend: Dependencias') {
+        stage('5. Frontend: Dependencias') {
             when { anyOf { changeset "Frontend/**"; changeset "package.json"; changeset "Jenkinsfile" } }
             steps {
                 dir('Frontend') {
@@ -81,7 +65,7 @@ pipeline {
             }
         }
 
-        stage('8. Frontend: Ejecutar Tests') {
+        stage('6. Frontend: Ejecutar Tests') {
             when { anyOf { changeset "Frontend/**"; changeset "package.json"; changeset "Jenkinsfile" } }
             steps {
                 catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
@@ -97,21 +81,21 @@ pipeline {
             }
         }
 
-        stage('9. Docker Build Backend') {
+        stage('7. Docker Build Backend') {
             when { branch 'main' }
             steps {
                 bat 'docker build -t acuamont/acuamont-backend:%GIT_COMMIT% ./Backend'
             }
         }
 
-        stage('10. Docker Build Frontend') {
+        stage('8. Docker Build Frontend') {
             when { branch 'main' }
             steps {
                 bat 'docker build -t acuamont/acuamont-frontend:%GIT_COMMIT% ./Frontend'
             }
         }
 
-        stage('11. Docker Push') {
+        stage('9. Docker Push') {
             when { branch 'main' }
             steps {
                 withCredentials([usernamePassword(
@@ -130,7 +114,7 @@ pipeline {
             }
         }
 
-        stage('12. Deploy a VPS') {
+        stage('10. Deploy a VPS') {
             when { branch 'main' }
             steps {
                 withCredentials([
