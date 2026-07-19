@@ -9,7 +9,7 @@ pipeline {
         GITHUB_TOKEN = credentials('github-credential')
         REPO_OWNER   = 'Herramientas-Group'
         REPO_NAME    = 'Acuamont'
-        AZURE_VM_IP  = credentials('azure-vm-ip')
+        VPS_IP       = credentials('vps-ip')
     }
 
     stages {
@@ -70,36 +70,6 @@ pipeline {
             post {
                 always {
                     junit allowEmptyResults: true, testResults: 'Backend/target/surefire-reports/*.xml'
-                    script {
-                        bat '''
-powershell -NoProfile -Command "$r = Get-ChildItem Backend/target/surefire-reports/TEST-*.xml | ForEach-Object { [xml]$c = Get-Content -Raw $_; [PSCustomObject]@{name=$c.testsuite.name.Split('.')[-1]; tests=[int]$c.testsuite.tests; failures=([int]$c.testsuite.failures + [int]$c.testsuite.errors); skipped=[int]$c.testsuite.skipped} }; ConvertTo-Json $r -Compress | Out-File -FilePath ci-test-results.json -Encoding ASCII"
-'''
-                        def reports = readJSON(file: 'ci-test-results.json')
-                        if (!(reports instanceof List)) { reports = [reports] }
-
-                        def total = 0, passed = 0, failed = 0, skipped = 0
-                        def table = ""
-                        def failedTable = ""
-                        reports.each { r ->
-                            def t = r.tests
-                            def f = r.failures
-                            def s = r.skipped
-                            def p = t - f - s
-                            total += t; passed += p; failed += f; skipped += s
-                            def icon = f == 0 ? "✅" : "❌"
-                            table += "| ${icon} ${r.name} | ${t} | ${p} | ${f} | ${s} |\n"
-                            if (f > 0) {
-                                failedTable += "| ${icon} ${r.name} | ${t} | ${p} | ${f} | ${s} |\n"
-                            }
-                        }
-
-                        env.TESTS_TABLE       = table
-                        env.TESTS_FAILED_TABLE = failedTable
-                        env.TESTS_TOTAL       = total.toString()
-                        env.TESTS_PASSED      = passed.toString()
-                        env.TESTS_FAILED      = failed.toString()
-                        env.TESTS_SKIPPED     = skipped.toString()
-                    }
                 }
             }
         }
@@ -117,25 +87,6 @@ powershell -NoProfile -Command "$r = Get-ChildItem Backend/target/surefire-repor
             when { anyOf { changeset "Backend/**"; changeset "pom.xml"; changeset "Jenkinsfile" } }
             steps {
                 archiveArtifacts artifacts: 'Backend/target/*.jar', fingerprint: true
-            }
-        }
-
-        stage('10. Backend: Deploy a Azure') {
-            when { branch 'main' }
-            steps {
-                dir('Backend') {
-                    withCredentials([sshUserPrivateKey(
-                        credentialsId: 'azure-vm-prod-key',
-                        keyFileVariable: 'SSH_KEY',
-                        usernameVariable: 'SSH_USER'
-                    )]) {
-                        bat 'powershell -NoProfile -Command "$key=\'%SSH_KEY%\'; $acl=Get-Acl $key; $acl.SetAccessRuleProtection($true,$false); $identity=[System.Security.Principal.WindowsIdentity]::GetCurrent().Name; $rule=New-Object System.Security.AccessControl.FileSystemAccessRule($identity,\'FullControl\',\'Allow\'); $acl.SetAccessRule($rule); Set-Acl $key $acl"'
-                        echo 'Subiendo .jar a Azure VM...'
-                        bat "scp -i %SSH_KEY% -o StrictHostKeyChecking=no target/*.jar %SSH_USER%@%AZURE_VM_IP%:/home/azureuser/acuamont/backend/acuamont-backend.jar"
-                        echo 'Reiniciando servicio...'
-                        bat "ssh -i %SSH_KEY% -o StrictHostKeyChecking=no %SSH_USER%@%AZURE_VM_IP% \"sudo systemctl restart acuamont-backend.service\""
-                    }
-                }
             }
         }
 
@@ -160,31 +111,53 @@ powershell -NoProfile -Command "$r = Get-ChildItem Backend/target/surefire-repor
             post {
                 always {
                     junit allowEmptyResults: true, testResults: 'Frontend/test-results/junit.xml'
-                    script {
-                        bat '''
-powershell -NoProfile -Command "if (Test-Path Frontend/test-results/junit.xml) { [xml]$c = Get-Content -Raw Frontend/test-results/junit.xml; $suites = $c.testsuites.testsuite; if ($suites -isnot [array]) { $suites = @($suites) }; $r = $suites | ForEach-Object { [PSCustomObject]@{name=$_.name.Split('/')[-1].Split('.')[0]; tests=[int]$_.tests; failures=([int]$_.failures + [int]$_.errors); skipped=[int]$_.skipped} }; ConvertTo-Json $r -Compress | Out-File -FilePath ci-frontend-results.json -Encoding ASCII } else { '[]' | Out-File -FilePath ci-frontend-results.json -Encoding ASCII }"
-'''
-                        def fReports = readJSON(file: 'ci-frontend-results.json')
-                        if (!(fReports instanceof List)) { fReports = [fReports] }
-                        def fTotal = 0, fPassed = 0, fFailed = 0, fSkipped = 0
-                        def fTable = ""
-                        def fFailedTable = ""
-                        fReports.each { r ->
-                            def t = r.tests; def f = r.failures; def s = r.skipped; def p = t - f - s
-                            fTotal += t; fPassed += p; fFailed += f; fSkipped += s
-                            def icon = f == 0 ? "✅" : "❌"
-                            fTable += "| ${icon} ${r.name} | ${t} | ${p} | ${f} | ${s} |\n"
-                            if (f > 0) {
-                                fFailedTable += "| ${icon} ${r.name} | ${t} | ${p} | ${f} | ${s} |\n"
-                            }
-                        }
-                        env.FRONTEND_TESTS_TABLE       = fTable
-                        env.FRONTEND_TESTS_FAILED_TABLE = fFailedTable
-                        env.FRONTEND_TESTS_TOTAL       = fTotal.toString()
-                        env.FRONTEND_TESTS_PASSED      = fPassed.toString()
-                        env.FRONTEND_TESTS_FAILED      = fFailed.toString()
-                        env.FRONTEND_TESTS_SKIPPED     = fSkipped.toString()
-                    }
+                }
+            }
+        }
+
+        stage('11. Docker Build Backend') {
+            when { branch 'main' }
+            steps {
+                bat 'docker build -t acuamont/acuamont-backend:%GIT_COMMIT% ./Backend'
+            }
+        }
+
+        stage('12. Docker Build Frontend') {
+            when { branch 'main' }
+            steps {
+                bat 'docker build -t acuamont/acuamont-frontend:%GIT_COMMIT% ./Frontend'
+            }
+        }
+
+        stage('13. Docker Push') {
+            when { branch 'main' }
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'dockerhub-credentials',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+                    bat 'echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin'
+                    bat 'docker tag acuamont/acuamont-backend:%GIT_COMMIT% acuamont/acuamont-backend:latest'
+                    bat 'docker tag acuamont/acuamont-frontend:%GIT_COMMIT% acuamont/acuamont-frontend:latest'
+                    bat 'docker push acuamont/acuamont-backend:latest'
+                    bat 'docker push acuamont/acuamont-backend:%GIT_COMMIT%'
+                    bat 'docker push acuamont/acuamont-frontend:latest'
+                    bat 'docker push acuamont/acuamont-frontend:%GIT_COMMIT%'
+                }
+            }
+        }
+
+        stage('14. Deploy a VPS') {
+            when { branch 'main' }
+            steps {
+                withCredentials([sshUserPrivateKey(
+                    credentialsId: 'vps-ssh-key',
+                    keyFileVariable: 'SSH_KEY',
+                    usernameVariable: 'SSH_USER'
+                )]) {
+                    bat 'powershell -NoProfile -Command "$key=\'%SSH_KEY%\'; $acl=Get-Acl $key; $acl.SetAccessRuleProtection($true,$false); $identity=[System.Security.Principal.WindowsIdentity]::GetCurrent().Name; $rule=New-Object System.Security.AccessControl.FileSystemAccessRule($identity,\'FullControl\',\'Allow\'); $acl.SetAccessRule($rule); Set-Acl $key $acl"'
+                    bat "ssh -i %SSH_KEY% -o StrictHostKeyChecking=no %SSH_USER%@%VPS_IP% \"cd /home/acuamont && docker compose pull && docker compose up -d\""
                 }
             }
         }
@@ -198,10 +171,8 @@ powershell -NoProfile -Command "if (Test-Path Frontend/test-results/junit.xml) {
             script {
                 if (env.CHANGE_ID) {
                     def comment = """### CI Exitoso
-- **Estado:** PAS\u00d3
+- **Estado:** PASÓ
 - **Rama:** ${env.BRANCH_NAME}
-- **Backend:** ${env.TESTS_PASSED ?: '0'} pasaron / ${env.TESTS_FAILED ?: '0'} fallaron
-- **Frontend:** ${env.FRONTEND_TESTS_PASSED ?: '0'} pasaron / ${env.FRONTEND_TESTS_FAILED ?: '0'} fallaron
 
 [Ver build en Jenkins](${env.BUILD_URL})"""
 
@@ -222,33 +193,9 @@ powershell -NoProfile -Command "if (Test-Path Frontend/test-results/junit.xml) {
             '''
             script {
                 if (env.CHANGE_ID) {
-                    def backendFailed = (env.TESTS_FAILED ?: '0') != '0'
-                    def frontendFailed = (env.FRONTEND_TESTS_FAILED ?: '0') != '0'
-
-                    def backendSection = ""
-                    if (backendFailed) {
-                        backendSection = """
-**Tests fallidos - Backend:**
-| Clase de Test | Tests | Pasaron | Fallaron | Omitidos |
-|---|---|---|---|---|
-${env.TESTS_FAILED_TABLE ?: ''}"""
-                    }
-
-                    def frontendSection = ""
-                    if (frontendFailed) {
-                        frontendSection = """
-**Tests fallidos - Frontend:**
-| Test | Tests | Pasaron | Fallaron | Omitidos |
-|---|---|---|---|---|
-${env.FRONTEND_TESTS_FAILED_TABLE ?: ''}"""
-                    }
-
                     def comment = """### Fallo en CI
-- **Estado:** FALL\u00d3
+- **Estado:** FALLÓ
 - **Rama:** ${env.BRANCH_NAME}
-- **Backend:** ${env.TESTS_PASSED ?: '0'} pasaron / ${env.TESTS_FAILED ?: '0'} fallaron
-- **Frontend:** ${env.FRONTEND_TESTS_PASSED ?: '0'} pasaron / ${env.FRONTEND_TESTS_FAILED ?: '0'} fallaron
-${backendSection}${frontendSection}
 
 [Ver logs en Jenkins](${env.BUILD_URL}console)"""
 
