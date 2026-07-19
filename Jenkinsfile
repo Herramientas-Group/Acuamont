@@ -126,8 +126,8 @@ pipeline {
                     file(credentialsId: 'acuamont-env-file', variable: 'ENV_FILE')
                 ]) {
                     bat 'powershell -NoProfile -Command "$key=\'%SSH_KEY%\'; $acl=Get-Acl $key; $acl.SetAccessRuleProtection($true,$false); $identity=[System.Security.Principal.WindowsIdentity]::GetCurrent().Name; $rule=New-Object System.Security.AccessControl.FileSystemAccessRule($identity,\'FullControl\',\'Allow\'); $acl.SetAccessRule($rule); Set-Acl $key $acl"'
-                    bat 'scp -i %SSH_KEY% -o StrictHostKeyChecking=no %ENV_FILE% %SSH_USER%@%VPS_IP%:/home/acuamont/.env'
-                    bat "ssh -i %SSH_KEY% -o StrictHostKeyChecking=no %SSH_USER%@%VPS_IP% \"cd /home/acuamont && docker compose pull && docker compose up -d\""
+                    bat 'scp -i %SSH_KEY% -o StrictHostKeyChecking=no %ENV_FILE% %SSH_USER%@%VPS_IP%:/home/azureuser/acuamont/.env'
+                    bat "ssh -i %SSH_KEY% -o StrictHostKeyChecking=no %SSH_USER%@%VPS_IP% \"cd /home/azureuser/acuamont && docker compose pull && docker compose up -d\""
                 }
             }
         }
