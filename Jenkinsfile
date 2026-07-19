@@ -32,7 +32,7 @@ pipeline {
                                 def sepIndex = trimmed.indexOf('=')
                                 def key = trimmed.substring(0, sepIndex).trim()
                                 def value = trimmed.substring(sepIndex + 1).trim()
-                                env[key] = value
+                                env.put(key, value)
                             }
                         }
                     }
