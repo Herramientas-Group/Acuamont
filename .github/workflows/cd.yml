@@ -1,0 +1,57 @@
+name: CD - Build & Deploy
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  docker-build-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Login a Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build Backend
+        run: |
+          docker build -t spartan876/acuamont:backend-${{ github.sha }} ./Backend
+          docker tag spartan876/acuamont:backend-${{ github.sha }} spartan876/acuamont:backend-latest
+
+      - name: Build Frontend
+        run: |
+          docker build -t spartan876/acuamont:frontend-${{ github.sha }} ./Frontend
+          docker tag spartan876/acuamont:frontend-${{ github.sha }} spartan876/acuamont:frontend-latest
+
+      - name: Push a Docker Hub
+        run: |
+          docker push spartan876/acuamont:backend-${{ github.sha }}
+          docker push spartan876/acuamont:backend-latest
+          docker push spartan876/acuamont:frontend-${{ github.sha }}
+          docker push spartan876/acuamont:frontend-latest
+
+  deploy-vps:
+    needs: docker-build-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Copiar .env al VPS
+        run: |
+          echo "${{ secrets.ENV_FILE }}" > /tmp/.env
+          scp -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no /tmp/.env ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/home/azureuser/acuamont/.env
+          rm /tmp/.env
+
+      - name: Deploy en VPS
+        run: |
+          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} \
+            "cd /home/azureuser/acuamont && docker compose pull && docker compose up -d"
