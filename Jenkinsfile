@@ -9,7 +9,6 @@ pipeline {
         GITHUB_TOKEN = credentials('github-credential')
         REPO_OWNER   = 'Herramientas-Group'
         REPO_NAME    = 'Acuamont'
-        VPS_IP       = credentials('vps-ip')
     }
 
     stages {
@@ -81,56 +80,6 @@ pipeline {
             }
         }
 
-        stage('7. Docker Build Backend') {
-            when { branch 'main' }
-            steps {
-                    bat 'docker build -t spartan876/acuamont:backend-%GIT_COMMIT% ./Backend'
-            }
-        }
-
-        stage('8. Docker Build Frontend') {
-            when { branch 'main' }
-            steps {
-                    bat 'docker build -t spartan876/acuamont:frontend-%GIT_COMMIT% ./Frontend'
-            }
-        }
-
-        stage('9. Docker Push') {
-            when { branch 'main' }
-            steps {
-                withCredentials([usernamePassword(
-                    credentialsId: 'dockerhub-credentials',
-                    usernameVariable: 'DOCKER_USER',
-                    passwordVariable: 'DOCKER_PASS'
-                )]) {
-                    bat 'echo|set /p="%DOCKER_PASS%" | docker login -u %DOCKER_USER% --password-stdin'
-                    bat 'docker tag spartan876/acuamont:backend-%GIT_COMMIT% spartan876/acuamont:backend-latest'
-                    bat 'docker tag spartan876/acuamont:frontend-%GIT_COMMIT% spartan876/acuamont:frontend-latest'
-                    bat 'docker push spartan876/acuamont:backend-latest'
-                    bat 'docker push spartan876/acuamont:backend-%GIT_COMMIT%'
-                    bat 'docker push spartan876/acuamont:frontend-latest'
-                    bat 'docker push spartan876/acuamont:frontend-%GIT_COMMIT%'
-                }
-            }
-        }
-
-        stage('10. Deploy a VPS') {
-            when { branch 'main' }
-            steps {
-                withCredentials([
-                    sshUserPrivateKey(
-                        credentialsId: 'vps-ssh-key',
-                        keyFileVariable: 'SSH_KEY',
-                        usernameVariable: 'SSH_USER'
-                    ),
-                    file(credentialsId: 'acuamont-env-file', variable: 'ENV_FILE')
-                ]) {
-                    bat 'powershell -NoProfile -Command "$key=\'%SSH_KEY%\'; $acl=Get-Acl $key; $acl.SetAccessRuleProtection($true,$false); $identity=[System.Security.Principal.WindowsIdentity]::GetCurrent().Name; $rule=New-Object System.Security.AccessControl.FileSystemAccessRule($identity,\'FullControl\',\'Allow\'); $acl.SetAccessRule($rule); Set-Acl $key $acl"'
-                    bat 'scp -i %SSH_KEY% -o StrictHostKeyChecking=no %ENV_FILE% %SSH_USER%@%VPS_IP%:/home/azureuser/acuamont/.env'
-                    bat "ssh -i %SSH_KEY% -o StrictHostKeyChecking=no %SSH_USER%@%VPS_IP% \"cd /home/azureuser/acuamont && docker compose pull && docker compose up -d\""
-                }
-            }
-        }
     }
 
     post {
