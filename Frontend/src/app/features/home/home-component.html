@@ -129,6 +129,7 @@
           ></iframe>
           <h5 class="text-lg font-bold text-gray-800 mt-4 mb-3">La Victoria</h5>
           <button
+            (click)="mostrarDetalleLocal(0)"
             class="px-5 py-2.5 rounded-xl text-white text-sm font-semibold shadow-sm hover:opacity-90 transition-all cursor-pointer"
             style="background-color: #061748"
           >
@@ -148,6 +149,7 @@
           ></iframe>
           <h5 class="text-lg font-bold text-gray-800 mt-4 mb-3">Reque</h5>
           <button
+            (click)="mostrarDetalleLocal(1)"
             class="px-5 py-2.5 rounded-xl text-white text-sm font-semibold shadow-sm hover:opacity-90 transition-all cursor-pointer"
             style="background-color: #061748"
           >
@@ -201,4 +203,25 @@
   </div>
 
   <app-footer-component></app-footer-component>
+
+  <p-dialog
+    [header]="localSeleccionado?.nombre"
+    [(visible)]="dialogVisible"
+    [modal]="true"
+    [style]="{ width: '450px' }"
+    [closable]="true"
+  >
+    <div *ngIf="localSeleccionado" class="flex flex-col gap-3">
+      <p><strong>Dirección:</strong> {{ localSeleccionado.direccion }}</p>
+      <p><strong>Descripción:</strong> {{ localSeleccionado.descripcion }}</p>
+      <p><strong>Productos principales:</strong></p>
+      <ul class="list-disc list-inside">
+        <li *ngFor="let p of localSeleccionado.productos">{{ p }}</li>
+      </ul>
+      <p><strong>Horario de Atención:</strong></p>
+      <ul class="list-disc list-inside">
+        <li *ngFor="let h of localSeleccionado.horarios">{{ h.dias }} - {{ h.horas }}</li>
+      </ul>
+    </div>
+  </p-dialog>
 </div>
